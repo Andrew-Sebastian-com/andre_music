@@ -107,11 +107,72 @@
   footer { text-align: center; padding: 15px; font-size: 10px; color: #999; border-top: 1px solid #eee; }
   .legal-nav { text-align: center; margin-bottom: 10px; font-size: 11px; }
   .legal-nav a { color: var(--accent-blue); text-decoration: underline; margin: 0 10px; cursor: pointer; }
+
+  /* Black bar for logo */
+.logo-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  padding: 10px 0;
+}
+
+.site-logo {
+  height: 32px; /* smaller logo */
+  width: auto;
+  object-fit: contain;
+}
+
+/* Header styling */
+header {
+  text-align: center;
+  padding: 30px 20px 20px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0b1220;
+}
+
+header p {
+  margin: 8px 0 20px;
+  color: #555;
+  font-size: 15px;
+}
+
+/* Navigation buttons in header */
+.header-nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.header-nav a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0a84ff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.05);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.header-nav a:hover {
+  background: rgba(0,0,0,0.1);
+  color: #007aff;
+}
+
 </style>
 </head>
 <body>
 
 <div class="app">
+  <div class="logo-header">
+  <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo">
+</div>
   <header>
     <div class="logo-area">
       <a href="#" class="logo">AndreMusic</a>
