@@ -27,7 +27,6 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
 
-  /* Black bar for logo */
   .logo-header {
     display: flex;
     justify-content: center;
@@ -138,7 +137,7 @@
     </div>
     <div style="display:flex; gap:10px;">
       <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁</label>
-      <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
+      <input id="fileInput" type="file" accept="audio/mpeg, audio/wav, audio/x-m4a, audio/mp4, audio/*" multiple style="display:none" />
       <button class="btn" id="clearBtn">Clear Library</button>
     </div>
   </header>
@@ -432,19 +431,14 @@ async function playTrack(index, isRandom = false) {
   if (index < 0 || index >= library.length) return;
   initVisualizer();
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-  // Cleanup old object URL to prevent memory leaks
   if (currentUrl) URL.revokeObjectURL(currentUrl);
-
   currentIndex = index;
   const t = library[currentIndex];
   currentUrl = URL.createObjectURL(t.blob);
   audio.src = currentUrl;
   audio.play().catch(e => console.log("Playback blocked:", e));
-  
   document.getElementById('nowTitle').textContent = t.name;
   renderLibrary();
-
   if (isRandom) {
     setTimeout(() => {
       const activeItem = document.querySelector('.track-item.active');
@@ -461,9 +455,7 @@ async function deleteTrack(dbId, arrayIndex) {
   const db = await openDB();
   await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
   if (arrayIndex === currentIndex) { 
-    audio.pause(); 
-    audio.src = ""; 
-    currentIndex = -1; 
+    audio.pause(); audio.src = ""; currentIndex = -1; 
     document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
   } else if (arrayIndex < currentIndex) { 
     currentIndex--; 
@@ -490,17 +482,14 @@ document.getElementById('fileInput').onchange = async (e) => {
       renderLibrary();
     };
   }
-  e.target.value = ''; // Allow re-uploading same file name
+  e.target.value = '';
 };
 
 document.getElementById('clearBtn').onclick = async () => {
   if(confirm(translations[currentLang].confirm)) {
     const db = await openDB();
     await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
-    library = []; 
-    currentIndex = -1;
-    audio.pause(); 
-    audio.src = "";
+    library = []; currentIndex = -1; audio.pause(); audio.src = "";
     if(currentUrl) URL.revokeObjectURL(currentUrl);
     renderLibrary(); 
     document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
@@ -597,18 +586,14 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Init
 (async function init() {
   try {
     const db = await openDB();
     db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-      library = e.target.result;
-      renderLibrary();
-      setLanguage('ja');
+      library = e.target.result; renderLibrary(); setLanguage('ja');
     };
     const resize = () => { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; };
-    window.onresize = resize;
-    resize();
+    window.onresize = resize; resize();
   } catch(e) { console.error("Init Error", e); }
 })();
 </script>
