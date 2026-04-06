@@ -220,45 +220,45 @@
 
 <script>
 const translations = {
-  ja: {
-    upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ",
-    noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
-    loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
-    vol: "マスターボリューム", total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
-    navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ",
-    contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
-    searchPh: "曲名で検索...",
-    tosTitle: "利用規約",
-    tosBody: `<p><strong>1. 規約の同意:</strong> AndreMusicを使用することで、本規約に同意したものとみなされます。</p><p><strong>2. サービスの概要:</strong> 本アプリはブラウザベースのローカルメディアプレイヤーであり、音楽コンテンツは提供しません。</p><p><strong>3. 知的財産権:</strong> AndreMusicのデザインおよびソースコードはAndrew Sudiroに帰属します。</p><p><strong>4. ユーザーの責任:</strong> 取り込むファイルは、ユーザーが合法的に所有しているものに限ります。</p><p><strong>5. 禁止事項:</strong> 著作権のある素材の無断公衆放送、および違法な目的での使用を禁止します。</p><p><strong>6. 免責事項:</strong> 本アプリは現状有姿で提供され、ブラウザキャッシュ削除によるデータ損失等の責任は負いません。</p>`,
-    privacyTitle: "プライバシーポリシー",
-    privacyBody: `<p><strong>1. データ収集なし:</strong> 音楽ファイルや再生履歴を外部サーバーへ送信することはありません。</p><p><strong>2. ローカル保存:</strong> データはIndexedDBを使用してお使いのブラウザ内にのみ保存されます。</p><p><strong>3. トラッキングなし:</strong> クッキーやトラッキングピクセルは一切使用していません。</p><p><strong>4. お問い合わせ:</strong> フォームから送信された名前とメールアドレスは返信にのみ使用されます。</p>`
-  },
-  en: {
-    upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY",
-    noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
-    loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
-    vol: "MASTER VOLUME", total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
-    navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact",
-    contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
-    searchPh: "Search tracks...",
-    tosTitle: "Terms of Service",
-    tosBody: `<p><strong>1. Acceptance:</strong> By using AndreMusic, you agree to these terms.</p><p><strong>2. Service:</strong> This is a local player; you must provide your own legal audio files.</p><p><strong>3. Intellectual Property:</strong> Source code and design are owned by Andrew Sudiro.</p><p><strong>4. Responsibility:</strong> Users are responsible for the legality of their imported files.</p><p><strong>5. Prohibited:</strong> Illegal use or public broadcasting without a license is prohibited.</p><p><strong>6. Disclaimer:</strong> Provided "AS IS." We are not liable for data loss due to browser clearing.</p>`,
-    privacyTitle: "Privacy Policy",
-    privacyBody: `<p><strong>1. No Data Collection:</strong> We do not track or upload your listening habits.</p><p><strong>2. Local Storage:</strong> All files stay in your browser's IndexedDB.</p><p><strong>3. No Cookies:</strong> We do not use third-party tracking pixels.</p><p><strong>4. Communication:</strong> Name and Email provided in contact are only used for replies.</p>`
-  },
-  id: {
-    upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR",
-    noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
-    loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
-    vol: "VOLUME UTAMA", total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
-    navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak",
-    contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
-    searchPh: "Cari lagu...",
-    tosTitle: "Ketentuan Layanan",
-    tosBody: `<p><strong>1. Penerimaan:</strong> Dengan menggunakan AndreMusic, Anda menyetujui ketentuan ini.</p><p><strong>2. Layanan:</strong> Ini adalah pemutar lokal; Anda harus menyediakan file audio legal sendiri.</p><p><strong>3. Hak Kekayaan Intelektual:</strong> Kode sumber dan desain dimiliki oleh Andrew Sudiro.</p><p><strong>4. Tanggung Jawab:</strong> Pengguna bertanggung jawab atas legalitas file yang diimpor.</p><p><strong>5. Larangan:</strong> Dilarang menggunakan untuk tujuan ilegal atau penyiaran publik tanpa lisensi.</p><p><strong>6. Penafian:</strong> Disediakan "APA ADANYA." Kami tidak bertanggung jawab atas kehilangan data.</p>`,
-    privacyTitle: "Kebijakan Privasi",
-    privacyBody: `<p><strong>1. Tanpa Koleksi Data:</strong> Kami tidak melacak atau mengunggah kebiasaan mendengarkan Anda.</p><p><strong>2. Penyimpanan Lokal:</strong> Semua file tetap berada di IndexedDB browser Anda.</p><p><strong>3. Tanpa Cookie:</strong> Kami tidak menggunakan piksel pelacakan pihak ketiga.</p><p><strong>4. Komunikasi:</strong> Nama dan Email yang diberikan hanya digunakan untuk membalas pesan.</p>`
-  }
+    ja: {
+        upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ",
+        noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
+        loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
+        vol: "マスターボリューム", total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
+        navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ",
+        contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
+        searchPh: "曲名で検索...",
+        tosTitle: "利用規約",
+        tosBody: `<p><strong>1. 規約の同意:</strong> AndreMusicを使用することで、本規約に同意したものとみなされます。</p><p><strong>2. サービスの概要:</strong> 本アプリはブラウザベースのローカルメディアプレイヤーであり、音楽コンテンツは提供しません。</p><p><strong>3. 知的財産権:</strong> AndreMusicのデザインおよびソースコードはAndrew Sudiroに帰属します。</p><p><strong>4. ユーザーの責任:</strong> 取り込むファイルは、ユーザーが合法的に所有しているものに限ります。</p><p><strong>5. 禁止事項:</strong> 著作権のある素材の無断公衆放送、および違法な目的での使用を禁止します。</p><p><strong>6. 免責事項:</strong> 本アプリは現状有姿で提供され、ブラウザキャッシュ削除によるデータ損失等の責任は負いません。</p>`,
+        privacyTitle: "プライバシーポリシー",
+        privacyBody: `<p><strong>1. データ収集なし:</strong> 音楽ファイルや再生履歴を外部サーバーへ送信することはありません。</p><p><strong>2. ローカル保存:</strong> データはIndexedDBを使用してお使いのブラウザ内にのみ保存されます。</p><p><strong>3. トラッキングなし:</strong> クッキーやトラッキングピクセルは一切使用していません。</p><p><strong>4. お問い合わせ:</strong> フォームから送信された名前とメールアドレスは返信にのみ使用されます。</p>`
+    },
+    en: {
+        upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY",
+        noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
+        loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
+        vol: "MASTER VOLUME", total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
+        navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact",
+        contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
+        searchPh: "Search tracks...",
+        tosTitle: "Terms of Service",
+        tosBody: `<p><strong>1. Acceptance:</strong> By using AndreMusic, you agree to these terms.</p><p><strong>2. Service:</strong> This is a local player; you must provide your own legal audio files.</p><p><strong>3. Intellectual Property:</strong> Source code and design are owned by Andrew Sudiro.</p><p><strong>4. Responsibility:</strong> Users are responsible for the legality of their imported files.</p><p><strong>5. Prohibited:</strong> Illegal use or public broadcasting without a license is prohibited.</p><p><strong>6. Disclaimer:</strong> Provided "AS IS." We are not liable for data loss due to browser clearing.</p>`,
+        privacyTitle: "Privacy Policy",
+        privacyBody: `<p><strong>1. No Data Collection:</strong> We do not track or upload your listening habits.</p><p><strong>2. Local Storage:</strong> All files stay in your browser's IndexedDB.</p><p><strong>3. No Cookies:</strong> We do not use third-party tracking pixels.</p><p><strong>4. Communication:</strong> Name and Email provided in contact are only used for replies.</p>`
+    },
+    id: {
+        upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR",
+        noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
+        loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
+        vol: "VOLUME UTAMA", total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
+        navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak",
+        contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
+        searchPh: "Cari lagu...",
+        tosTitle: "Ketentuan Layanan",
+        tosBody: `<p><strong>1. Penerimaan:</strong> Dengan menggunakan AndreMusic, Anda menyetujui ketentuan ini.</p><p><strong>2. Layanan:</strong> Ini adalah pemutar lokal; Anda harus menyediakan file audio legal sendiri.</p><p><strong>3. Hak Kekayaan Intelektual:</strong> Kode sumber dan desain dimiliki oleh Andrew Sudiro.</p><p><strong>4. Tanggung Jawab:</strong> Pengguna bertanggung jawab atas legalitas file yang diimpor.</p><p><strong>5. Larangan:</strong> Dilarang menggunakan untuk tujuan ilegal atau penyiaran publik tanpa lisensi.</p><p><strong>6. Penafian:</strong> Disediakan "APA ADANYA." Kami tidak bertanggung jawab atas kehilangan data.</p>`,
+        privacyTitle: "Kebijakan Privasi",
+        privacyBody: `<p><strong>1. Tanpa Koleksi Data:</strong> Kami tidak melacak atau mengunggah kebiasaan mendengarkan Anda.</p><p><strong>2. Penyimpanan Lokal:</strong> Semua file tetap berada di IndexedDB browser Anda.</p><p><strong>3. Tanpa Cookie:</strong> Kami tidak menggunakan piksel pelacakan pihak ketiga.</p><p><strong>4. Komunikasi:</strong> Nama dan Email yang diberikan hanya digunakan untuk membalas pesan.</p>`
+    }
 };
 
 let currentLang = 'ja';
@@ -274,69 +274,75 @@ let audioCtx, analyser, source, dataArray;
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
+// --- FIXED: One-time Visualizer Initialization ---
 function initVisualizer() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioCtx.createAnalyser();
-    source = audioCtx.createMediaElementSource(audio);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-    draw();
-  } catch(e) { console.log("Visualizer failed:", e); }
+    if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+    }
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+        draw();
+    } catch(e) { console.warn("Visualizer failed to initialize:", e); }
 }
 
 function draw() {
-  requestAnimationFrame(draw);
-  if (!analyser) return;
-  const bufferLength = analyser.frequencyBinCount;
-  analyser.getByteFrequencyData(dataArray);
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const barWidth = (canvas.width / bufferLength) * 2.5;
-  let x = 0;
-  for (let i = 0; i < bufferLength; i++) {
-    let barHeight = dataArray[i] / 2;
-    ctx.fillStyle = `rgb(0, 102, 204)`;
-    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-    x += barWidth + 1;
-  }
+    requestAnimationFrame(draw);
+    if (!analyser) return;
+    analyser.getByteFrequencyData(dataArray);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const barWidth = (canvas.width / analyser.frequencyBinCount) * 2.5;
+    let x = 0;
+    for (let i = 0; i < analyser.frequencyBinCount; i++) {
+        let barHeight = dataArray[i] / 2;
+        ctx.fillStyle = `rgb(0, 102, 204)`;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+    }
 }
 
 function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
+    return new Promise((res, rej) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        req.onsuccess = () => res(req.result);
+        req.onerror = () => rej(req.error);
+    });
 }
 
 function setLanguage(lang) {
-  currentLang = lang;
-  const t = translations[lang];
-  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`lang-${lang}`).classList.add('active');
-  const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-vol', 'label-count', 'label-status', 'nav-tos', 'nav-privacy', 'nav-contact'];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
-    if(el && t[key]) el.textContent = t[key];
-  });
-  document.getElementById('searchBar').placeholder = t.searchPh;
-  document.getElementById('title-contact').textContent = t.contactTitle;
-  document.getElementById('contact-send').textContent = t.contactSend;
-  document.getElementById('contact-name').placeholder = t.namePh;
-  document.getElementById('contact-email').placeholder = t.emailPh;
-  document.getElementById('contact-message').placeholder = t.msgPh;
-  document.getElementById('title-tos').textContent = t.tosTitle;
-  document.getElementById('body-tos').innerHTML = t.tosBody;
-  document.getElementById('title-privacy').textContent = t.privacyTitle;
-  document.getElementById('body-privacy').innerHTML = t.privacyBody;
-  document.getElementById('playLabel').textContent = audio.paused ? t.play : t.pause;
+    currentLang = lang;
+    const t = translations[lang];
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.getElementById(`lang-${lang}`);
+    if (targetBtn) targetBtn.classList.add('active');
+
+    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-vol', 'label-count', 'label-status', 'nav-tos', 'nav-privacy', 'nav-contact'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
+        if(el && t[key]) el.textContent = t[key];
+    });
+
+    document.getElementById('searchBar').placeholder = t.searchPh;
+    document.getElementById('title-contact').textContent = t.contactTitle;
+    document.getElementById('contact-send').textContent = t.contactSend;
+    document.getElementById('contact-name').placeholder = t.namePh;
+    document.getElementById('contact-email').placeholder = t.emailPh;
+    document.getElementById('contact-message').placeholder = t.msgPh;
+    document.getElementById('title-tos').textContent = t.tosTitle;
+    document.getElementById('body-tos').innerHTML = t.tosBody;
+    document.getElementById('title-privacy').textContent = t.privacyTitle;
+    document.getElementById('body-privacy').innerHTML = t.privacyBody;
+    document.getElementById('playLabel').textContent = audio.paused ? t.play : t.pause;
 }
 
 function openModal(id) { document.getElementById(id).style.display = "block"; }
@@ -344,194 +350,237 @@ function closeModal(id) { document.getElementById(id).style.display = "none"; }
 window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; }
 
 function renderLibrary() {
-  const list = document.getElementById('trackList');
-  const searchTerm = document.getElementById('searchBar').value.toLowerCase();
-  list.innerHTML = '';
-  library.forEach((t, idx) => {
-    if (t.name.toLowerCase().includes(searchTerm)) {
-      const li = document.createElement('li');
-      li.className = 'track-item' + (idx === currentIndex ? ' active' : '');
-      const info = document.createElement('span');
-      info.className = 'track-info';
-      info.textContent = `♪ ${t.name}`;
-      info.onclick = () => playTrack(idx);
-      const del = document.createElement('button');
-      del.className = 'del-btn';
-      del.textContent = 'DEL';
-      del.onclick = (e) => { e.stopPropagation(); deleteTrack(t.id, idx); };
-      li.append(info, del);
-      list.appendChild(li);
-    }
-  });
-  document.getElementById('count').textContent = library.length;
+    const list = document.getElementById('trackList');
+    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    list.innerHTML = '';
+    library.forEach((t, idx) => {
+        if (t.name.toLowerCase().includes(searchTerm)) {
+            const li = document.createElement('li');
+            li.className = 'track-item' + (idx === currentIndex ? ' active' : '');
+            const info = document.createElement('span');
+            info.className = 'track-info';
+            info.textContent = `♪ ${t.name}`;
+            info.onclick = () => playTrack(idx);
+            const del = document.createElement('button');
+            del.className = 'del-btn';
+            del.textContent = 'DEL';
+            del.onclick = (e) => { e.stopPropagation(); deleteTrack(t.id, idx); };
+            li.append(info, del);
+            list.appendChild(li);
+        }
+    });
+    document.getElementById('count').textContent = library.length;
 }
 
 async function playTrack(index, isRandom = false) {
-  if (index < 0 || index >= library.length) return;
-  initVisualizer();
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  if (currentUrl) URL.revokeObjectURL(currentUrl);
-  currentIndex = index;
-  const t = library[currentIndex];
-  currentUrl = URL.createObjectURL(t.blob);
-  audio.src = currentUrl;
-  audio.play().catch(e => console.log("Playback blocked:", e));
-  document.getElementById('nowTitle').textContent = t.name;
-  renderLibrary();
-  if (isRandom) {
-    setTimeout(() => {
-      const activeItem = document.querySelector('.track-item.active');
-      if (activeItem) {
-        activeItem.classList.add('picking-animation');
-        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => activeItem.classList.remove('picking-animation'), 600);
-      }
-    }, 50);
-  }
+    if (index < 0 || index >= library.length) return;
+    initVisualizer();
+    
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    currentIndex = index;
+    const t = library[currentIndex];
+    currentUrl = URL.createObjectURL(t.blob);
+    audio.src = currentUrl;
+    
+    try {
+        await audio.play();
+    } catch(e) { console.log("Playback blocked by browser settings."); }
+
+    document.getElementById('nowTitle').textContent = t.name;
+    renderLibrary();
+
+    if (isRandom) {
+        setTimeout(() => {
+            const activeItem = document.querySelector('.track-item.active');
+            if (activeItem) {
+                activeItem.classList.add('picking-animation');
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => activeItem.classList.remove('picking-animation'), 600);
+            }
+        }, 50);
+    }
 }
 
 async function deleteTrack(dbId, arrayIndex) {
-  const db = await openDB();
-  await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
-  if (arrayIndex === currentIndex) { 
-    audio.pause(); audio.src = ""; currentIndex = -1; 
-    document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-  } else if (arrayIndex < currentIndex) { 
-    currentIndex--; 
-  }
-  library.splice(arrayIndex, 1);
-  renderLibrary();
+    const db = await openDB();
+    await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
+    
+    if (arrayIndex === currentIndex) { 
+        audio.pause(); audio.src = ""; currentIndex = -1; 
+        document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+    } else if (arrayIndex < currentIndex) { 
+        currentIndex--; 
+    }
+    library.splice(arrayIndex, 1);
+    renderLibrary();
 }
 
 function getNext() {
-  if (library.length === 0) return -1;
-  if(mode === 'shuffle') return Math.floor(Math.random() * library.length);
-  return (currentIndex + 1) % library.length;
+    if (library.length === 0) return -1;
+    if(mode === 'shuffle') {
+        if (library.length === 1) return 0;
+        let nextIdx;
+        do { nextIdx = Math.floor(Math.random() * library.length); } while (nextIdx === currentIndex);
+        return nextIdx;
+    }
+    return (currentIndex + 1) % library.length;
 }
 
 document.getElementById('fileInput').onchange = async (e) => {
-  const db = await openDB();
-  const files = Array.from(e.target.files);
-  for (const f of files) {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
-    req.onsuccess = (ev) => {
-      library.push({ id: ev.target.result, name: f.name, blob: f });
-      renderLibrary();
-    };
-  }
-  e.target.value = '';
+    const db = await openDB();
+    const files = Array.from(e.target.files);
+    for (const f of files) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.add({ name: f.name, blob: f });
+        req.onsuccess = (ev) => {
+            library.push({ id: ev.target.result, name: f.name, blob: f });
+            renderLibrary();
+        };
+    }
+    e.target.value = '';
 };
 
 document.getElementById('clearBtn').onclick = async () => {
-  if(confirm(translations[currentLang].confirm)) {
-    const db = await openDB();
-    await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
-    library = []; currentIndex = -1; audio.pause(); audio.src = "";
-    if(currentUrl) URL.revokeObjectURL(currentUrl);
-    renderLibrary(); 
-    document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-  }
+    if(confirm(translations[currentLang].confirm)) {
+        const db = await openDB();
+        await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
+        library = []; currentIndex = -1; audio.pause(); audio.src = "";
+        if(currentUrl) URL.revokeObjectURL(currentUrl);
+        renderLibrary(); 
+        document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+    }
 };
 
 document.getElementById('playBtn').onclick = () => {
-  if (!audio.src && library.length > 0) playTrack(0);
-  else {
-    initVisualizer();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    audio.paused ? audio.play() : audio.pause();
-  }
+    if (library.length === 0) return;
+    if (!audio.src) {
+        playTrack(0);
+    } else {
+        initVisualizer();
+        audio.paused ? audio.play() : audio.pause();
+    }
 };
 
 audio.onplay = () => { 
-  document.getElementById('playLabel').textContent = translations[currentLang].pause; 
-  document.getElementById('playBtn').classList.add('active'); 
+    document.getElementById('playLabel').textContent = translations[currentLang].pause; 
+    document.getElementById('playBtn').classList.add('active'); 
 };
 audio.onpause = () => { 
-  document.getElementById('playLabel').textContent = translations[currentLang].play; 
-  document.getElementById('playBtn').classList.remove('active'); 
+    document.getElementById('playLabel').textContent = translations[currentLang].play; 
+    document.getElementById('playBtn').classList.remove('active'); 
 };
 
 audio.onended = () => {
-  if(mode === 'loopOne') playTrack(currentIndex);
-  else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
-  else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
+    if(mode === 'loopOne') playTrack(currentIndex);
+    else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
+    else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
 };
 
 document.getElementById('nextBtn').onclick = () => {
-  const n = getNext();
-  if (n !== -1) playTrack(n);
+    const n = getNext();
+    if (n !== -1) playTrack(n);
 };
 document.getElementById('prevBtn').onclick = () => {
-  if (library.length === 0) return;
-  playTrack((currentIndex - 1 + library.length) % library.length);
+    if (library.length === 0) return;
+    const n = (currentIndex <= 0) ? library.length - 1 : currentIndex - 1;
+    playTrack(n);
 };
 
 document.getElementById('randomBtn').onclick = () => {
-  if (library.length <= 1) { if(library.length === 1) playTrack(0, true); return; }
-  let idx;
-  do { idx = Math.floor(Math.random() * library.length); } while (idx === currentIndex);
-  playTrack(idx, true);
+    if (library.length === 0) return;
+    if (library.length === 1) { playTrack(0, true); return; }
+    let idx;
+    do { idx = Math.floor(Math.random() * library.length); } while (idx === currentIndex);
+    playTrack(idx, true);
 };
 
 document.getElementById('searchBar').oninput = renderLibrary;
-document.getElementById('seek').oninput = (e) => { if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; };
-document.getElementById('volume').oninput = (e) => audio.volume = e.target.value;
+document.getElementById('seek').oninput = (e) => { 
+    if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; 
+};
+document.getElementById('volume').oninput = (e) => {
+    audio.volume = e.target.value;
+    audio.muted = false;
+    document.getElementById('muteBtn').classList.remove('active');
+};
 
 audio.ontimeupdate = () => {
-  if (!audio.duration) return;
-  document.getElementById('currentTime').textContent = Math.floor(audio.currentTime / 60) + ":" + Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-  document.getElementById('duration').textContent = Math.floor(audio.duration / 60) + ":" + Math.floor(audio.duration % 60).toString().padStart(2, '0');
-  document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
+    if (!audio.duration || isNaN(audio.duration)) return;
+    const curM = Math.floor(audio.currentTime / 60);
+    const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+    const durM = Math.floor(audio.duration / 60);
+    const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+    
+    document.getElementById('currentTime').textContent = `${curM}:${curS}`;
+    document.getElementById('duration').textContent = `${durM}:${durS}`;
+    document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
 };
 
 function toggleMode(newMode, btnId) {
-  if (mode === newMode) {
-    mode = 'normal';
-    document.getElementById(btnId).classList.remove('active');
-  } else {
-    ['loopAllBtn', 'loopOneBtn', 'shuffleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
-    mode = newMode;
-    document.getElementById(btnId).classList.add('active');
-  }
+    if (mode === newMode) {
+        mode = 'normal';
+        document.getElementById(btnId).classList.remove('active');
+    } else {
+        ['loopAllBtn', 'loopOneBtn', 'shuffleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+        mode = newMode;
+        document.getElementById(btnId).classList.add('active');
+    }
 }
 
 document.getElementById('loopAllBtn').onclick = () => toggleMode('loopAll', 'loopAllBtn');
 document.getElementById('loopOneBtn').onclick = () => toggleMode('loopOne', 'loopOneBtn');
 document.getElementById('shuffleBtn').onclick = () => toggleMode('shuffle', 'shuffleBtn');
-document.getElementById('muteBtn').onclick = function() { audio.muted = !audio.muted; this.classList.toggle('active', audio.muted); };
+document.getElementById('muteBtn').onclick = function() { 
+    audio.muted = !audio.muted; 
+    this.classList.toggle('active', audio.muted); 
+};
 
 window.addEventListener('keydown', (e) => {
-  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-  switch (e.code) {
-    case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
-    case 'ArrowRight': document.getElementById('nextBtn').click(); break;
-    case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
-    case 'ArrowUp': e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); document.getElementById('volume').value = audio.volume; break;
-    case 'ArrowDown': e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); document.getElementById('volume').value = audio.volume; break;
-    case 'KeyR': document.getElementById('randomBtn').click(); break;
-    case 'KeyL': document.getElementById('loopAllBtn').click(); break;
-    case 'KeyO': document.getElementById('loopOneBtn').click(); break;
-    case 'KeyS': document.getElementById('shuffleBtn').click(); break;
-    case 'KeyM': document.getElementById('muteBtn').click(); break;
-    case 'KeyU': document.getElementById('fileInput').click(); break;
-    case 'KeyH': openModal('help-modal'); break;
-    case 'Delete': document.getElementById('clearBtn').click(); break;
-    case 'KeyJ': setLanguage('ja'); break;
-    case 'KeyE': setLanguage('en'); break;
-    case 'KeyI': setLanguage('id'); break;
-  }
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+    switch (e.code) {
+        case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
+        case 'ArrowRight': document.getElementById('nextBtn').click(); break;
+        case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
+        case 'ArrowUp': 
+            e.preventDefault(); 
+            audio.volume = Math.min(1, audio.volume + 0.05); 
+            document.getElementById('volume').value = audio.volume; 
+            break;
+        case 'ArrowDown': 
+            e.preventDefault(); 
+            audio.volume = Math.max(0, audio.volume - 0.05); 
+            document.getElementById('volume').value = audio.volume; 
+            break;
+        case 'KeyR': document.getElementById('randomBtn').click(); break;
+        case 'KeyL': document.getElementById('loopAllBtn').click(); break;
+        case 'KeyO': document.getElementById('loopOneBtn').click(); break;
+        case 'KeyS': document.getElementById('shuffleBtn').click(); break;
+        case 'KeyM': document.getElementById('muteBtn').click(); break;
+        case 'KeyU': document.getElementById('fileInput').click(); break;
+        case 'KeyH': openModal('help-modal'); break;
+        case 'Delete': document.getElementById('clearBtn').click(); break;
+        case 'KeyJ': setLanguage('ja'); break;
+        case 'KeyE': setLanguage('en'); break;
+        case 'KeyI': setLanguage('id'); break;
+    }
 });
 
 (async function init() {
-  try {
-    const db = await openDB();
-    db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-      library = e.target.result; renderLibrary(); setLanguage('ja');
-    };
-    const resize = () => { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; };
-    window.onresize = resize; resize();
-  } catch(e) { console.error("Init Error", e); }
+    try {
+        const db = await openDB();
+        db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+            library = e.target.result; 
+            renderLibrary(); 
+            setLanguage('ja');
+        };
+        const resize = () => { 
+            canvas.width = canvas.clientWidth; 
+            canvas.height = canvas.clientHeight; 
+        };
+        window.onresize = resize; 
+        resize();
+    } catch(e) { console.error("Init Error", e); }
 })();
 </script>
 </body>
