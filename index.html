@@ -19,10 +19,9 @@
     color: #333;
   }
 
-  /* --- RESPONSIVE ADJUSTMENT --- */
   .app {
     width: 95%;
-    max-width: 1080px; /* Limits size on desktop */
+    max-width: 1080px;
     margin: 10px auto;
     background: #fff;
     border: 1px solid var(--border-gray);
@@ -50,7 +49,7 @@
     justify-content: space-between;
     align-items: center;
     background: #fff;
-    flex-wrap: wrap; /* Allows buttons to wrap on tiny screens */
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -61,14 +60,13 @@
   .lang-btn { cursor: pointer; color: var(--accent-blue); text-decoration: underline; background: none; border: none; padding: 0; font-size: 11px; }
   .lang-btn.active { color: #000; text-decoration: none; font-weight: bold; }
 
-  /* --- GRID RESPONSIVENESS --- */
   .container { 
     display: grid; 
     grid-template-columns: 280px 1fr; 
   }
 
   @media (max-width: 850px) {
-    .container { grid-template-columns: 1fr; } /* Stacks sidebar on top of player for mobile */
+    .container { grid-template-columns: 1fr; }
     .sidebar { border-right: none !important; border-bottom: 1px solid var(--border-gray); min-height: auto !important; }
     .track-list { max-height: 250px !important; }
   }
@@ -107,7 +105,7 @@
   .now-playing-display { background: #fff; border: 1px solid #b0c4de; padding: 20px; margin-bottom: 20px; text-align: center; }
   .song-title { font-size: 18px; font-weight: bold; color: #003366; margin-bottom: 15px; word-break: break-all; min-height: 1.2em; }
 
-  #visualizer { width: 100%; height: 80px; background: #fafafa; border-radius: 4px; margin-bottom: 15px; }
+  #visualizer { width: 100%; height: 120px; background: #fafafa; border-radius: 4px; margin-bottom: 15px; }
 
   .timer-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
   input[type=range] { width: 100%; cursor: pointer; }
@@ -119,7 +117,6 @@
 
   .status-bar { margin-top: 30px; border: 1px solid #ddd; background: #fcfcfc; padding: 10px; font-size: 11px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
   
-  /* --- MODAL RESPONSIVENESS --- */
   .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
   .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; border: 2px solid #333; box-shadow: 8px 8px 0px rgba(0,0,0,0.2); font-size: 13px; line-height: 1.6; box-sizing: border-box; }
   .modal-header { font-weight: bold; border-bottom: 2px solid var(--accent-red); margin-bottom: 15px; padding-bottom: 5px; font-size: 16px; display: flex; justify-content: space-between; }
@@ -209,7 +206,7 @@
 
 <div id="tos-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-tos">Terms of Service</span><span class="close-btn" onclick="closeModal('tos-modal')">[X]</span></div><div class="modal-scroll" id="body-tos"></div></div></div>
 <div id="privacy-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-privacy">Privacy Policy</span><span class="close-btn" onclick="closeModal('privacy-modal')">[X]</span></div><div class="modal-scroll" id="body-privacy"></div></div></div>
-<div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>↑ / ↓</strong></td><td>Volume Up / Down</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J</strong></td><td>Switch to Japanese</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>E</strong></td><td>Switch to English</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>I</strong></td><td>Switch to Indonesian</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show this Help</td></tr></table></div></div></div>
+<div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J</strong></td><td>Switch to Japanese</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>E</strong></td><td>Switch to English</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>I</strong></td><td>Switch to Indonesian</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show this Help</td></tr></table></div></div></div>
 <div id="contact-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div><form id="contactForm" class="contact-form"><input type="text" id="contact-name" placeholder="Your Name" required><input type="email" id="contact-email" placeholder="Your Email Address" required><textarea id="contact-message" placeholder="Your Message..." required></textarea><button type="submit" class="btn btn-upload" id="contact-send">Send Message</button></form><p style="text-align:center; font-size:11px; margin-top:15px; color:#555;">YouTube: <a href="https://www.youtube.com/@AndrewSudiro" target="_blank">@AndrewSudiro</a></p></div></div>
 
 <audio id="audio" crossorigin="anonymous" preload="metadata"></audio>
@@ -220,7 +217,7 @@ const translations = {
         upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ",
         noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
-        vol: "マスターボリューム", total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
+        total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
         navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ",
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
         searchPh: "曲名で検索...",
@@ -233,7 +230,7 @@ const translations = {
         upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY",
         noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
-        vol: "MASTER VOLUME", total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
+        total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
         navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact",
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
         searchPh: "Search tracks...",
@@ -246,7 +243,7 @@ const translations = {
         upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR",
         noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
-        vol: "VOLUME UTAMA", total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
+        total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
         navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak",
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
         searchPh: "Cari lagu...",
@@ -270,7 +267,6 @@ let audioCtx, analyser, source, dataArray;
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
-// --- FIXED: One-time Visualizer Initialization ---
 function initVisualizer() {
     if (audioCtx) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -283,8 +279,7 @@ function initVisualizer() {
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
         analyser.fftSize = 256;
-        const bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
         draw();
     } catch(e) { console.warn("Visualizer failed to initialize:", e); }
 }
@@ -321,7 +316,7 @@ function setLanguage(lang) {
     const targetBtn = document.getElementById(`lang-${lang}`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-vol', 'label-count', 'label-status', 'nav-tos', 'nav-privacy', 'nav-contact'];
+    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'label-status', 'nav-tos', 'nav-privacy', 'nav-contact'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
@@ -371,20 +366,14 @@ function renderLibrary() {
 async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
     initVisualizer();
-    
     if (currentUrl) URL.revokeObjectURL(currentUrl);
     currentIndex = index;
     const t = library[currentIndex];
     currentUrl = URL.createObjectURL(t.blob);
     audio.src = currentUrl;
-    
-    try {
-        await audio.play();
-    } catch(e) { console.log("Playback blocked by browser settings."); }
-
+    try { await audio.play(); } catch(e) { console.log("Playback blocked."); }
     document.getElementById('nowTitle').textContent = t.name;
     renderLibrary();
-
     if (isRandom) {
         setTimeout(() => {
             const activeItem = document.querySelector('.track-item.active');
@@ -400,7 +389,6 @@ async function playTrack(index, isRandom = false) {
 async function deleteTrack(dbId, arrayIndex) {
     const db = await openDB();
     await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
-    
     if (arrayIndex === currentIndex) { 
         audio.pause(); audio.src = ""; currentIndex = -1; 
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
@@ -427,8 +415,7 @@ document.getElementById('fileInput').onchange = async (e) => {
     const files = Array.from(e.target.files);
     for (const f of files) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.add({ name: f.name, blob: f });
+        const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
         req.onsuccess = (ev) => {
             library.push({ id: ev.target.result, name: f.name, blob: f });
             renderLibrary();
@@ -450,12 +437,8 @@ document.getElementById('clearBtn').onclick = async () => {
 
 document.getElementById('playBtn').onclick = () => {
     if (library.length === 0) return;
-    if (!audio.src) {
-        playTrack(0);
-    } else {
-        initVisualizer();
-        audio.paused ? audio.play() : audio.pause();
-    }
+    if (!audio.src) playTrack(0);
+    else { initVisualizer(); audio.paused ? audio.play() : audio.pause(); }
 };
 
 audio.onplay = () => { 
@@ -484,8 +467,7 @@ document.getElementById('prevBtn').onclick = () => {
 };
 
 document.getElementById('randomBtn').onclick = () => {
-    if (library.length === 0) return;
-    if (library.length === 1) { playTrack(0, true); return; }
+    if (library.length <= 1) { if(library.length === 1) playTrack(0, true); return; }
     let idx;
     do { idx = Math.floor(Math.random() * library.length); } while (idx === currentIndex);
     playTrack(idx, true);
@@ -495,11 +477,6 @@ document.getElementById('searchBar').oninput = renderLibrary;
 document.getElementById('seek').oninput = (e) => { 
     if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; 
 };
-document.getElementById('volume').oninput = (e) => {
-    audio.volume = e.target.value;
-    audio.muted = false;
-    document.getElementById('muteBtn').classList.remove('active');
-};
 
 audio.ontimeupdate = () => {
     if (!audio.duration || isNaN(audio.duration)) return;
@@ -507,7 +484,6 @@ audio.ontimeupdate = () => {
     const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
     const durM = Math.floor(audio.duration / 60);
     const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
-    
     document.getElementById('currentTime').textContent = `${curM}:${curS}`;
     document.getElementById('duration').textContent = `${durM}:${durS}`;
     document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
@@ -538,16 +514,6 @@ window.addEventListener('keydown', (e) => {
         case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
         case 'ArrowRight': document.getElementById('nextBtn').click(); break;
         case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
-        case 'ArrowUp': 
-            e.preventDefault(); 
-            audio.volume = Math.min(1, audio.volume + 0.05); 
-            document.getElementById('volume').value = audio.volume; 
-            break;
-        case 'ArrowDown': 
-            e.preventDefault(); 
-            audio.volume = Math.max(0, audio.volume - 0.05); 
-            document.getElementById('volume').value = audio.volume; 
-            break;
         case 'KeyR': document.getElementById('randomBtn').click(); break;
         case 'KeyL': document.getElementById('loopAllBtn').click(); break;
         case 'KeyO': document.getElementById('loopOneBtn').click(); break;
