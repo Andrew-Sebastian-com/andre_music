@@ -281,7 +281,7 @@ function initVisualizer() {
         analyser.fftSize = 256;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         draw();
-    } catch(e) { console.warn("Visualizer failed to initialize:", e); }
+    } catch(e) { console.warn("Visualizer failed:", e); }
 }
 
 function draw() {
@@ -370,8 +370,15 @@ async function playTrack(index, isRandom = false) {
     currentIndex = index;
     const t = library[currentIndex];
     currentUrl = URL.createObjectURL(t.blob);
+    
+    // Reset UI before load
+    document.getElementById('seek').value = 0;
+    document.getElementById('currentTime').textContent = "0:00";
+    
     audio.src = currentUrl;
-    try { await audio.play(); } catch(e) { console.log("Playback blocked."); }
+    audio.load(); // Force browser to re-read metadata
+
+    try { await audio.play(); } catch(e) { console.log("Interaction needed"); }
     document.getElementById('nowTitle').textContent = t.name;
     renderLibrary();
     if (isRandom) {
@@ -409,6 +416,29 @@ function getNext() {
     }
     return (currentIndex + 1) % library.length;
 }
+
+// Duration Fixes
+audio.onloadedmetadata = () => {
+    if (audio.duration) {
+        const durM = Math.floor(audio.duration / 60);
+        const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+        document.getElementById('duration').textContent = `${durM}:${durS}`;
+    }
+};
+
+audio.ontimeupdate = () => {
+    if (!audio.duration || isNaN(audio.duration)) return;
+    const curM = Math.floor(audio.currentTime / 60);
+    const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+    document.getElementById('currentTime').textContent = `${curM}:${curS}`;
+    document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
+};
+
+document.getElementById('seek').oninput = (e) => { 
+    if (audio.duration && !isNaN(audio.duration)) {
+        audio.currentTime = (e.target.value / 100) * audio.duration; 
+    }
+};
 
 document.getElementById('fileInput').onchange = async (e) => {
     const db = await openDB();
@@ -449,7 +479,6 @@ audio.onpause = () => {
     document.getElementById('playLabel').textContent = translations[currentLang].play; 
     document.getElementById('playBtn').classList.remove('active'); 
 };
-
 audio.onended = () => {
     if(mode === 'loopOne') playTrack(currentIndex);
     else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
@@ -465,28 +494,11 @@ document.getElementById('prevBtn').onclick = () => {
     const n = (currentIndex <= 0) ? library.length - 1 : currentIndex - 1;
     playTrack(n);
 };
-
 document.getElementById('randomBtn').onclick = () => {
     if (library.length <= 1) { if(library.length === 1) playTrack(0, true); return; }
     let idx;
     do { idx = Math.floor(Math.random() * library.length); } while (idx === currentIndex);
     playTrack(idx, true);
-};
-
-document.getElementById('searchBar').oninput = renderLibrary;
-document.getElementById('seek').oninput = (e) => { 
-    if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; 
-};
-
-audio.ontimeupdate = () => {
-    if (!audio.duration || isNaN(audio.duration)) return;
-    const curM = Math.floor(audio.currentTime / 60);
-    const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-    const durM = Math.floor(audio.duration / 60);
-    const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
-    document.getElementById('currentTime').textContent = `${curM}:${curS}`;
-    document.getElementById('duration').textContent = `${durM}:${durS}`;
-    document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
 };
 
 function toggleMode(newMode, btnId) {
@@ -540,8 +552,7 @@ window.addEventListener('keydown', (e) => {
             canvas.width = canvas.clientWidth; 
             canvas.height = canvas.clientHeight; 
         };
-        window.onresize = resize; 
-        resize();
+        window.onresize = resize; resize();
     } catch(e) { console.error("Init Error", e); }
 })();
 </script>
