@@ -27,6 +27,21 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
 
+  /* Black bar for logo */
+  .logo-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    padding: 10px 0;
+  }
+
+  .site-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+  }
+
   header {
     padding: 15px 25px;
     border-bottom: 3px solid var(--accent-red);
@@ -36,10 +51,10 @@
     background: #fff;
   }
 
-  .logo-area { display: flex; align-items: baseline; gap: 10px; }
+  .logo-area { display: flex; align-items: baseline; gap: 15px; }
   .logo { font-size: 26px; font-weight: bold; color: var(--accent-red); text-decoration: none; }
   
-  .lang-switcher { font-size: 11px; margin-right: 15px; display: flex; gap: 5px; }
+  .lang-switcher { font-size: 11px; display: flex; gap: 5px; }
   .lang-btn { cursor: pointer; color: var(--accent-blue); text-decoration: underline; background: none; border: none; padding: 0; font-size: 11px; }
   .lang-btn.active { color: #000; text-decoration: none; font-weight: bold; }
 
@@ -60,16 +75,12 @@
   .track-item:hover { background: #fffceb; color: var(--accent-red); }
   .track-item.active { background: #ffebcc; border-left: 5px solid #ff9900; font-weight: bold; }
   
-  /* --- RANDOM PICK ANIMATION --- */
   @keyframes highlightPick {
     0% { background-color: #ff9900; transform: scale(1.02); }
     50% { background-color: #ffe0b3; transform: scale(1.04); }
     100% { background-color: #ffebcc; transform: scale(1); }
   }
-  .picking-animation {
-    animation: highlightPick 0.6s ease-out;
-    z-index: 10;
-  }
+  .picking-animation { animation: highlightPick 0.6s ease-out; z-index: 10; }
 
   .del-btn { 
     color: #999; border: 1px solid #ccc; background: #fff; font-size: 9px; 
@@ -80,14 +91,14 @@
   .main-player { padding: 30px; background: #fff; }
   .player-frame { background: #eef4f9; border: 2px solid var(--accent-blue); padding: 25px; border-radius: 2px; }
   .now-playing-display { background: #fff; border: 1px solid #b0c4de; padding: 20px; margin-bottom: 20px; text-align: center; }
-  .song-title { font-size: 18px; font-weight: bold; color: #003366; margin-bottom: 15px; word-break: break-all; }
+  .song-title { font-size: 18px; font-weight: bold; color: #003366; margin-bottom: 15px; word-break: break-all; min-height: 1.2em; }
 
   #visualizer { width: 100%; height: 80px; background: #fafafa; border-radius: 4px; margin-bottom: 15px; }
 
   .timer-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
   input[type=range] { width: 100%; cursor: pointer; }
 
-  .control-group { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+  .control-group { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
   .btn { background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%); border: 1px solid #aaa; padding: 6px 16px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 3px; box-shadow: 0 1px 0 #fff inset; }
   .btn-upload { background: linear-gradient(to bottom, #ff4d4d, #cc0000); color: white; border-color: #900; }
   .btn.active { background: #00cc66 !important; color: white !important; border-color: #008844 !important; }
@@ -107,72 +118,15 @@
   footer { text-align: center; padding: 15px; font-size: 10px; color: #999; border-top: 1px solid #eee; }
   .legal-nav { text-align: center; margin-bottom: 10px; font-size: 11px; }
   .legal-nav a { color: var(--accent-blue); text-decoration: underline; margin: 0 10px; cursor: pointer; }
-
-  /* Black bar for logo */
-.logo-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000;
-  padding: 10px 0;
-}
-
-.site-logo {
-  height: 32px; /* smaller logo */
-  width: auto;
-  object-fit: contain;
-}
-
-/* Header styling */
-header {
-  text-align: center;
-  padding: 30px 20px 20px;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
-  color: #0b1220;
-}
-
-header p {
-  margin: 8px 0 20px;
-  color: #555;
-  font-size: 15px;
-}
-
-/* Navigation buttons in header */
-.header-nav {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.header-nav a {
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #0a84ff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.05);
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.header-nav a:hover {
-  background: rgba(0,0,0,0.1);
-  color: #007aff;
-}
-
 </style>
 </head>
 <body>
 
 <div class="app">
   <div class="logo-header">
-  <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo">
-</div>
+    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo">
+  </div>
+  
   <header>
     <div class="logo-area">
       <a href="#" class="logo">AndreMusic</a>
@@ -248,12 +202,14 @@ header p {
     <div class="modal-scroll" id="body-tos"></div>
   </div>
 </div>
+
 <div id="privacy-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header"><span id="title-privacy">Privacy Policy</span><span class="close-btn" onclick="closeModal('privacy-modal')">[X]</span></div>
     <div class="modal-scroll" id="body-privacy"></div>
   </div>
 </div>
+
 <div id="help-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div>
@@ -278,6 +234,7 @@ header p {
     </div>
   </div>
 </div>
+
 <div id="contact-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div>
@@ -369,6 +326,7 @@ const audio = document.getElementById('audio');
 let library = [];
 let currentIndex = -1;
 let mode = 'normal';
+let currentUrl = null;
 
 // --- VISUALIZER LOGIC ---
 let audioCtx, analyser, source, dataArray;
@@ -377,58 +335,47 @@ const ctx = canvas.getContext('2d');
 
 function initVisualizer() {
   if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  source = audioCtx.createMediaElementSource(audio);
-  source.connect(analyser);
-  analyser.connect(audioCtx.destination);
-  analyser.fftSize = 256;
-  const bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
-  draw();
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    source = audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+    draw();
+  } catch(e) { console.log("Visualizer failed:", e); }
 }
 
 function draw() {
   requestAnimationFrame(draw);
+  if (!analyser) return;
   const bufferLength = analyser.frequencyBinCount;
   analyser.getByteFrequencyData(dataArray);
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const barWidth = (canvas.width / bufferLength) * 2.5;
-  let barHeight;
   let x = 0;
   for (let i = 0; i < bufferLength; i++) {
-    barHeight = dataArray[i] / 2;
+    let barHeight = dataArray[i] / 2;
     ctx.fillStyle = `rgb(0, 102, 204)`;
     ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
     x += barWidth + 1;
   }
 }
 
-// --- KEYBOARD SHORTCUTS ---
-window.addEventListener('keydown', (e) => {
-  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-  switch (e.code) {
-    case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
-    case 'ArrowRight': document.getElementById('nextBtn').click(); break;
-    case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
-    case 'ArrowUp': e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); document.getElementById('volume').value = audio.volume; break;
-    case 'ArrowDown': e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); document.getElementById('volume').value = audio.volume; break;
-    case 'KeyR': document.getElementById('randomBtn').click(); break;
-    case 'KeyL': document.getElementById('loopAllBtn').click(); break;
-    case 'KeyO': document.getElementById('loopOneBtn').click(); break;
-    case 'KeyS': document.getElementById('shuffleBtn').click(); break;
-    case 'KeyM': document.getElementById('muteBtn').click(); break;
-    case 'KeyU': document.getElementById('fileInput').click(); break;
-    case 'KeyH': openModal('help-modal'); break;
-    case 'Delete': document.getElementById('clearBtn').click(); break;
-    //--- Keyboard Shortcuts for changing language ---
-    case 'KeyJ': document.getElementById('lang-ja').click(); break;
-    case 'KeyE': document.getElementById('lang-en').click(); break;
-    case 'KeyI': document.getElementById('lang-id').click(); break;
-  }
-});
+// --- DATABASE HELPERS ---
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
 
+// --- UI HELPERS ---
 function setLanguage(lang) {
   currentLang = lang;
   const t = translations[lang];
@@ -455,28 +402,9 @@ function setLanguage(lang) {
 
 function openModal(id) { document.getElementById(id).style.display = "block"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
-window.onclick = (e) => { if(e.target.className.includes('modal')) e.target.style.display = "none"; }
+window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; }
 
-document.getElementById('contactForm').onsubmit = function(e) {
-  e.preventDefault();
-  const name = document.getElementById('contact-name').value;
-  const email = document.getElementById('contact-email').value;
-  const message = document.getElementById('contact-message').value;
-  const subject = encodeURIComponent(`AndreMusic Inquiry from ${name}`);
-  const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-  window.location.href = `mailto:andrew.sbstian@gmail.com?subject=${subject}&body=${body}`;
-  closeModal('contact-modal');
-  this.reset();
-};
-
-function openDB() {
-  return new Promise((res) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-    req.onsuccess = () => res(req.result);
-  });
-}
-
+// --- CORE FUNCTIONALITY ---
 function renderLibrary() {
   const list = document.getElementById('trackList');
   const searchTerm = document.getElementById('searchBar').value.toLowerCase();
@@ -500,35 +428,25 @@ function renderLibrary() {
   document.getElementById('count').textContent = library.length;
 }
 
-document.getElementById('searchBar').oninput = renderLibrary;
-
-async function deleteTrack(dbId, arrayIndex) {
-  const db = await openDB();
-  await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
-  if (arrayIndex === currentIndex) { audio.pause(); audio.src = ""; currentIndex = -1; }
-  else if (arrayIndex < currentIndex) { currentIndex--; }
-  library.splice(arrayIndex, 1);
-  renderLibrary();
-}
-
-// --- UPDATED PLAYTRACK WITH ANIMATION ---
 async function playTrack(index, isRandom = false) {
   if (index < 0 || index >= library.length) return;
   initVisualizer();
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
+  // Cleanup old object URL to prevent memory leaks
+  if (currentUrl) URL.revokeObjectURL(currentUrl);
+
   currentIndex = index;
   const t = library[currentIndex];
-  if (!t.url) t.url = URL.createObjectURL(t.blob);
-  audio.src = t.url;
-  audio.play();
+  currentUrl = URL.createObjectURL(t.blob);
+  audio.src = currentUrl;
+  audio.play().catch(e => console.log("Playback blocked:", e));
+  
   document.getElementById('nowTitle').textContent = t.name;
   renderLibrary();
 
   if (isRandom) {
     setTimeout(() => {
-      const trackItems = document.querySelectorAll('.track-item');
-      // We look for the active item in the list
       const activeItem = document.querySelector('.track-item.active');
       if (activeItem) {
         activeItem.classList.add('picking-animation');
@@ -539,59 +457,98 @@ async function playTrack(index, isRandom = false) {
   }
 }
 
-function toggleMode(newMode, btnId) {
-    const btn = document.getElementById(btnId);
-    if (mode === newMode) {
-        mode = 'normal';
-        btn.classList.remove('active');
-    } else {
-        ['loopAllBtn', 'loopOneBtn', 'shuffleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
-        mode = newMode;
-        btn.classList.add('active');
-    }
+async function deleteTrack(dbId, arrayIndex) {
+  const db = await openDB();
+  await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
+  if (arrayIndex === currentIndex) { 
+    audio.pause(); 
+    audio.src = ""; 
+    currentIndex = -1; 
+    document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+  } else if (arrayIndex < currentIndex) { 
+    currentIndex--; 
+  }
+  library.splice(arrayIndex, 1);
+  renderLibrary();
 }
 
 function getNext() {
-    if(mode === 'shuffle' && library.length > 0) return Math.floor(Math.random() * library.length);
-    return (currentIndex + 1) % library.length;
+  if (library.length === 0) return -1;
+  if(mode === 'shuffle') return Math.floor(Math.random() * library.length);
+  return (currentIndex + 1) % library.length;
 }
 
-audio.onended = () => {
-    if(mode === 'loopOne') playTrack(currentIndex);
-    else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
-    else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
+// --- EVENT HANDLERS ---
+document.getElementById('fileInput').onchange = async (e) => {
+  const db = await openDB();
+  const files = Array.from(e.target.files);
+  for (const f of files) {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
+    req.onsuccess = (ev) => {
+      library.push({ id: ev.target.result, name: f.name, blob: f });
+      renderLibrary();
+    };
+  }
+  e.target.value = ''; // Allow re-uploading same file name
+};
+
+document.getElementById('clearBtn').onclick = async () => {
+  if(confirm(translations[currentLang].confirm)) {
+    const db = await openDB();
+    await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
+    library = []; 
+    currentIndex = -1;
+    audio.pause(); 
+    audio.src = "";
+    if(currentUrl) URL.revokeObjectURL(currentUrl);
+    renderLibrary(); 
+    document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+  }
 };
 
 document.getElementById('playBtn').onclick = () => {
-  initVisualizer();
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  audio.paused ? audio.play() : audio.pause();
-};
-
-audio.onplay = () => { document.getElementById('playLabel').textContent = translations[currentLang].pause; document.getElementById('playBtn').classList.add('active'); };
-audio.onpause = () => { document.getElementById('playLabel').textContent = translations[currentLang].play; document.getElementById('playBtn').classList.remove('active'); };
-document.getElementById('nextBtn').onclick = () => playTrack(getNext());
-document.getElementById('prevBtn').onclick = () => playTrack((currentIndex - 1 + library.length) % library.length);
-
-// --- UPDATED RANDOM CLICK ---
-document.getElementById('randomBtn').onclick = () => {
-  if (library.length === 0) return;
-  let randomIndex;
-  if (library.length === 1) {
-    randomIndex = 0;
-  } else {
-    do {
-      randomIndex = Math.floor(Math.random() * library.length);
-    } while (randomIndex === currentIndex);
+  if (!audio.src && library.length > 0) playTrack(0);
+  else {
+    initVisualizer();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    audio.paused ? audio.play() : audio.pause();
   }
-  playTrack(randomIndex, true);
 };
 
-document.getElementById('loopAllBtn').onclick = () => toggleMode('loopAll', 'loopAllBtn');
-document.getElementById('loopOneBtn').onclick = () => toggleMode('loopOne', 'loopOneBtn');
-document.getElementById('shuffleBtn').onclick = () => toggleMode('shuffle', 'shuffleBtn');
-document.getElementById('muteBtn').onclick = function() { audio.muted = !audio.muted; this.classList.toggle('active', audio.muted); };
-document.getElementById('seek').oninput = (e) => audio.currentTime = (e.target.value / 100) * audio.duration;
+audio.onplay = () => { 
+  document.getElementById('playLabel').textContent = translations[currentLang].pause; 
+  document.getElementById('playBtn').classList.add('active'); 
+};
+audio.onpause = () => { 
+  document.getElementById('playLabel').textContent = translations[currentLang].play; 
+  document.getElementById('playBtn').classList.remove('active'); 
+};
+
+audio.onended = () => {
+  if(mode === 'loopOne') playTrack(currentIndex);
+  else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
+  else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
+};
+
+document.getElementById('nextBtn').onclick = () => {
+  const n = getNext();
+  if (n !== -1) playTrack(n);
+};
+document.getElementById('prevBtn').onclick = () => {
+  if (library.length === 0) return;
+  playTrack((currentIndex - 1 + library.length) % library.length);
+};
+
+document.getElementById('randomBtn').onclick = () => {
+  if (library.length <= 1) { if(library.length === 1) playTrack(0, true); return; }
+  let idx;
+  do { idx = Math.floor(Math.random() * library.length); } while (idx === currentIndex);
+  playTrack(idx, true);
+};
+
+document.getElementById('searchBar').oninput = renderLibrary;
+document.getElementById('seek').oninput = (e) => { if(audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; };
 document.getElementById('volume').oninput = (e) => audio.volume = e.target.value;
 
 audio.ontimeupdate = () => {
@@ -601,36 +558,58 @@ audio.ontimeupdate = () => {
   document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
 };
 
-document.getElementById('fileInput').onchange = async (e) => {
-  const db = await openDB();
-  for (const f of e.target.files) {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
-    req.onsuccess = (ev) => { 
-      library.push({ id: ev.target.result, name: f.name, blob: f, url: null }); 
-      renderLibrary(); 
-    };
+function toggleMode(newMode, btnId) {
+  if (mode === newMode) {
+    mode = 'normal';
+    document.getElementById(btnId).classList.remove('active');
+  } else {
+    ['loopAllBtn', 'loopOneBtn', 'shuffleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+    mode = newMode;
+    document.getElementById(btnId).classList.add('active');
   }
-};
+}
 
-document.getElementById('clearBtn').onclick = async () => {
-  if(confirm(translations[currentLang].confirm)) {
-    const db = await openDB();
-    await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
-    library = []; renderLibrary(); audio.src = "";
-    document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+document.getElementById('loopAllBtn').onclick = () => toggleMode('loopAll', 'loopAllBtn');
+document.getElementById('loopOneBtn').onclick = () => toggleMode('loopOne', 'loopOneBtn');
+document.getElementById('shuffleBtn').onclick = () => toggleMode('shuffle', 'shuffleBtn');
+document.getElementById('muteBtn').onclick = function() { audio.muted = !audio.muted; this.classList.toggle('active', audio.muted); };
+
+// Shortcuts
+window.addEventListener('keydown', (e) => {
+  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  switch (e.code) {
+    case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
+    case 'ArrowRight': document.getElementById('nextBtn').click(); break;
+    case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
+    case 'ArrowUp': e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); document.getElementById('volume').value = audio.volume; break;
+    case 'ArrowDown': e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); document.getElementById('volume').value = audio.volume; break;
+    case 'KeyR': document.getElementById('randomBtn').click(); break;
+    case 'KeyL': document.getElementById('loopAllBtn').click(); break;
+    case 'KeyO': document.getElementById('loopOneBtn').click(); break;
+    case 'KeyS': document.getElementById('shuffleBtn').click(); break;
+    case 'KeyM': document.getElementById('muteBtn').click(); break;
+    case 'KeyU': document.getElementById('fileInput').click(); break;
+    case 'KeyH': openModal('help-modal'); break;
+    case 'Delete': document.getElementById('clearBtn').click(); break;
+    case 'KeyJ': setLanguage('ja'); break;
+    case 'KeyE': setLanguage('en'); break;
+    case 'KeyI': setLanguage('id'); break;
   }
-};
+});
 
+// Init
 (async function init() {
-  const db = await openDB();
-  db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-    library = e.target.result.map(it => ({ ...it, url: null }));
-    renderLibrary();
-    setLanguage('ja');
-  };
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+  try {
+    const db = await openDB();
+    db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+      library = e.target.result;
+      renderLibrary();
+      setLanguage('ja');
+    };
+    const resize = () => { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; };
+    window.onresize = resize;
+    resize();
+  } catch(e) { console.error("Init Error", e); }
 })();
 </script>
 </body>
