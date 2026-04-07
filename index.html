@@ -74,8 +74,7 @@
   .sidebar { border-right: 1px solid var(--border-gray); background: #f9f9f9; min-height: 600px; display: flex; flex-direction: column; }
   .panel-header { background: linear-gradient(to bottom, #666, #333); color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #000; }
 
-  .search-container { padding: 10px; background: #eee; border-bottom: 1px solid #ccc; }
-  #searchBar { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; font-size: 12px; border-radius: 2px; }
+  /* REMOVED: .search-container styling */
 
   .track-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; max-height: 500px; overflow-y: auto; scroll-behavior: smooth; }
   .track-item { 
@@ -158,9 +157,7 @@
   <div class="container">
     <aside class="sidebar">
       <div class="panel-header" id="label-playlist">♫ PLAYLIST LIBRARY</div>
-      <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search track...">
-      </div>
+      <!-- REMOVED SEARCH BAR HERE -->
       <ul class="track-list" id="trackList"></ul>
     </aside>
 
@@ -220,7 +217,6 @@ const translations = {
         total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
         navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ",
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
-        searchPh: "曲名で検索...",
         tosTitle: "利用規約",
         tosBody: `<p><strong>1. 規約の同意:</strong> AndreMusicを使用することで、本規約に同意したものとみなされます。</p><p><strong>2. サービスの概要:</strong> 本アプリはブラウザベースのローカルメディアプレイヤーであり、音楽コンテンツは提供しません。</p><p><strong>3. 知的財産権:</strong> AndreMusicのデザインおよびソースコードはAndrew Sudiroに帰属します。</p><p><strong>4. ユーザーの責任:</strong> 取り込むファイルは、ユーザーが合法的に所有しているものに限ります。</p><p><strong>5. 禁止事項:</strong> 著作権のある素材の無断公衆放送、および違法な目的での使用を禁止します。</p><p><strong>6. 免責事項:</strong> 本アプリは現状有姿で提供され、ブラウザキャッシュ削除によるデータ損失等の責任は負いません。</p>`,
         privacyTitle: "プライバシーポリシー",
@@ -233,7 +229,6 @@ const translations = {
         total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
         navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact",
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
-        searchPh: "Search tracks...",
         tosTitle: "Terms of Service",
         tosBody: `<p><strong>1. Acceptance:</strong> By using AndreMusic, you agree to these terms.</p><p><strong>2. Service:</strong> This is a local player; you must provide your own legal audio files.</p><p><strong>3. Intellectual Property:</strong> Source code and design are owned by Andrew Sudiro.</p><p><strong>4. Responsibility:</strong> Users are responsible for the legality of their imported files.</p><p><strong>5. Prohibited:</strong> Illegal use or public broadcasting without a license is prohibited.</p><p><strong>6. Disclaimer:</strong> Provided "AS IS." We are not liable for data loss due to browser clearing.</p>`,
         privacyTitle: "Privacy Policy",
@@ -246,7 +241,6 @@ const translations = {
         total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
         navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak",
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
-        searchPh: "Cari lagu...",
         tosTitle: "Ketentuan Layanan",
         tosBody: `<p><strong>1. Penerimaan:</strong> Dengan menggunakan AndreMusic, Anda menyetujui ketentuan ini.</p><p><strong>2. Layanan:</strong> Ini adalah pemutar lokal; Anda harus menyediakan file audio legal sendiri.</p><p><strong>3. Hak Kekayaan Intelektual:</strong> Kode sumber dan desain dimiliki oleh Andrew Sudiro.</p><p><strong>4. Tanggung Jawab:</strong> Pengguna bertanggung jawab atas legalitas file yang diimpor.</p><p><strong>5. Larangan:</strong> Dilarang menggunakan untuk tujuan ilegal atau penyiaran publik tanpa lisensi.</p><p><strong>6. Penafian:</strong> Disediakan "APA ADANYA." Kami tidak bertanggung jawab atas kehilangan data.</p>`,
         privacyTitle: "Kebijakan Privasi",
@@ -323,7 +317,7 @@ function setLanguage(lang) {
         if(el && t[key]) el.textContent = t[key];
     });
 
-    document.getElementById('searchBar').placeholder = t.searchPh;
+    // REMOVED the search bar translation logic here (no searchBar element)
     document.getElementById('title-contact').textContent = t.contactTitle;
     document.getElementById('contact-send').textContent = t.contactSend;
     document.getElementById('contact-name').placeholder = t.namePh;
@@ -342,23 +336,20 @@ window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.styl
 
 function renderLibrary() {
     const list = document.getElementById('trackList');
-    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
     list.innerHTML = '';
     library.forEach((t, idx) => {
-        if (t.name.toLowerCase().includes(searchTerm)) {
-            const li = document.createElement('li');
-            li.className = 'track-item' + (idx === currentIndex ? ' active' : '');
-            const info = document.createElement('span');
-            info.className = 'track-info';
-            info.textContent = `♪ ${t.name}`;
-            info.onclick = () => playTrack(idx);
-            const del = document.createElement('button');
-            del.className = 'del-btn';
-            del.textContent = 'DEL';
-            del.onclick = (e) => { e.stopPropagation(); deleteTrack(t.id, idx); };
-            li.append(info, del);
-            list.appendChild(li);
-        }
+        const li = document.createElement('li');
+        li.className = 'track-item' + (idx === currentIndex ? ' active' : '');
+        const info = document.createElement('span');
+        info.className = 'track-info';
+        info.textContent = `♪ ${t.name}`;
+        info.onclick = () => playTrack(idx);
+        const del = document.createElement('button');
+        del.className = 'del-btn';
+        del.textContent = 'DEL';
+        del.onclick = (e) => { e.stopPropagation(); deleteTrack(t.id, idx); };
+        li.append(info, del);
+        list.appendChild(li);
     });
     document.getElementById('count').textContent = library.length;
 }
