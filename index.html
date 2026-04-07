@@ -114,7 +114,24 @@
   .btn-upload { background: linear-gradient(to bottom, #ff4d4d, #cc0000); color: white; border-color: #900; }
   .btn.active { background: #00cc66 !important; color: white !important; border-color: #008844 !important; }
 
-  .status-bar { margin-top: 30px; border: 1px solid #ddd; background: #fcfcfc; padding: 10px; font-size: 11px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .status-bar { 
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;      /* The bar will only be as wide as its content */
+    min-width: 300px;        /* Optional: prevents it from being too tiny */
+    
+    border: 1px solid #ddd; 
+    background: #fcfcfc; 
+    padding: 10px 20px; 
+    font-size: 11px; 
+    
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+}
   
   .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
   .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; border: 2px solid #333; box-shadow: 8px 8px 0px rgba(0,0,0,0.2); font-size: 13px; line-height: 1.6; box-sizing: border-box; }
