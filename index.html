@@ -226,7 +226,11 @@
 }
 </style>
 
-<img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" id="refresh-logo" style="cursor:pointer;">
+<div class="app">
+  <div class="logo-header">
+    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();">
+  </div>
+</div>
   
   <header>
     <div class="logo-area">
@@ -682,9 +686,6 @@ window.addEventListener('keydown', (e) => {
         document.getElementById('loading-text').textContent = "Loading Failed :(";
         if(overlay) overlay.style.background = "#fff6f6";
     }
-
-  document.getElementById('refresh-logo').addEventListener('click', function() {
-  location.reload();
 })();
 </script>
 </body>
