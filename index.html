@@ -76,8 +76,6 @@
   .sidebar { border-right: 1px solid var(--border-gray); background: #f9f9f9; min-height: 600px; display: flex; flex-direction: column; }
   .panel-header { background: linear-gradient(to bottom, #666, #333); color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #000; }
 
-  /* REMOVED: .search-container styling */
-
   .track-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; max-height: 500px; overflow-y: auto; scroll-behavior: smooth; }
   .track-item { 
     display: flex; justify-content: space-between; align-items: center;
@@ -148,6 +146,64 @@
   footer { text-align: center; padding: 15px; font-size: 10px; color: #999; border-top: 1px solid #eee; }
   .legal-nav { text-align: center; margin-bottom: 10px; font-size: 11px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
   .legal-nav a { color: var(--accent-blue); text-decoration: underline; cursor: pointer; }
+
+  /* --- Responsive patches --- */
+  @media (max-width: 600px) {
+    .app {
+      width: 100vw;
+      min-width: 0;
+      box-sizing: border-box;
+      border-radius: 0 !important;
+      margin: 0;
+      border: none;
+      box-shadow: none;
+    }
+    .logo-header {
+      padding: 5px 0;
+    }
+    header {
+      padding: 10px 5vw;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+    }
+    .logo { font-size: 20px; }
+    .lang-switcher { justify-content: flex-start; width: 100%; }
+    .main-player { padding: 8px; }
+    .player-frame { padding: 7vw 3vw 5vw 3vw; }
+    .now-playing-display { padding: 7vw 3vw 5vw 3vw; }
+    .container { display: block; min-height: initial; }
+    .sidebar { min-height: auto !important; border-right: none !important; border-bottom: 1px solid var(--border-gray); }
+    .track-list { max-height: 160px !important; font-size: 13px; }
+    .legal-nav { font-size: 12px; gap: 6px; flex-wrap: wrap; line-height: 22px;}
+    footer { font-size: 11px; }
+    .status-bar { min-width: 0; width: 98vw; padding: 5px 2vw; font-size: 12px; }
+    #visualizer { height: 60px; }
+    .song-title { font-size: 14px; }
+    .btn, .btn-upload, .del-btn { min-height: 36px; font-size: 15px; padding: 8px 14px !important;}
+    .del-btn { font-size: 12px; padding: 5px 10px !important;}
+    .modal-content { width: 98% !important; max-width: 98vw !important; padding: 3vw !important; font-size: 14px !important;}
+    .modal-scroll { height: 220px !important; }
+    .track-item { min-height: 38px; font-size: 15px; }
+    .track-info { font-size: 15px; }
+  }
+  @media (min-width: 601px) and (max-width: 950px) {
+    .app { width: 98vw; }
+    .main-player { padding: 13px 2vw; }
+    .player-frame, .now-playing-display { padding: 18px 2vw; }
+    .sidebar { min-height: 350px !important; }
+    .container { grid-template-columns: 185px 1fr; }
+    .track-list { max-height: 190px !important; }
+    #visualizer { height: 80px; }
+  }
+  @media (min-width: 951px) and (max-width: 1300px) {
+    .app { width: 98vw;}
+    .container { grid-template-columns: 240px 1fr; }
+    .main-player { padding: 22px 2vw; }
+    .player-frame { padding: 18px 4vw; }
+    .track-list { max-height: 300px !important; }
+    #visualizer { height: 100px; }
+  }
 </style>
 </head>
 <body>
