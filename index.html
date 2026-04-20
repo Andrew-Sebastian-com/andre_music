@@ -283,7 +283,6 @@ Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, 
     }
 };
 
-let currentLang = 'ja';
 const DB_NAME = 'music-library-db';
 const STORE_NAME = 'tracks';
 const audio = document.getElementById('audio');
@@ -291,6 +290,7 @@ let library = [];
 let currentIndex = -1;
 let mode = 'normal';
 let currentUrl = null;
+let currentLang = 'ja';
 
 let audioCtx, analyser, source, dataArray;
 const canvas = document.getElementById('visualizer');
@@ -310,7 +310,9 @@ function initVisualizer() {
         analyser.fftSize = 256;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         draw();
-    } catch(e) { console.warn("Visualizer failed:", e); }
+    } catch(e) {
+        console.warn("Visualizer failed:", e);
+    }
 }
 
 function draw() {
@@ -332,9 +334,12 @@ function draw() {
 function openDB() {
     return new Promise((res, rej) => {
         const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        req.onupgradeneeded = () => {
+            if (!req.result.objectStoreNames.contains(STORE_NAME))
+                req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        };
         req.onsuccess = () => res(req.result);
-        req.onerror = () => rej(req.error);
+        req.onerror = () => rej(req.error || 'indexedDB open error');
     });
 }
 
@@ -352,7 +357,6 @@ function setLanguage(lang) {
         if(el && t[key]) el.textContent = t[key];
     });
 
-    // REMOVED the search bar translation logic here (no searchBar element)
     document.getElementById('title-contact').textContent = t.contactTitle;
     document.getElementById('contact-send').textContent = t.contactSend;
     document.getElementById('contact-name').placeholder = t.namePh;
@@ -367,8 +371,9 @@ function setLanguage(lang) {
 
 function openModal(id) { document.getElementById(id).style.display = "block"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
-window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; }
+window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; };
 
+// Render the library list
 function renderLibrary() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
@@ -396,15 +401,15 @@ async function playTrack(index, isRandom = false) {
     currentIndex = index;
     const t = library[currentIndex];
     currentUrl = URL.createObjectURL(t.blob);
-    
+
     // Reset UI before load
     document.getElementById('seek').value = 0;
     document.getElementById('currentTime').textContent = "0:00";
-    
+
     audio.src = currentUrl;
     audio.load(); // Force browser to re-read metadata
 
-    try { await audio.play(); } catch(e) { console.log("Interaction needed"); }
+    try { await audio.play(); } catch(e) { console.log("Interaction needed: ", e); }
     document.getElementById('nowTitle').textContent = t.name;
     renderLibrary();
     if (isRandom) {
@@ -421,12 +426,16 @@ async function playTrack(index, isRandom = false) {
 
 async function deleteTrack(dbId, arrayIndex) {
     const db = await openDB();
-    await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(dbId);
-    if (arrayIndex === currentIndex) { 
-        audio.pause(); audio.src = ""; currentIndex = -1; 
+    await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(dbId).onsuccess = resolve;
+        tx.onerror = reject;
+    });
+    if (arrayIndex === currentIndex) {
+        audio.pause(); audio.src = ""; currentIndex = -1;
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-    } else if (arrayIndex < currentIndex) { 
-        currentIndex--; 
+    } else if (arrayIndex < currentIndex) {
+        currentIndex--;
     }
     library.splice(arrayIndex, 1);
     renderLibrary();
@@ -443,7 +452,7 @@ function getNext() {
     return (currentIndex + 1) % library.length;
 }
 
-// Duration Fixes
+// Duration and seekbar
 audio.onloadedmetadata = () => {
     if (audio.duration) {
         const durM = Math.floor(audio.duration / 60);
@@ -460,9 +469,9 @@ audio.ontimeupdate = () => {
     document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
 };
 
-document.getElementById('seek').oninput = (e) => { 
+document.getElementById('seek').oninput = (e) => {
     if (audio.duration && !isNaN(audio.duration)) {
-        audio.currentTime = (e.target.value / 100) * audio.duration; 
+        audio.currentTime = (e.target.value / 100) * audio.duration;
     }
 };
 
@@ -471,10 +480,14 @@ document.getElementById('fileInput').onchange = async (e) => {
     const files = Array.from(e.target.files);
     for (const f of files) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.add({ name: f.name, blob: f });
         req.onsuccess = (ev) => {
             library.push({ id: ev.target.result, name: f.name, blob: f });
             renderLibrary();
+        };
+        req.onerror = (err) => {
+            alert('Failed to add track: ' + (err?.target?.error || 'unknown error!'));
         };
     }
     e.target.value = '';
@@ -483,27 +496,31 @@ document.getElementById('fileInput').onchange = async (e) => {
 document.getElementById('clearBtn').onclick = async () => {
     if(confirm(translations[currentLang].confirm)) {
         const db = await openDB();
-        await db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
+            tx.onerror = reject;
+        });
         library = []; currentIndex = -1; audio.pause(); audio.src = "";
         if(currentUrl) URL.revokeObjectURL(currentUrl);
-        renderLibrary(); 
+        renderLibrary();
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
     }
 };
 
 document.getElementById('playBtn').onclick = () => {
     if (library.length === 0) return;
-    if (!audio.src) playTrack(0);
+    if (!audio.src || currentIndex === -1) playTrack(0);
     else { initVisualizer(); audio.paused ? audio.play() : audio.pause(); }
 };
 
-audio.onplay = () => { 
-    document.getElementById('playLabel').textContent = translations[currentLang].pause; 
-    document.getElementById('playBtn').classList.add('active'); 
+audio.onplay = () => {
+    document.getElementById('playLabel').textContent = translations[currentLang].pause;
+    document.getElementById('playBtn').classList.add('active');
 };
-audio.onpause = () => { 
-    document.getElementById('playLabel').textContent = translations[currentLang].play; 
-    document.getElementById('playBtn').classList.remove('active'); 
+audio.onpause = () => {
+    document.getElementById('playLabel').textContent = translations[currentLang].play;
+    document.getElementById('playBtn').classList.remove('active');
 };
 audio.onended = () => {
     if(mode === 'loopOne') playTrack(currentIndex);
@@ -541,9 +558,9 @@ function toggleMode(newMode, btnId) {
 document.getElementById('loopAllBtn').onclick = () => toggleMode('loopAll', 'loopAllBtn');
 document.getElementById('loopOneBtn').onclick = () => toggleMode('loopOne', 'loopOneBtn');
 document.getElementById('shuffleBtn').onclick = () => toggleMode('shuffle', 'shuffleBtn');
-document.getElementById('muteBtn').onclick = function() { 
-    audio.muted = !audio.muted; 
-    this.classList.toggle('active', audio.muted); 
+document.getElementById('muteBtn').onclick = function() {
+    audio.muted = !audio.muted;
+    this.classList.toggle('active', audio.muted);
 };
 
 window.addEventListener('keydown', (e) => {
@@ -569,14 +586,15 @@ window.addEventListener('keydown', (e) => {
 (async function init() {
     try {
         const db = await openDB();
-        db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-            library = e.target.result; 
-            renderLibrary(); 
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+            library = e.target.result;
+            renderLibrary();
             setLanguage('ja');
         };
-        const resize = () => { 
-            canvas.width = canvas.clientWidth; 
-            canvas.height = canvas.clientHeight; 
+        const resize = () => {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
         };
         window.onresize = resize; resize();
     } catch(e) { console.error("Init Error", e); }
