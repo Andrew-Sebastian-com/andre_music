@@ -226,11 +226,7 @@
 }
 </style>
 
-<div class="app">
-  <div class="logo-header">
-    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();">
-  </div>
-</div>
+<img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" id="refresh-logo" style="cursor:pointer;">
   
   <header>
     <div class="logo-area">
@@ -357,6 +353,7 @@ Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, 
         privacyBody: `<p>AndreMusic beroperasi dengan Mandat Tanpa Pelacakan, memastikan bahwa kebiasaan mendengarkan, jumlah pemutaran, dan preferensi perpustakaan Anda tidak pernah dipantau, diunggah, atau dijual kepada pihak ketiga. Setiap file yang Anda interaksi dikelola melalui Penyimpanan Lokal Terisolasi, menggunakan IndexedDB browser Anda sehingga koleksi audio Anda tetap sepenuhnya berada di perangkat keras Anda dan tidak pernah menyentuh server pusat. Komitmen terhadap anonimitas ini diperkuat oleh Lingkungan Tanpa Cookie, yang menghilangkan piksel pelacakan pihak ketiga dan pengidentifikasi tetap untuk menjamin sesi pribadi setiap kali Anda mendengarkan. Lebih lanjut, jika terjadi komunikasi langsung, detail pribadi apa pun seperti Nama atau Alamat Email yang diberikan melalui formulir kontak hanya digunakan untuk menanggapi pertanyaan Anda dan tidak pernah digunakan kembali untuk pemasaran atau pembuatan profil data. Bersama-sama, aturan-aturan ini memastikan bahwa interaksi Anda dengan platform ini sama pribadinya dengan mendengarkan rekaman fisik di rumah Anda sendiri.</p>`
     }
 };
+
 
 const DB_NAME = 'music-library-db';
 const STORE_NAME = 'tracks';
@@ -685,6 +682,9 @@ window.addEventListener('keydown', (e) => {
         document.getElementById('loading-text').textContent = "Loading Failed :(";
         if(overlay) overlay.style.background = "#fff6f6";
     }
+
+  document.getElementById('refresh-logo').addEventListener('click', function() {
+  location.reload();
 })();
 </script>
 </body>
