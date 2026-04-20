@@ -208,6 +208,24 @@
 </head>
 <body>
 
+    <!-- AndreMusic Loading Screen -->
+<div id="loading-overlay" style="
+  position:fixed; z-index:32000; left:0; top:0; width:100vw; height:100vh;
+  background: #fff; display: flex; align-items: center; justify-content: center; flex-direction:column;
+  transition: opacity 0.5s;
+">
+  <img src="logo.jpg" alt="AndreMusic" style="width:64px;height:64px;margin-bottom:10px;">
+  <div style="font-size:24px; color:#cc0000; margin-bottom:16px; font-weight:bold;">AndreMusic</div>
+  <div id="loading-text" style="font-family:sans-serif; color:#333; margin-bottom:20px; font-size:14px;">Loading...</div>
+  <div style="width:48px;height:48px; border:4px solid #eee; border-top:4px solid #cc0000; border-radius:50%; animation:loading-spin 1s linear infinite;"></div>
+</div>
+<style>
+@keyframes loading-spin {
+  0% {transform: rotate(0deg);}
+  100% {transform: rotate(360deg);}
+}
+</style>
+
 <div class="app">
   <div class="logo-header">
     <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo">
@@ -647,13 +665,25 @@ window.addEventListener('keydown', (e) => {
             library = e.target.result;
             renderLibrary();
             setLanguage('ja');
+            // --- Hide the loader AFTER rendering and localization ---
+            setTimeout(() => {
+              document.getElementById('loading-overlay').style.opacity = 0;
+              setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+              }, 700); // Fade out
+            }, 500); // Optional: minimum loading delay for smoothness
         };
         const resize = () => {
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.clientHeight;
         };
         window.onresize = resize; resize();
-    } catch(e) { console.error("Init Error", e); }
+    } catch(e) {
+        console.error("Init Error", e);
+        const overlay = document.getElementById('loading-overlay');
+        document.getElementById('loading-text').textContent = "Loading Failed :(";
+        if(overlay) overlay.style.background = "#fff6f6";
+    }
 })();
 </script>
 </body>
