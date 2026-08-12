@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
 <title>AndreMusic</title>
 <style>
   :root {
@@ -14,12 +14,32 @@
     --bg-main: #f0f0f0;
   }
 
+  * { box-sizing: border-box; }
+
   body {
     margin: 0; padding: 0;
     background-color: var(--bg-main);
     font-family: "Hiragino Kaku Gothic ProN", "MS PGothic", "Helvetica", sans-serif;
     color: #333;
+    user-select: none;
   }
+
+  /* Drag and drop overlay */
+  #drop-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 102, 204, 0.85);
+    color: white;
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  body.drag-over #drop-overlay { display: flex; }
 
   .app {
     width: 95%;
@@ -76,6 +96,23 @@
   .sidebar { border-right: 1px solid var(--border-gray); background: #f9f9f9; min-height: 600px; display: flex; flex-direction: column; }
   .panel-header { background: linear-gradient(to bottom, #666, #333); color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #000; }
 
+  .search-container {
+    padding: 8px;
+    background: #eee;
+    border-bottom: 1px solid var(--border-gray);
+  }
+  .search-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    outline: none;
+  }
+  .search-input:focus {
+    border-color: var(--accent-blue);
+  }
+
   .track-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; max-height: 500px; overflow-y: auto; scroll-behavior: smooth; }
   .track-item { 
     display: flex; justify-content: space-between; align-items: center;
@@ -95,7 +132,7 @@
 
   .del-btn { 
     color: #999; border: 1px solid #ccc; background: #fff; font-size: 9px; 
-    padding: 2px 5px; margin-left: 10px; border-radius: 2px;
+    padding: 2px 5px; margin-left: 10px; border-radius: 2px; cursor: pointer;
   }
   .del-btn:hover { background: #cc0000; color: #fff; border-color: #900; }
 
@@ -104,40 +141,52 @@
   .now-playing-display { background: #fff; border: 1px solid #b0c4de; padding: 20px; margin-bottom: 20px; text-align: center; }
   .song-title { font-size: 18px; font-weight: bold; color: #003366; margin-bottom: 15px; word-break: break-all; min-height: 1.2em; }
 
-  #visualizer { width: 100%; height: 120px; background: #fafafa; border-radius: 4px; margin-bottom: 15px; }
+  #visualizer { width: 100%; height: 120px; background: #fafafa; border-radius: 4px; margin-bottom: 15px; display: block; }
 
   .timer-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
-  input[type=range] { width: 100%; cursor: pointer; }
+  input[type=range] { width: 100%; cursor: pointer; accent-color: var(--accent-blue); }
 
-  .control-group { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+  .control-group { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
   .btn { background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%); border: 1px solid #aaa; padding: 6px 16px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 3px; box-shadow: 0 1px 0 #fff inset; }
+  .btn:active { background: #ddd; }
   .btn-upload { background: linear-gradient(to bottom, #ff4d4d, #cc0000); color: white; border-color: #900; }
   .btn.active { background: #00cc66 !important; color: white !important; border-color: #008844 !important; }
+
+  .volume-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    padding: 4px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+  .volume-container input[type=range] {
+    width: 80px;
+  }
 
   .status-bar { 
     margin-top: 30px;
     margin-left: auto;
     margin-right: auto;
-    width: fit-content;      /* The bar will only be as wide as its content */
-    min-width: 300px;        /* Optional: prevents it from being too tiny */
-    
+    width: fit-content;
+    min-width: 300px;
     border: 1px solid #ddd; 
     background: #fcfcfc; 
     padding: 10px 20px; 
     font-size: 11px; 
-    
     display: flex; 
     justify-content: center; 
     align-items: center; 
     flex-wrap: wrap; 
     gap: 15px; 
-}
+  }
   
   .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
   .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; border: 2px solid #333; box-shadow: 8px 8px 0px rgba(0,0,0,0.2); font-size: 13px; line-height: 1.6; box-sizing: border-box; }
   .modal-header { font-weight: bold; border-bottom: 2px solid var(--accent-red); margin-bottom: 15px; padding-bottom: 5px; font-size: 16px; display: flex; justify-content: space-between; }
   .close-btn { cursor: pointer; color: var(--accent-red); font-family: monospace; }
-  .modal-scroll { font-size: 12px; height: 350px; overflow-y: scroll; padding-right: 15px; border: 1px solid #eee; text-align: justify; }
+  .modal-scroll { font-size: 12px; height: 350px; overflow-y: auto; padding-right: 15px; border: 1px solid #eee; text-align: justify; }
 
   .contact-form { display: flex; flex-direction: column; gap: 10px; }
   .contact-form input, .contact-form textarea { width: 100%; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; }
@@ -152,63 +201,63 @@
     .app {
       width: 100vw;
       min-width: 0;
-      box-sizing: border-box;
       border-radius: 0 !important;
       margin: 0;
       border: none;
       box-shadow: none;
     }
-    .logo-header {
-      padding: 5px 0;
-    }
+    .logo-header { padding: 5px 0; }
     header {
       padding: 10px 5vw;
       flex-direction: column;
       align-items: stretch;
-      gap: 5px;
+      gap: 10px;
     }
     .logo { font-size: 20px; }
     .lang-switcher { justify-content: flex-start; width: 100%; }
     .main-player { padding: 8px; }
-    .player-frame { padding: 7vw 3vw 5vw 3vw; }
-    .now-playing-display { padding: 7vw 3vw 5vw 3vw; }
+    .player-frame { padding: 5vw 3vw; }
+    .now-playing-display { padding: 5vw 3vw; }
     .container { display: block; min-height: initial; }
     .sidebar { min-height: auto !important; border-right: none !important; border-bottom: 1px solid var(--border-gray); }
-    .track-list { max-height: 160px !important; font-size: 13px; }
+    .track-list { max-height: 180px !important; font-size: 13px; }
     .legal-nav { font-size: 12px; gap: 6px; flex-wrap: wrap; line-height: 22px;}
     footer { font-size: 11px; }
     .status-bar { min-width: 0; width: 98vw; padding: 5px 2vw; font-size: 12px; }
-    #visualizer { height: 60px; }
+    #visualizer { height: 70px; }
     .song-title { font-size: 14px; }
-    .btn, .btn-upload, .del-btn { min-height: 36px; font-size: 15px; padding: 8px 14px !important;}
-    .del-btn { font-size: 12px; padding: 5px 10px !important;}
-    .modal-content { width: 98% !important; max-width: 98vw !important; padding: 3vw !important; font-size: 14px !important;}
-    .modal-scroll { height: 220px !important; }
-    .track-item { min-height: 38px; font-size: 15px; }
-    .track-info { font-size: 15px; }
+    .btn, .btn-upload, .del-btn { min-height: 38px; font-size: 13px; padding: 8px 12px !important;}
+    .del-btn { font-size: 11px; padding: 4px 8px !important; min-height: auto;}
+    .modal-content { width: 98% !important; max-width: 98vw !important; padding: 4vw !important; font-size: 13px !important;}
+    .modal-scroll { height: 240px !important; }
+    .track-item { min-height: 40px; font-size: 13px; }
+    .track-info { font-size: 13px; }
+    .volume-container { width: 100%; justify-content: center; margin-top: 5px; }
+    .volume-container input[type=range] { width: 140px; }
   }
   @media (min-width: 601px) and (max-width: 950px) {
     .app { width: 98vw; }
     .main-player { padding: 13px 2vw; }
     .player-frame, .now-playing-display { padding: 18px 2vw; }
     .sidebar { min-height: 350px !important; }
-    .container { grid-template-columns: 185px 1fr; }
-    .track-list { max-height: 190px !important; }
-    #visualizer { height: 80px; }
+    .container { grid-template-columns: 200px 1fr; }
+    .track-list { max-height: 220px !important; }
+    #visualizer { height: 90px; }
   }
   @media (min-width: 951px) and (max-width: 1300px) {
     .app { width: 98vw;}
-    .container { grid-template-columns: 240px 1fr; }
+    .container { grid-template-columns: 250px 1fr; }
     .main-player { padding: 22px 2vw; }
     .player-frame { padding: 18px 4vw; }
-    .track-list { max-height: 300px !important; }
-    #visualizer { height: 100px; }
+    .track-list { max-height: 320px !important; }
+    #visualizer { height: 110px; }
   }
 </style>
 </head>
 <body>
 
-    <!-- AndreMusic Loading Screen -->
+<div id="drop-overlay">📁 Drop audio files to import into AndreMusic</div>
+
 <div id="loading-overlay" style="
   position:fixed; z-index:32000; left:0; top:0; width:100vw; height:100vh;
   background: #000; display: flex; align-items: center; justify-content: center; flex-direction:column;
@@ -216,7 +265,7 @@
 ">
   <img src="logo.jpg" alt="AndreMusic" style="width:360px; height:64px; object-fit:fill; margin-bottom:10px;">
   <div style="font-size:24px; color:#cc0000; margin-bottom:16px; font-weight:bold;">AndreMusic</div>
-  <div id="loading-text" style="font-family:sans-serif; color:#333; margin-bottom:20px; font-size:14px;">Loading...</div>
+  <div id="loading-text" style="font-family:sans-serif; color:#ccc; margin-bottom:20px; font-size:14px;">Loading...</div>
   <div style="width:48px;height:48px; border:4px solid #222; border-top:4px solid #cc0000; border-radius:50%; animation:loading-spin 1s linear infinite;"></div>
 </div>
 <style>
@@ -230,8 +279,7 @@
   <div class="logo-header">
     <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();">
   </div>
-</div>
-  
+
   <header>
     <div class="logo-area">
       <a href="#" class="logo">AndreMusic</a>
@@ -242,8 +290,9 @@
       </div>
     </div>
     <div style="display:flex; gap:10px; flex-wrap: wrap;">
+      <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
       <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁</label>
-      <input id="fileInput" type="file" accept="audio/mpeg, audio/wav, audio/x-m4a, audio/mp4, audio/*" multiple style="display:none" />
+      <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
       <button class="btn" id="clearBtn">Clear Library</button>
     </div>
   </header>
@@ -251,7 +300,9 @@
   <div class="container">
     <aside class="sidebar">
       <div class="panel-header" id="label-playlist">♫ PLAYLIST LIBRARY</div>
-      <!-- REMOVED SEARCH BAR HERE -->
+      <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search track..." />
+      </div>
       <ul class="track-list" id="trackList"></ul>
     </aside>
 
@@ -262,7 +313,7 @@
           <canvas id="visualizer"></canvas>
           <div style="margin: 20px 0;">
             <div class="timer-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
-            <input id="seek" type="range" min="0" max="100" value="0" />
+            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" />
           </div>
           <div class="control-group">
             <button class="btn" id="prevBtn">Back</button>
@@ -275,7 +326,10 @@
           <button class="btn" id="loopAllBtn">Loop All</button>
           <button class="btn" id="loopOneBtn">Loop One</button>
           <button class="btn" id="shuffleBtn">Shuffle</button>
-          <button class="btn" id="muteBtn">Mute</button>
+          <div class="volume-container">
+            <button class="btn" id="muteBtn" style="padding: 2px 8px; font-size: 11px;">Mute</button>
+            <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" title="Volume" />
+          </div>
         </div>
       </div>
       <div class="status-bar">
@@ -291,15 +345,69 @@
     <a onclick="openModal('help-modal')" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
   </nav>
   <footer>Copyright &copy; 2026 AndrewSudiro</footer>
-  <a href="files/AndreMusic.zip" download="AndreMusic.zip">
-  <button>Download AndreMusic</button>
-  </a>
-</a>
+  <div style="text-align: center; margin-bottom: 15px;">
+    <a href="files/AndreMusic.zip" download="AndreMusic.zip">
+      <button class="btn">Download AndreMusic</button>
+    </a>
+  </div>
+</div>
+
+<div id="settings-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span id="title-settings">⚙️ Performance & Smart Settings</span>
+      <span class="close-btn" onclick="closeModal('settings-modal')">[X]</span>
+    </div>
+    <div class="modal-scroll" style="height: auto; max-height: 400px; padding: 10px;">
+      
+      <div id="device-detect-info" style="background: #eef4f9; border: 1px solid #0066cc; padding: 8px 12px; font-size: 11px; margin-bottom: 15px; border-radius: 3px;">
+        <strong>Detected System:</strong> <span id="detected-device">Analyzing system...</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Preset Profile:</label>
+          <select id="perfPreset" class="search-input" onchange="changePerfPreset(this.value)">
+            <option value="auto">⚡ Auto (Smart Device Detection)</option>
+            <option value="high">🚀 High Performance (60 FPS, Full Stream Preload)</option>
+            <option value="balanced">⚖️ Balanced (30 FPS Eco Mode, Metadata Preload)</option>
+            <option value="low">🔋 Battery Saver Mode (Visualizer Off)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Audio Visualizer Quality:</label>
+          <select id="visualizerQuality" class="search-input" onchange="savePerfSettings()">
+            <option value="60">High (60 FPS Canvas Render)</option>
+            <option value="30">Medium (30 FPS Eco Mode)</option>
+            <option value="0">Off (Disable Visualizer Canvas)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Background Battery Saver:</label>
+          <select id="bgPauseSetting" class="search-input" onchange="savePerfSettings()">
+            <option value="true">Enabled (Pause visualizer when tab is hidden)</option>
+            <option value="false">Disabled (Always render visualizer)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Audio Preload Mode:</label>
+          <select id="preloadSetting" class="search-input" onchange="savePerfSettings()">
+            <option value="metadata">Data Saver (Preload Metadata Only - Mobile Recommended)</option>
+            <option value="auto">Fast Buffering (Preload Audio Stream - Desktop Recommended)</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <div id="tos-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-tos">Terms of Service</span><span class="close-btn" onclick="closeModal('tos-modal')">[X]</span></div><div class="modal-scroll" id="body-tos"></div></div></div>
 <div id="privacy-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-privacy">Privacy Policy</span><span class="close-btn" onclick="closeModal('privacy-modal')">[X]</span></div><div class="modal-scroll" id="body-privacy"></div></div></div>
-<div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J</strong></td><td>Switch to Japanese</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>E</strong></td><td>Switch to English</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>I</strong></td><td>Switch to Indonesian</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show this Help</td></tr></table></div></div></div>
+<div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>↑ / ↓</strong></td><td>Volume Up / Down</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>/</strong></td><td>Search Playlist</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>P</strong></td><td>Performance Settings</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Esc</strong></td><td>Close Modals</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J / E / I</strong></td><td>Switch Language</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show Help</td></tr></table></div></div></div>
 <div id="contact-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div><form id="contactForm" class="contact-form"><input type="text" id="contact-name" placeholder="Your Name" required><input type="email" id="contact-email" placeholder="Your Email Address" required><textarea id="contact-message" placeholder="Your Message..." required></textarea><button type="submit" class="btn btn-upload" id="contact-send">Send Message</button></form><p style="text-align:center; font-size:11px; margin-top:15px; color:#555;">YouTube: <a href="https://www.youtube.com/@AndrewSudiro" target="_blank">@AndrewSudiro</a></p></div></div>
 
 <audio id="audio" crossorigin="anonymous" preload="metadata"></audio>
@@ -307,7 +415,7 @@
 <script>
 const translations = {
     ja: {
-        upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ",
+        upload: "音楽を取り込む 📁", clear: "ライブラリ消去", settingsBtn: "⚙️ 設定", titleSettings: "⚙️ パフォーマンス・スマート設定", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
         noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
         total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
@@ -322,10 +430,10 @@ const translations = {
 
 このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
         privacyTitle: "ルール",
-        privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され、マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
+        privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され, マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
     },
     en: {
-        upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY",
+        upload: "Import Music 📁", clear: "Clear Library", settingsBtn: "⚙️ Settings", titleSettings: "⚙️ Performance Settings", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
         noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
         total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
@@ -343,7 +451,7 @@ While the platform offers deep aesthetic and technical customization, it strictl
         privacyBody: `<p>AndreMusic operates with a Zero-Tracking Mandate, ensuring that your listening habits, play counts, and library preferences are never monitored, uploaded, or sold to third parties. Every file you interact with is managed via Isolated Local Storage, utilizing your browser’s IndexedDB so that your audio collection remains entirely on your hardware and never touches a central server. This commitment to anonymity is reinforced by a No-Cookie Environment, which strips away third-party tracking pixels and persistent identifiers to guarantee a private session every time you listen. Furthermore, in the event of direct communication, any personal details such as Names or Email Addresses provided through contact forms are strictly reserved for responding to your inquiries and are never repurposed for marketing or data profiling. Together, these rules ensure that your interaction with the platform is as private as listening to a physical record in your own home.</p>`
     },
     id: {
-        upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR",
+        upload: "Impor Musik 📁", clear: "Hapus Pustaka", settingsBtn: "⚙️ Pengaturan", titleSettings: "⚙️ Pengaturan Performa", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
         noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
         total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
@@ -362,7 +470,6 @@ Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, 
     }
 };
 
-
 const DB_NAME = 'music-library-db';
 const STORE_NAME = 'tracks';
 const audio = document.getElementById('audio');
@@ -371,46 +478,210 @@ let currentIndex = -1;
 let mode = 'normal';
 let currentUrl = null;
 let currentLang = 'ja';
+let isSeeking = false;
+let searchQuery = "";
 
-let audioCtx, analyser, source, dataArray;
+// Web Audio API State
+let audioCtx = null;
+let analyser = null;
+let mediaSource = null;
+let dataArray = null;
+let animFrameId = null;
+
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
-function initVisualizer() {
-    if (audioCtx) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        return;
+// --- Performance & Smart Settings State ---
+const PERF_KEY = "andre_music_perf_settings";
+const defaultPerfSettings = {
+    preset: "auto",
+    visualizerFps: 60,
+    bgPause: true,
+    preloadMode: "metadata"
+};
+let currentPerfSettings = { ...defaultPerfSettings };
+let isMobileDevice = false;
+let lastRenderTime = 0;
+
+// Hardware & Device Detection
+function detectDeviceCapabilities() {
+    isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 850;
+    const cpuCores = navigator.hardwareConcurrency || 2;
+    
+    const statusText = isMobileDevice 
+        ? `Mobile Device (${cpuCores} CPU Cores) - Power Efficiency Recommended` 
+        : `Desktop Environment (${cpuCores} CPU Cores) - Full Acceleration Ready`;
+    
+    const infoEl = document.getElementById('detected-device');
+    if (infoEl) infoEl.textContent = statusText;
+    
+    return { isMobileDevice, cpuCores };
+}
+
+// Performance Settings Handlers
+function loadPerfSettings() {
+    const saved = localStorage.getItem(PERF_KEY);
+    if (saved) {
+        try {
+            currentPerfSettings = { ...defaultPerfSettings, ...JSON.parse(saved) };
+        } catch(e) {
+            currentPerfSettings = { ...defaultPerfSettings };
+        }
+    } else {
+        const { isMobileDevice } = detectDeviceCapabilities();
+        if (isMobileDevice) {
+            currentPerfSettings.preset = "auto";
+            currentPerfSettings.visualizerFps = 30;
+            currentPerfSettings.preloadMode = "metadata";
+        }
     }
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        source = audioCtx.createMediaElementSource(audio);
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-        analyser.fftSize = 256;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        draw();
-    } catch(e) {
-        console.warn("Visualizer failed:", e);
+    applyPerfSettingsToUI();
+    applyPerfSettingsToEngine();
+}
+
+function savePerfSettings() {
+    currentPerfSettings.preset = document.getElementById('perfPreset').value;
+    currentPerfSettings.visualizerFps = parseInt(document.getElementById('visualizerQuality').value, 10);
+    currentPerfSettings.bgPause = document.getElementById('bgPauseSetting').value === "true";
+    currentPerfSettings.preloadMode = document.getElementById('preloadSetting').value;
+
+    localStorage.setItem(PERF_KEY, JSON.stringify(currentPerfSettings));
+    applyPerfSettingsToEngine();
+}
+
+function changePerfPreset(preset) {
+    if (preset === "high") {
+        document.getElementById('visualizerQuality').value = "60";
+        document.getElementById('bgPauseSetting').value = "true";
+        document.getElementById('preloadSetting').value = "auto";
+    } else if (preset === "balanced") {
+        document.getElementById('visualizerQuality').value = "30";
+        document.getElementById('bgPauseSetting').value = "true";
+        document.getElementById('preloadSetting').value = "metadata";
+    } else if (preset === "low") {
+        document.getElementById('visualizerQuality').value = "0";
+        document.getElementById('bgPauseSetting').value = "true";
+        document.getElementById('preloadSetting').value = "metadata";
+    } else if (preset === "auto") {
+        const { isMobileDevice } = detectDeviceCapabilities();
+        document.getElementById('visualizerQuality').value = isMobileDevice ? "30" : "60";
+        document.getElementById('bgPauseSetting').value = "true";
+        document.getElementById('preloadSetting').value = isMobileDevice ? "metadata" : "auto";
+    }
+    savePerfSettings();
+}
+
+function applyPerfSettingsToUI() {
+    if (document.getElementById('perfPreset')) {
+        document.getElementById('perfPreset').value = currentPerfSettings.preset;
+        document.getElementById('visualizerQuality').value = currentPerfSettings.visualizerFps;
+        document.getElementById('bgPauseSetting').value = currentPerfSettings.bgPause ? "true" : "false";
+        document.getElementById('preloadSetting').value = currentPerfSettings.preloadMode;
     }
 }
 
-function draw() {
-    requestAnimationFrame(draw);
+function applyPerfSettingsToEngine() {
+    if (audio) {
+        audio.preload = currentPerfSettings.preloadMode;
+    }
+    if (canvas) {
+        if (currentPerfSettings.visualizerFps === 0) {
+            canvas.style.display = 'none';
+        } else {
+            canvas.style.display = 'block';
+        }
+    }
+}
+
+function shouldRenderFrame(currentTime) {
+    if (currentPerfSettings.visualizerFps === 0) return false;
+    if (currentPerfSettings.bgPause && document.hidden) return false;
+
+    if (!currentTime) return true;
+    const interval = 1000 / currentPerfSettings.visualizerFps;
+    const delta = currentTime - lastRenderTime;
+
+    if (delta >= interval) {
+        lastRenderTime = currentTime - (delta % interval);
+        return true;
+    }
+    return false;
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && currentPerfSettings.bgPause) {
+        console.log("Tab hidden: Throttling visualizer rendering to save battery.");
+    }
+});
+
+// --- Audio Visualizer with High-DPI support & CPU Saver ---
+function initAudioContext() {
+    if (!audioCtx) {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            mediaSource = audioCtx.createMediaElementSource(audio);
+            mediaSource.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+        } catch(e) {
+            console.warn("AudioContext setup error:", e);
+        }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function startVisualizer() {
+    if (!animFrameId && currentPerfSettings.visualizerFps > 0) {
+        drawVisualizer();
+    }
+}
+
+function stopVisualizer() {
+    if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+        const dpr = window.devicePixelRatio || 1;
+        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    }
+}
+
+function drawVisualizer(timestamp) {
+    animFrameId = requestAnimationFrame(drawVisualizer);
     if (!analyser) return;
+
+    if (!shouldRenderFrame(timestamp)) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+
     analyser.getByteFrequencyData(dataArray);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const barWidth = (canvas.width / analyser.frequencyBinCount) * 2.5;
+    ctx.clearRect(0, 0, width, height);
+
+    const barWidth = (width / analyser.frequencyBinCount) * 2.2;
     let x = 0;
+
     for (let i = 0; i < analyser.frequencyBinCount; i++) {
-        let barHeight = dataArray[i] / 2;
-        ctx.fillStyle = `rgb(0, 102, 204)`;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+        let barHeight = (dataArray[i] / 255) * height;
+        ctx.fillStyle = '#0066cc';
+        ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight);
+        x += barWidth;
     }
 }
 
+function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+}
+
+// --- IndexedDB Helper ---
 function openDB() {
     return new Promise((res, rej) => {
         const req = indexedDB.open(DB_NAME, 1);
@@ -423,6 +694,7 @@ function openDB() {
     });
 }
 
+// --- UI & Language Management ---
 function setLanguage(lang) {
     currentLang = lang;
     const t = translations[lang];
@@ -430,13 +702,17 @@ function setLanguage(lang) {
     const targetBtn = document.getElementById(`lang-${lang}`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'label-status', 'nav-tos', 'nav-privacy', 'nav-contact'];
+    const ids = ['label-upload', 'clearBtn', 'settingsBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'nav-tos', 'nav-privacy', 'nav-contact'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
         if(el && t[key]) el.textContent = t[key];
     });
 
+    if (t.settingsBtn) document.getElementById('settingsBtn').textContent = t.settingsBtn;
+    if (t.titleSettings) document.getElementById('title-settings').textContent = t.titleSettings;
+
+    document.getElementById('searchInput').placeholder = t.searchPh;
     document.getElementById('title-contact').textContent = t.contactTitle;
     document.getElementById('contact-send').textContent = t.contactSend;
     document.getElementById('contact-name').placeholder = t.namePh;
@@ -453,45 +729,74 @@ function openModal(id) { document.getElementById(id).style.display = "block"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
 window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; };
 
-// Render the library list
+// --- Render Playlist with Filter/Search Support ---
 function renderLibrary() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
-    library.forEach((t, idx) => {
+
+    const filtered = library.map((t, originalIdx) => ({ track: t, originalIdx }))
+                            .filter(item => item.track.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    filtered.forEach(item => {
+        const { track, originalIdx } = item;
         const li = document.createElement('li');
-        li.className = 'track-item' + (idx === currentIndex ? ' active' : '');
+        li.className = 'track-item' + (originalIdx === currentIndex ? ' active' : '');
+        
         const info = document.createElement('span');
         info.className = 'track-info';
-        info.textContent = `♪ ${t.name}`;
-        info.onclick = () => playTrack(idx);
+        info.textContent = `♪ ${track.name}`;
+        info.onclick = () => playTrack(originalIdx);
+
         const del = document.createElement('button');
         del.className = 'del-btn';
         del.textContent = 'DEL';
-        del.onclick = (e) => { e.stopPropagation(); deleteTrack(t.id, idx); };
+        del.onclick = (e) => { e.stopPropagation(); deleteTrack(track.id, originalIdx); };
+
         li.append(info, del);
         list.appendChild(li);
     });
+
     document.getElementById('count').textContent = library.length;
 }
 
+document.getElementById('searchInput').oninput = (e) => {
+    searchQuery = e.target.value;
+    renderLibrary();
+};
+
+function cleanFileName(filename) {
+    return filename.replace(/\.[^/.]+$/, "");
+}
+
+// --- Audio Playback Functions ---
 async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
-    initVisualizer();
-    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    initAudioContext();
+
+    if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+    }
+    
     currentIndex = index;
     const t = library[currentIndex];
     currentUrl = URL.createObjectURL(t.blob);
 
-    // Reset UI before load
     document.getElementById('seek').value = 0;
     document.getElementById('currentTime').textContent = "0:00";
 
     audio.src = currentUrl;
-    audio.load(); // Force browser to re-read metadata
+    audio.load();
 
-    try { await audio.play(); } catch(e) { console.log("Interaction needed: ", e); }
-    document.getElementById('nowTitle').textContent = t.name;
+    try {
+        await audio.play();
+    } catch(e) {
+        console.log("User interaction needed to play audio: ", e);
+    }
+
+    document.getElementById('nowTitle').textContent = cleanFileName(t.name);
     renderLibrary();
+    updateMediaSession(t);
+
     if (isRandom) {
         setTimeout(() => {
             const activeItem = document.querySelector('.track-item.active');
@@ -504,6 +809,28 @@ async function playTrack(index, isRandom = false) {
     }
 }
 
+function updateMediaSession(track) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: cleanFileName(track.name),
+            artist: 'AndreMusic Local Library',
+            album: 'AndreMusic'
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => audio.play());
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => document.getElementById('prevBtn').click());
+        navigator.mediaSession.setActionHandler('nexttrack', () => document.getElementById('nextBtn').click());
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.fastSeek && 'fastSeek' in audio) {
+                audio.fastSeek(details.seekTime);
+                return;
+            }
+            audio.currentTime = details.seekTime;
+        });
+    }
+}
+
 async function deleteTrack(dbId, arrayIndex) {
     const db = await openDB();
     await new Promise((resolve, reject) => {
@@ -511,12 +838,17 @@ async function deleteTrack(dbId, arrayIndex) {
         tx.objectStore(STORE_NAME).delete(dbId).onsuccess = resolve;
         tx.onerror = reject;
     });
+
     if (arrayIndex === currentIndex) {
-        audio.pause(); audio.src = ""; currentIndex = -1;
+        audio.pause(); 
+        audio.src = ""; 
+        currentIndex = -1;
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+        stopVisualizer();
     } else if (arrayIndex < currentIndex) {
         currentIndex--;
     }
+
     library.splice(arrayIndex, 1);
     renderLibrary();
 }
@@ -532,7 +864,7 @@ function getNext() {
     return (currentIndex + 1) % library.length;
 }
 
-// Duration and seekbar
+// --- Audio Event Listeners ---
 audio.onloadedmetadata = () => {
     if (audio.duration) {
         const durM = Math.floor(audio.duration / 60);
@@ -542,23 +874,45 @@ audio.onloadedmetadata = () => {
 };
 
 audio.ontimeupdate = () => {
-    if (!audio.duration || isNaN(audio.duration)) return;
+    if (!audio.duration || isNaN(audio.duration) || isSeeking) return;
     const curM = Math.floor(audio.currentTime / 60);
     const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
     document.getElementById('currentTime').textContent = `${curM}:${curS}`;
     document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
 };
 
-document.getElementById('seek').oninput = (e) => {
+const seekInput = document.getElementById('seek');
+seekInput.onmousedown = () => { isSeeking = true; };
+seekInput.ontouchstart = () => { isSeeking = true; };
+seekInput.onmouseup = () => { isSeeking = false; };
+seekInput.ontouchend = () => { isSeeking = false; };
+seekInput.oninput = (e) => {
     if (audio.duration && !isNaN(audio.duration)) {
         audio.currentTime = (e.target.value / 100) * audio.duration;
     }
 };
 
-document.getElementById('fileInput').onchange = async (e) => {
+// --- Volume Control & State Restoration ---
+const volumeSlider = document.getElementById('volumeSlider');
+const savedVolume = localStorage.getItem('andre_music_volume');
+if (savedVolume !== null) {
+    audio.volume = parseFloat(savedVolume);
+    volumeSlider.value = audio.volume;
+}
+
+volumeSlider.oninput = (e) => {
+    audio.volume = e.target.value;
+    audio.muted = (audio.volume === 0);
+    document.getElementById('muteBtn').classList.toggle('active', audio.muted);
+    localStorage.setItem('andre_music_volume', audio.volume);
+};
+
+// --- File Import & Processing ---
+async function handleFilesImport(files) {
     const db = await openDB();
-    const files = Array.from(e.target.files);
-    for (const f of files) {
+    const audioFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
+    
+    for (const f of audioFiles) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
         const req = store.add({ name: f.name, blob: f });
@@ -566,12 +920,33 @@ document.getElementById('fileInput').onchange = async (e) => {
             library.push({ id: ev.target.result, name: f.name, blob: f });
             renderLibrary();
         };
-        req.onerror = (err) => {
-            alert('Failed to add track: ' + (err?.target?.error || 'unknown error!'));
-        };
     }
+}
+
+document.getElementById('fileInput').onchange = (e) => {
+    handleFilesImport(e.target.files);
     e.target.value = '';
 };
+
+// --- Drag and Drop Support ---
+window.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    document.body.classList.add('drag-over');
+});
+
+window.addEventListener('dragleave', (e) => {
+    if (e.clientX === 0 && e.clientY === 0) {
+        document.body.classList.remove('drag-over');
+    }
+});
+
+window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    document.body.classList.remove('drag-over');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFilesImport(e.dataTransfer.files);
+    }
+});
 
 document.getElementById('clearBtn').onclick = async () => {
     if(confirm(translations[currentLang].confirm)) {
@@ -581,7 +956,11 @@ document.getElementById('clearBtn').onclick = async () => {
             tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
             tx.onerror = reject;
         });
-        library = []; currentIndex = -1; audio.pause(); audio.src = "";
+        library = []; 
+        currentIndex = -1; 
+        audio.pause(); 
+        audio.src = "";
+        stopVisualizer();
         if(currentUrl) URL.revokeObjectURL(currentUrl);
         renderLibrary();
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
@@ -590,22 +969,29 @@ document.getElementById('clearBtn').onclick = async () => {
 
 document.getElementById('playBtn').onclick = () => {
     if (library.length === 0) return;
-    if (!audio.src || currentIndex === -1) playTrack(0);
-    else { initVisualizer(); audio.paused ? audio.play() : audio.pause(); }
+    initAudioContext();
+    if (!audio.src || currentIndex === -1) {
+        playTrack(0);
+    } else {
+        audio.paused ? audio.play() : audio.pause();
+    }
 };
 
 audio.onplay = () => {
     document.getElementById('playLabel').textContent = translations[currentLang].pause;
     document.getElementById('playBtn').classList.add('active');
+    startVisualizer();
 };
 audio.onpause = () => {
     document.getElementById('playLabel').textContent = translations[currentLang].play;
     document.getElementById('playBtn').classList.remove('active');
+    stopVisualizer();
 };
 audio.onended = () => {
     if(mode === 'loopOne') playTrack(currentIndex);
     else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
     else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
+    else stopVisualizer();
 };
 
 document.getElementById('nextBtn').onclick = () => {
@@ -643,19 +1029,47 @@ document.getElementById('muteBtn').onclick = function() {
     this.classList.toggle('active', audio.muted);
 };
 
+// --- Contact Form Handling ---
+document.getElementById('contactForm').onsubmit = (e) => {
+    e.preventDefault();
+    alert("Thank you! Your message has been received.");
+    closeModal('contact-modal');
+    e.target.reset();
+};
+
+// --- Keyboard Navigation ---
 window.addEventListener('keydown', (e) => {
-    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        if (e.code === 'Escape') document.activeElement.blur();
+        return;
+    }
     switch (e.code) {
         case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
         case 'ArrowRight': document.getElementById('nextBtn').click(); break;
         case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
+        case 'ArrowUp': 
+            e.preventDefault();
+            audio.volume = Math.min(1, audio.volume + 0.05);
+            volumeSlider.value = audio.volume;
+            break;
+        case 'ArrowDown': 
+            e.preventDefault();
+            audio.volume = Math.max(0, audio.volume - 0.05);
+            volumeSlider.value = audio.volume;
+            break;
+        case 'Slash': 
+            e.preventDefault(); 
+            document.getElementById('searchInput').focus(); 
+            break;
         case 'KeyR': document.getElementById('randomBtn').click(); break;
         case 'KeyL': document.getElementById('loopAllBtn').click(); break;
         case 'KeyO': document.getElementById('loopOneBtn').click(); break;
         case 'KeyS': document.getElementById('shuffleBtn').click(); break;
         case 'KeyM': document.getElementById('muteBtn').click(); break;
         case 'KeyU': document.getElementById('fileInput').click(); break;
+        case 'KeyP': openModal('settings-modal'); break;
         case 'KeyH': openModal('help-modal'); break;
+        case 'Escape': document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); break;
         case 'Delete': document.getElementById('clearBtn').click(); break;
         case 'KeyJ': setLanguage('ja'); break;
         case 'KeyE': setLanguage('en'); break;
@@ -663,27 +1077,30 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+// --- Initialization ---
 (async function init() {
     try {
+        detectDeviceCapabilities();
+        loadPerfSettings();
+
         const db = await openDB();
         const tx = db.transaction(STORE_NAME, 'readonly');
         tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
             library = e.target.result;
             renderLibrary();
             setLanguage('ja');
-            // --- Hide the loader AFTER rendering and localization ---
+            
             setTimeout(() => {
-              document.getElementById('loading-overlay').style.opacity = 0;
-              setTimeout(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-              }, 700); // Fade out
-            }, 500); // Optional: minimum loading delay for smoothness
+              const overlay = document.getElementById('loading-overlay');
+              if (overlay) {
+                  overlay.style.opacity = 0;
+                  setTimeout(() => { overlay.style.display = 'none'; }, 500);
+              }
+            }, 300);
         };
-        const resize = () => {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        };
-        window.onresize = resize; resize();
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
     } catch(e) {
         console.error("Init Error", e);
         const overlay = document.getElementById('loading-overlay');
