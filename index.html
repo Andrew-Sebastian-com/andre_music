@@ -413,9 +413,18 @@
 <audio id="audio" crossorigin="anonymous" preload="metadata"></audio>
 
 <script>
+// --- Debounce Utility ---
+function debounce(fn, delay = 150) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
 const translations = {
     ja: {
-        upload: "音楽を取り込む 📁", clear: "ライブラリ消去", settingsBtn: "⚙️ 設定", titleSettings: "⚙️ パフォーマンス・スマート設定", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
+        upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
         noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
         total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
@@ -433,7 +442,7 @@ const translations = {
         privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され, マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
     },
     en: {
-        upload: "Import Music 📁", clear: "Clear Library", settingsBtn: "⚙️ Settings", titleSettings: "⚙️ Performance Settings", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
+        upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
         noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
         total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
@@ -451,7 +460,7 @@ While the platform offers deep aesthetic and technical customization, it strictl
         privacyBody: `<p>AndreMusic operates with a Zero-Tracking Mandate, ensuring that your listening habits, play counts, and library preferences are never monitored, uploaded, or sold to third parties. Every file you interact with is managed via Isolated Local Storage, utilizing your browser’s IndexedDB so that your audio collection remains entirely on your hardware and never touches a central server. This commitment to anonymity is reinforced by a No-Cookie Environment, which strips away third-party tracking pixels and persistent identifiers to guarantee a private session every time you listen. Furthermore, in the event of direct communication, any personal details such as Names or Email Addresses provided through contact forms are strictly reserved for responding to your inquiries and are never repurposed for marketing or data profiling. Together, these rules ensure that your interaction with the platform is as private as listening to a physical record in your own home.</p>`
     },
     id: {
-        upload: "Impor Musik 📁", clear: "Hapus Pustaka", settingsBtn: "⚙️ Pengaturan", titleSettings: "⚙️ Pengaturan Performa", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
+        upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
         noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
         total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
@@ -473,7 +482,9 @@ Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, 
 const DB_NAME = 'music-library-db';
 const STORE_NAME = 'tracks';
 const audio = document.getElementById('audio');
-let library = [];
+
+// Array now stores lightweight track objects: { id, name } without keeping full blobs in RAM
+let library = []; 
 let currentIndex = -1;
 let mode = 'normal';
 let currentUrl = null;
@@ -490,129 +501,6 @@ let animFrameId = null;
 
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
-
-// --- Performance & Smart Settings State ---
-const PERF_KEY = "andre_music_perf_settings";
-const defaultPerfSettings = {
-    preset: "auto",
-    visualizerFps: 60,
-    bgPause: true,
-    preloadMode: "metadata"
-};
-let currentPerfSettings = { ...defaultPerfSettings };
-let isMobileDevice = false;
-let lastRenderTime = 0;
-
-// Hardware & Device Detection
-function detectDeviceCapabilities() {
-    isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 850;
-    const cpuCores = navigator.hardwareConcurrency || 2;
-    
-    const statusText = isMobileDevice 
-        ? `Mobile Device (${cpuCores} CPU Cores) - Power Efficiency Recommended` 
-        : `Desktop Environment (${cpuCores} CPU Cores) - Full Acceleration Ready`;
-    
-    const infoEl = document.getElementById('detected-device');
-    if (infoEl) infoEl.textContent = statusText;
-    
-    return { isMobileDevice, cpuCores };
-}
-
-// Performance Settings Handlers
-function loadPerfSettings() {
-    const saved = localStorage.getItem(PERF_KEY);
-    if (saved) {
-        try {
-            currentPerfSettings = { ...defaultPerfSettings, ...JSON.parse(saved) };
-        } catch(e) {
-            currentPerfSettings = { ...defaultPerfSettings };
-        }
-    } else {
-        const { isMobileDevice } = detectDeviceCapabilities();
-        if (isMobileDevice) {
-            currentPerfSettings.preset = "auto";
-            currentPerfSettings.visualizerFps = 30;
-            currentPerfSettings.preloadMode = "metadata";
-        }
-    }
-    applyPerfSettingsToUI();
-    applyPerfSettingsToEngine();
-}
-
-function savePerfSettings() {
-    currentPerfSettings.preset = document.getElementById('perfPreset').value;
-    currentPerfSettings.visualizerFps = parseInt(document.getElementById('visualizerQuality').value, 10);
-    currentPerfSettings.bgPause = document.getElementById('bgPauseSetting').value === "true";
-    currentPerfSettings.preloadMode = document.getElementById('preloadSetting').value;
-
-    localStorage.setItem(PERF_KEY, JSON.stringify(currentPerfSettings));
-    applyPerfSettingsToEngine();
-}
-
-function changePerfPreset(preset) {
-    if (preset === "high") {
-        document.getElementById('visualizerQuality').value = "60";
-        document.getElementById('bgPauseSetting').value = "true";
-        document.getElementById('preloadSetting').value = "auto";
-    } else if (preset === "balanced") {
-        document.getElementById('visualizerQuality').value = "30";
-        document.getElementById('bgPauseSetting').value = "true";
-        document.getElementById('preloadSetting').value = "metadata";
-    } else if (preset === "low") {
-        document.getElementById('visualizerQuality').value = "0";
-        document.getElementById('bgPauseSetting').value = "true";
-        document.getElementById('preloadSetting').value = "metadata";
-    } else if (preset === "auto") {
-        const { isMobileDevice } = detectDeviceCapabilities();
-        document.getElementById('visualizerQuality').value = isMobileDevice ? "30" : "60";
-        document.getElementById('bgPauseSetting').value = "true";
-        document.getElementById('preloadSetting').value = isMobileDevice ? "metadata" : "auto";
-    }
-    savePerfSettings();
-}
-
-function applyPerfSettingsToUI() {
-    if (document.getElementById('perfPreset')) {
-        document.getElementById('perfPreset').value = currentPerfSettings.preset;
-        document.getElementById('visualizerQuality').value = currentPerfSettings.visualizerFps;
-        document.getElementById('bgPauseSetting').value = currentPerfSettings.bgPause ? "true" : "false";
-        document.getElementById('preloadSetting').value = currentPerfSettings.preloadMode;
-    }
-}
-
-function applyPerfSettingsToEngine() {
-    if (audio) {
-        audio.preload = currentPerfSettings.preloadMode;
-    }
-    if (canvas) {
-        if (currentPerfSettings.visualizerFps === 0) {
-            canvas.style.display = 'none';
-        } else {
-            canvas.style.display = 'block';
-        }
-    }
-}
-
-function shouldRenderFrame(currentTime) {
-    if (currentPerfSettings.visualizerFps === 0) return false;
-    if (currentPerfSettings.bgPause && document.hidden) return false;
-
-    if (!currentTime) return true;
-    const interval = 1000 / currentPerfSettings.visualizerFps;
-    const delta = currentTime - lastRenderTime;
-
-    if (delta >= interval) {
-        lastRenderTime = currentTime - (delta % interval);
-        return true;
-    }
-    return false;
-}
-
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden && currentPerfSettings.bgPause) {
-        console.log("Tab hidden: Throttling visualizer rendering to save battery.");
-    }
-});
 
 // --- Audio Visualizer with High-DPI support & CPU Saver ---
 function initAudioContext() {
@@ -635,7 +523,7 @@ function initAudioContext() {
 }
 
 function startVisualizer() {
-    if (!animFrameId && currentPerfSettings.visualizerFps > 0) {
+    if (!animFrameId) {
         drawVisualizer();
     }
 }
@@ -649,11 +537,9 @@ function stopVisualizer() {
     }
 }
 
-function drawVisualizer(timestamp) {
+function drawVisualizer() {
     animFrameId = requestAnimationFrame(drawVisualizer);
     if (!analyser) return;
-
-    if (!shouldRenderFrame(timestamp)) return;
 
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width / dpr;
@@ -681,7 +567,9 @@ function resizeCanvas() {
     ctx.scale(dpr, dpr);
 }
 
-// --- IndexedDB Helper ---
+const debouncedResize = debounce(resizeCanvas, 100);
+
+// --- IndexedDB Helpers ---
 function openDB() {
     return new Promise((res, rej) => {
         const req = indexedDB.open(DB_NAME, 1);
@@ -694,6 +582,17 @@ function openDB() {
     });
 }
 
+// Fetch track blob on demand to save RAM
+async function getTrackBlob(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get(id);
+        req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+        req.onerror = () => reject(req.error);
+    });
+}
+
 // --- UI & Language Management ---
 function setLanguage(lang) {
     currentLang = lang;
@@ -702,15 +601,12 @@ function setLanguage(lang) {
     const targetBtn = document.getElementById(`lang-${lang}`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const ids = ['label-upload', 'clearBtn', 'settingsBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'nav-tos', 'nav-privacy', 'nav-contact'];
+    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'nav-tos', 'nav-privacy', 'nav-contact'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
         if(el && t[key]) el.textContent = t[key];
     });
-
-    if (t.settingsBtn) document.getElementById('settingsBtn').textContent = t.settingsBtn;
-    if (t.titleSettings) document.getElementById('title-settings').textContent = t.titleSettings;
 
     document.getElementById('searchInput').placeholder = t.searchPh;
     document.getElementById('title-contact').textContent = t.contactTitle;
@@ -729,41 +625,67 @@ function openModal(id) { document.getElementById(id).style.display = "block"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
 window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; };
 
-// --- Render Playlist with Filter/Search Support ---
+// --- Efficient Playlist Rendering using DocumentFragment & Event Delegation ---
 function renderLibrary() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
 
-    const filtered = library.map((t, originalIdx) => ({ track: t, originalIdx }))
-                            .filter(item => item.track.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const fragment = document.createDocumentFragment();
+    const query = searchQuery.toLowerCase();
+
+    const filtered = library
+        .map((t, originalIdx) => ({ track: t, originalIdx }))
+        .filter(item => item.track.name.toLowerCase().includes(query));
 
     filtered.forEach(item => {
         const { track, originalIdx } = item;
         const li = document.createElement('li');
         li.className = 'track-item' + (originalIdx === currentIndex ? ' active' : '');
+        li.dataset.index = originalIdx;
         
         const info = document.createElement('span');
         info.className = 'track-info';
         info.textContent = `♪ ${track.name}`;
-        info.onclick = () => playTrack(originalIdx);
 
         const del = document.createElement('button');
         del.className = 'del-btn';
         del.textContent = 'DEL';
-        del.onclick = (e) => { e.stopPropagation(); deleteTrack(track.id, originalIdx); };
+        del.dataset.id = track.id;
+        del.dataset.index = originalIdx;
 
         li.append(info, del);
-        list.appendChild(li);
+        fragment.appendChild(li);
     });
 
+    list.appendChild(fragment);
     document.getElementById('count').textContent = library.length;
 }
 
-document.getElementById('searchInput').oninput = (e) => {
+// Global Event Delegation Listener for Playlist
+document.getElementById('trackList').addEventListener('click', (e) => {
+    const delBtn = e.target.closest('.del-btn');
+    if (delBtn) {
+        e.stopPropagation();
+        const dbId = Number(delBtn.dataset.id);
+        const arrayIdx = Number(delBtn.dataset.index);
+        deleteTrack(dbId, arrayIdx);
+        return;
+    }
+
+    const trackItem = e.target.closest('.track-item');
+    if (trackItem) {
+        const arrayIdx = Number(trackItem.dataset.index);
+        playTrack(arrayIdx);
+    }
+});
+
+// Debounced Search Query Listener
+document.getElementById('searchInput').oninput = debounce((e) => {
     searchQuery = e.target.value;
     renderLibrary();
-};
+}, 150);
 
+// --- Clean track name display helper ---
 function cleanFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
 }
@@ -775,22 +697,28 @@ async function playTrack(index, isRandom = false) {
 
     if (currentUrl) {
         URL.revokeObjectURL(currentUrl);
+        currentUrl = null;
     }
     
     currentIndex = index;
     const t = library[currentIndex];
-    currentUrl = URL.createObjectURL(t.blob);
 
+    // Reset UI before load
     document.getElementById('seek').value = 0;
     document.getElementById('currentTime').textContent = "0:00";
 
-    audio.src = currentUrl;
-    audio.load();
-
     try {
+        // Fetch audio file Blob lazily from IndexedDB
+        const blob = await getTrackBlob(t.id);
+        if (!blob) throw new Error("Audio blob missing in IndexedDB");
+
+        currentUrl = URL.createObjectURL(blob);
+        audio.src = currentUrl;
+        audio.load();
+
         await audio.play();
     } catch(e) {
-        console.log("User interaction needed to play audio: ", e);
+        console.warn("User interaction needed or playback error: ", e);
     }
 
     document.getElementById('nowTitle').textContent = cleanFileName(t.name);
@@ -917,7 +845,8 @@ async function handleFilesImport(files) {
         const store = tx.objectStore(STORE_NAME);
         const req = store.add({ name: f.name, blob: f });
         req.onsuccess = (ev) => {
-            library.push({ id: ev.target.result, name: f.name, blob: f });
+            // Keep lightweight metadata object in RAM
+            library.push({ id: ev.target.result, name: f.name });
             renderLibrary();
         };
     }
@@ -928,7 +857,7 @@ document.getElementById('fileInput').onchange = (e) => {
     e.target.value = '';
 };
 
-// --- Drag and Drop Support ---
+// --- Drag and Drop File Support ---
 window.addEventListener('dragover', (e) => {
     e.preventDefault();
     document.body.classList.add('drag-over');
@@ -1029,7 +958,7 @@ document.getElementById('muteBtn').onclick = function() {
     this.classList.toggle('active', audio.muted);
 };
 
-// --- Contact Form Handling ---
+// --- Contact Form Submission Handling ---
 document.getElementById('contactForm').onsubmit = (e) => {
     e.preventDefault();
     alert("Thank you! Your message has been received.");
@@ -1037,7 +966,7 @@ document.getElementById('contactForm').onsubmit = (e) => {
     e.target.reset();
 };
 
-// --- Keyboard Navigation ---
+// --- Keyboard Navigation & Controls ---
 window.addEventListener('keydown', (e) => {
     if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
         if (e.code === 'Escape') document.activeElement.blur();
@@ -1067,7 +996,6 @@ window.addEventListener('keydown', (e) => {
         case 'KeyS': document.getElementById('shuffleBtn').click(); break;
         case 'KeyM': document.getElementById('muteBtn').click(); break;
         case 'KeyU': document.getElementById('fileInput').click(); break;
-        case 'KeyP': openModal('settings-modal'); break;
         case 'KeyH': openModal('help-modal'); break;
         case 'Escape': document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); break;
         case 'Delete': document.getElementById('clearBtn').click(); break;
@@ -1080,16 +1008,15 @@ window.addEventListener('keydown', (e) => {
 // --- Initialization ---
 (async function init() {
     try {
-        detectDeviceCapabilities();
-        loadPerfSettings();
-
         const db = await openDB();
         const tx = db.transaction(STORE_NAME, 'readonly');
         tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-            library = e.target.result;
+            // Load lightweight track metadata only into memory
+            library = e.target.result.map(item => ({ id: item.id, name: item.name }));
             renderLibrary();
             setLanguage('ja');
             
+            // Hide loading overlay smoothly
             setTimeout(() => {
               const overlay = document.getElementById('loading-overlay');
               if (overlay) {
@@ -1099,7 +1026,7 @@ window.addEventListener('keydown', (e) => {
             }, 300);
         };
 
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', debouncedResize);
         resizeCanvas();
     } catch(e) {
         console.error("Init Error", e);
