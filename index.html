@@ -447,7 +447,7 @@
   background: #000; display: flex; align-items: center; justify-content: center; flex-direction:column;
   transition: opacity 0.5s;
 ">
-  <img src="logo.jpg" alt="AndreMusic" style="width:360px; height:64px; object-fit:fill; margin-bottom:10px;">
+  <img src="logo.jpg" alt="AndreMusic" style="width:360px; height:64px; object-fit:fill; margin-bottom:10px;" onerror="this.style.display='none'">
   <div style="font-size:24px; color:#cc0000; margin-bottom:16px; font-weight:bold;">AndreMusic</div>
   <div id="loading-text" style="font-family:sans-serif; color:#ccc; margin-bottom:20px; font-size:14px;">Loading...</div>
   <div style="width:48px;height:48px; border:4px solid #222; border-top:4px solid #cc0000; border-radius:50%; animation:loading-spin 1s linear infinite;"></div>
@@ -461,7 +461,7 @@
 
 <div class="app">
   <div class="logo-header">
-    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();">
+    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();" onerror="this.style.display='none'">
   </div>
 
   <header>
@@ -526,12 +526,12 @@
     <a onclick="openModal('tos-modal')" id="nav-tos">Terms of Service</a>
     <a onclick="openModal('privacy-modal')" id="nav-privacy">Privacy Policy</a>
     <a onclick="openModal('contact-modal')" id="nav-contact">Contact</a>
-    <a onclick="openModal('help-modal')" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
+    <a onclick="openModal('help-modal')" id="nav-help" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
   </nav>
   <footer>Copyright &copy; 2026 AndrewSudiro</footer>
   <div style="text-align: center; margin-bottom: 15px;">
     <a href="files/AndreMusic.zip" download="AndreMusic.zip">
-      <button class="btn">Download AndreMusic</button>
+      <button class="btn" id="downloadAppBtn">Download AndreMusic</button>
     </a>
   </div>
 </div>
@@ -545,54 +545,54 @@
     <div class="modal-scroll" style="height: auto; max-height: 400px; padding: 10px;">
       
       <div id="device-detect-info" style="background: var(--player-frame-bg); border: 1px solid var(--accent-blue); padding: 8px 12px; font-size: 11px; margin-bottom: 15px; border-radius: 3px; color: var(--text-color);">
-        <strong>Detected System:</strong> <span id="detected-device">Analyzing system...</span>
+        <strong id="lbl-detected-system">Detected System:</strong> <span id="detected-device">Analyzing system...</span>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <div>
-          <label style="font-weight: bold; display: block; margin-bottom: 4px;">🎨 Japanese 2000s Web Theme Preset:</label>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;" id="lbl-theme">🎨 Japanese 2000s Web Theme Preset:</label>
           <select id="themeSelect" class="search-input" onchange="changeTheme(this.value)">
-            <option value="default">🔴🔵 Heisei Classic Portal (平成クラシック)</option>
-            <option value="2ch">🍵 2channel BBS Board (2ちゃんねる掲示板)</option>
-            <option value="cyber">⚡ Cyber Otaku 200X (サイバーオタク)</option>
-            <option value="vkei">🥀 Visual Kei / Gothic (V系・ゴシック)</option>
-            <option value="kawaii">🎀 Decora Pop Gal (平成ギャル・デコ)</option>
-            <option value="galgame">🌸 Visual Novel Blue (ギャルゲー・美少女ゲー)</option>
+            <option value="default" id="opt-theme-default">🔴🔵 Heisei Classic Portal (平成クラシック)</option>
+            <option value="2ch" id="opt-theme-2ch">🍵 2channel BBS Board (2ちゃんねる掲示板)</option>
+            <option value="cyber" id="opt-theme-cyber">⚡ Cyber Otaku 200X (サイバーオタク)</option>
+            <option value="vkei" id="opt-theme-vkei">🥀 Visual Kei / Gothic (V系・ゴシック)</option>
+            <option value="kawaii" id="opt-theme-kawaii">🎀 Decora Pop Gal (平成ギャル・デコ)</option>
+            <option value="galgame" id="opt-theme-galgame">🌸 Visual Novel Blue (ギャルゲー・美少女ゲー)</option>
           </select>
         </div>
 
         <div>
-          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Preset Profile:</label>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;" id="lbl-preset">Preset Profile:</label>
           <select id="perfPreset" class="search-input" onchange="changePerfPreset(this.value)">
-            <option value="auto">⚡ Auto (Smart Device Detection)</option>
-            <option value="high">🚀 High Performance (60 FPS, Full Stream Preload)</option>
-            <option value="balanced">⚖️ Balanced (30 FPS Eco Mode, Metadata Preload)</option>
-            <option value="low">🔋 Battery Saver Mode (Visualizer Off)</option>
+            <option value="auto" id="opt-perf-auto">⚡ Auto (Smart Device Detection)</option>
+            <option value="high" id="opt-perf-high">🚀 High Performance (60 FPS, Full Stream Preload)</option>
+            <option value="balanced" id="opt-perf-balanced">⚖️ Balanced (30 FPS Eco Mode, Metadata Preload)</option>
+            <option value="low" id="opt-perf-low">🔋 Battery Saver Mode (Visualizer Off)</option>
           </select>
         </div>
 
         <div>
-          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Audio Visualizer Quality:</label>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;" id="lbl-viz-quality">Audio Visualizer Quality:</label>
           <select id="visualizerQuality" class="search-input" onchange="savePerfSettings()">
-            <option value="60">High (60 FPS Canvas Render)</option>
-            <option value="30">Medium (30 FPS Eco Mode)</option>
-            <option value="0">Off (Disable Visualizer Canvas)</option>
+            <option value="60" id="opt-viz-60">High (60 FPS Canvas Render)</option>
+            <option value="30" id="opt-viz-30">Medium (30 FPS Eco Mode)</option>
+            <option value="0" id="opt-viz-0">Off (Disable Visualizer Canvas)</option>
           </select>
         </div>
 
         <div>
-          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Background Battery Saver:</label>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;" id="lbl-bg-pause">Background Battery Saver:</label>
           <select id="bgPauseSetting" class="search-input" onchange="savePerfSettings()">
-            <option value="true">Enabled (Pause visualizer when tab is hidden)</option>
-            <option value="false">Disabled (Always render visualizer)</option>
+            <option value="true" id="opt-bg-true">Enabled (Pause visualizer when tab is hidden)</option>
+            <option value="false" id="opt-bg-false">Disabled (Always render visualizer)</option>
           </select>
         </div>
 
         <div>
-          <label style="font-weight: bold; display: block; margin-bottom: 4px;">Audio Preload Mode:</label>
+          <label style="font-weight: bold; display: block; margin-bottom: 4px;" id="lbl-preload">Audio Preload Mode:</label>
           <select id="preloadSetting" class="search-input" onchange="savePerfSettings()">
-            <option value="metadata">Data Saver (Preload Metadata Only - Mobile Recommended)</option>
-            <option value="auto">Fast Buffering (Preload Audio Stream - Desktop Recommended)</option>
+            <option value="metadata" id="opt-preload-metadata">Data Saver (Preload Metadata Only - Mobile Recommended)</option>
+            <option value="auto" id="opt-preload-auto">Fast Buffering (Preload Audio Stream - Desktop Recommended)</option>
           </select>
         </div>
       </div>
@@ -603,7 +603,34 @@
 
 <div id="tos-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-tos">Terms of Service</span><span class="close-btn" onclick="closeModal('tos-modal')">[X]</span></div><div class="modal-scroll" id="body-tos"></div></div></div>
 <div id="privacy-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-privacy">Privacy Policy</span><span class="close-btn" onclick="closeModal('privacy-modal')">[X]</span></div><div class="modal-scroll" id="body-privacy"></div></div></div>
-<div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>↑ / ↓</strong></td><td>Volume Up / Down</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>/</strong></td><td>Search Playlist</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>P</strong></td><td>Performance Settings</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Esc</strong></td><td>Close Modals</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J / E / I</strong></td><td>Switch Language</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show Help</td></tr></table></div></div></div>
+<div id="help-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span id="title-help">Keyboard Shortcuts</span>
+      <span class="close-btn" onclick="closeModal('help-modal')">[X]</span>
+    </div>
+    <div class="modal-scroll">
+      <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td id="hk-play">Play / Pause</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td id="hk-next">Next Track</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td id="hk-prev">Previous Track</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>↑ / ↓</strong></td><td id="hk-vol">Volume Up / Down</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>/</strong></td><td id="hk-search">Search Playlist</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td id="hk-rand">Play Random Song</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td id="hk-loopall">Loop All</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td id="hk-loopone">Loop One</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td id="hk-shuffle">Shuffle</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td id="hk-mute">Mute</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td id="hk-upload">Import Music</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>P</strong></td><td id="hk-settings">Performance Settings</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td id="hk-clear">Clear Library</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Esc</strong></td><td id="hk-esc">Close Modals</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J / E / I</strong></td><td id="hk-lang">Switch Language</td></tr>
+        <tr><td style="padding:8px;"><strong>H</strong></td><td id="hk-help">Show Help</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
 <div id="contact-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div><form id="contactForm" class="contact-form"><input type="text" id="contact-name" placeholder="Your Name" required><input type="email" id="contact-email" placeholder="Your Email Address" required><textarea id="contact-message" placeholder="Your Message..." required></textarea><button type="submit" class="btn btn-upload" id="contact-send">Send Message</button></form><p style="text-align:center; font-size:11px; margin-top:15px; color:#555;">YouTube: <a href="https://www.youtube.com/@AndrewSudiro" target="_blank">@AndrewSudiro</a></p></div></div>
 
 <audio id="audio" preload="metadata"></audio>
@@ -620,58 +647,178 @@ function debounce(fn, delay = 150) {
 
 const translations = {
     ja: {
+        dropOverlay: "📁 音声ファイルをドロップしてAndreMusicにインポート",
+        loadingText: "読み込み中...",
+        settingsBtn: "⚙️ 設定",
         upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
-        noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "<<", next: ">>", random: "ランダム再生 🎲",
+        noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "前へ", next: "次へ", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
         total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
-        navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ",
+        navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ", navHelp: "[ショートカットキー] [H]",
+        downloadAppBtn: "AndreMusicをダウンロード",
+        
+        // Settings Modal
+        settingsTitle: "⚙️ パフォーマンス・スマート設定",
+        lblDetectedSystem: "検出されたシステム:",
+        analyzingSystem: "システムを解析中...",
+        lblTheme: "🎨 2000年代ウェブテーマ プリセット:",
+        themeDefault: "🔴🔵 平成クラシックポータル (平成クラシック)",
+        theme2ch: "🍵 2ちゃんねる掲示板 (2ちゃんねる掲示板)",
+        themeCyber: "⚡ サイバーオタク 200X (サイバーオタク)",
+        themeVkei: "🥀 V系・ゴシック (V系・ゴシック)",
+        themeKawaii: "🎀 平成ギャル・デコポップ (平成ギャル・デコ)",
+        themeGalgame: "🌸 ギャルゲー・美少女ゲーム (ギャルゲー・美少女ゲー)",
+        lblPreset: "パフォーマンス プリセット:",
+        perfAuto: "⚡ 自動 (端末スマート検出)",
+        perfHigh: "🚀 高パフォーマンス (60 FPS, フルストリーム自動読み込み)",
+        perfBalanced: "⚖️ バランス (30 FPS 省エネモード, メタデータ読み込み)",
+        perfLow: "🔋 バッテリーセーバーモード (ビジュアライザーオフ)",
+        lblVizQuality: "オーディオ ビジュアライザー画質:",
+        viz60: "高 (60 FPS キャンバス描画)",
+        viz30: "中 (30 FPS 省エネモード)",
+        viz0: "オフ (ビジュアライザー無効)",
+        lblBgPause: "バックグラウンド バッテリーセーバー:",
+        bgTrue: "有効 (タブ非表示時にビジュアライザーを停止)",
+        bgFalse: "無効 (常にビジュアライザーを描画)",
+        lblPreload: "オーディオ 事前読み込みモード:",
+        preloadMetadata: "データセーバー (メタデータのみ事前読み込み - モバイル推奨)",
+        preloadAuto: "高速バッファリング (音声ストリーム事前読み込み - PC推奨)",
+
+        // Modal Texts & Forms
+        navHelpTitle: "ショートカットキー一覧",
+        hkPlay: "再生 / 一時停止", hkNext: "次の曲", hkPrev: "前の曲", hkVol: "音量 上げ / 下げ",
+        hkSearch: "プレイリスト検索", hkRand: "ランダム再生", hkLoopAll: "全曲ループ", hkLoopOne: "１曲ループ",
+        hkShuffle: "シャッフル", hkMute: "消音", hkUpload: "音楽を取り込む", hkSettings: "パフォーマンス設定",
+        hkClear: "ライブラリ消去", hkEsc: "モーダルを閉じる", hkLang: "言語切り替え", hkHelp: "ヘルプを表示",
+
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
-        tosTitle: "ルール",
-        tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。
+        contactSuccess: "ありがとうございます！メッセージを受け付けました。",
+        tosTitle: "利用規約",
+        tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。<br><br>
 
-プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。
+プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。<br><br>
 
-プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。
+プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。<br><br>
 
 このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
-        privacyTitle: "ルール",
-        privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され, マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
+        privacyTitle: "プライバシーポリシー",
+        privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され、マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
     },
     en: {
+        dropOverlay: "📁 Drop audio files to import into AndreMusic",
+        loadingText: "Loading...",
+        settingsBtn: "⚙️ Settings",
         upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
-        noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "<<", next: ">>", random: "Random Song 🎲",
+        noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "Back", next: "Next", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
         total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
-        navTos: "Rules", navPrivacy: "Privacy Policy", navContact: "Contact",
+        navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact", navHelp: "[Keyboard Shortcuts] [H]",
+        downloadAppBtn: "Download AndreMusic",
+
+        // Settings Modal
+        settingsTitle: "⚙️ Performance & Smart Settings",
+        lblDetectedSystem: "Detected System:",
+        analyzingSystem: "Analyzing system...",
+        lblTheme: "🎨 Japanese 2000s Web Theme Preset:",
+        themeDefault: "🔴🔵 Heisei Classic Portal (平成クラシック)",
+        theme2ch: "🍵 2channel BBS Board (2ちゃんねる掲示板)",
+        themeCyber: "⚡ Cyber Otaku 200X (サイバーオタク)",
+        themeVkei: "🥀 Visual Kei / Gothic (V系・ゴシック)",
+        themeKawaii: "🎀 Decora Pop Gal (平成ギャル・デコ)",
+        themeGalgame: "🌸 Visual Novel Blue (ギャルゲー・美少女ゲー)",
+        lblPreset: "Preset Profile:",
+        perfAuto: "⚡ Auto (Smart Device Detection)",
+        perfHigh: "🚀 High Performance (60 FPS, Full Stream Preload)",
+        perfBalanced: "⚖️ Balanced (30 FPS Eco Mode, Metadata Preload)",
+        perfLow: "🔋 Battery Saver Mode (Visualizer Off)",
+        lblVizQuality: "Audio Visualizer Quality:",
+        viz60: "High (60 FPS Canvas Render)",
+        viz30: "Medium (30 FPS Eco Mode)",
+        viz0: "Off (Disable Visualizer Canvas)",
+        lblBgPause: "Background Battery Saver:",
+        bgTrue: "Enabled (Pause visualizer when tab is hidden)",
+        bgFalse: "Disabled (Always render visualizer)",
+        lblPreload: "Audio Preload Mode:",
+        preloadMetadata: "Data Saver (Preload Metadata Only - Mobile Recommended)",
+        preloadAuto: "Fast Buffering (Preload Audio Stream - Desktop Recommended)",
+
+        // Modal Texts & Forms
+        navHelpTitle: "Keyboard Shortcuts",
+        hkPlay: "Play / Pause", hkNext: "Next Track", hkPrev: "Previous Track", hkVol: "Volume Up / Down",
+        hkSearch: "Search Playlist", hkRand: "Play Random Song", hkLoopAll: "Loop All", hkLoopOne: "Loop One",
+        hkShuffle: "Shuffle", hkMute: "Mute", hkUpload: "Import Music", hkSettings: "Performance Settings",
+        hkClear: "Clear Library", hkEsc: "Close Modals", hkLang: "Switch Language", hkHelp: "Show Help",
+
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
-        tosTitle: "Rules",
-        tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:
+        contactSuccess: "Thank you! Your message has been received.",
+        tosTitle: "Terms of Service",
+        tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:<br><br>
 
-The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.
+The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.<br><br>
 
-To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.
+To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.<br><br>
 
 While the platform offers deep aesthetic and technical customization, it strictly prohibits Commercial Atmosphere Usage. The interface, its high-resolution audio processing, and its unique visualizer suites are designed exclusively for private enjoyment and may not be used to provide background music for retail, public business, or commercial spaces. By restricting usage to personal, non-commercial contexts, the platform preserves its identity as a powerful, private tool dedicated to the individual music enthusiast rather than a public broadcasting utility.</p>`,
         privacyTitle: "Privacy Policy",
         privacyBody: `<p>AndreMusic operates with a Zero-Tracking Mandate, ensuring that your listening habits, play counts, and library preferences are never monitored, uploaded, or sold to third parties. Every file you interact with is managed via Isolated Local Storage, utilizing your browser’s IndexedDB so that your audio collection remains entirely on your hardware and never touches a central server. This commitment to anonymity is reinforced by a No-Cookie Environment, which strips away third-party tracking pixels and persistent identifiers to guarantee a private session every time you listen. Furthermore, in the event of direct communication, any personal details such as Names or Email Addresses provided through contact forms are strictly reserved for responding to your inquiries and are never repurposed for marketing or data profiling. Together, these rules ensure that your interaction with the platform is as private as listening to a physical record in your own home.</p>`
     },
     id: {
+        dropOverlay: "📁 Tarik & lepas berkas audio untuk diimpor ke AndreMusic",
+        loadingText: "Memuatkan...",
+        settingsBtn: "⚙️ Pengaturan",
         upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
-        noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "<<", next: ">>", random: "Lagu Acak 🎲",
+        noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "Sebelumnya", next: "Selanjutnya", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
         total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
-        navTos: "Peraturan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak",
+        navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak", navHelp: "[Pintasan Kibor] [H]",
+        downloadAppBtn: "Unduh AndreMusic",
+
+        // Settings Modal
+        settingsTitle: "⚙️ Pengaturan Kinerja & Cerdas",
+        lblDetectedSystem: "Sistem Terdeteksi:",
+        analyzingSystem: "Menganalisis sistem...",
+        lblTheme: "🎨 Tema Web Jepang 2000-an:",
+        themeDefault: "🔴🔵 Heisei Classic Portal (平成クラシック)",
+        theme2ch: "🍵 2channel BBS Board (2ちゃんねる掲示板)",
+        themeCyber: "⚡ Cyber Otaku 200X (サイバーオタク)",
+        themeVkei: "🥀 Visual Kei / Gothic (V系・ゴシック)",
+        themeKawaii: "🎀 Decora Pop Gal (平成ギャル・デコ)",
+        themeGalgame: "🌸 Visual Novel Blue (ギャルゲー・美少女ゲー)",
+        lblPreset: "Profil Pengaturan Kinerja:",
+        perfAuto: "⚡ Otomatis (Deteksi Perangkat Cerdas)",
+        perfHigh: "🚀 Kinerja Tinggi (60 FPS, Preload Aliran Audio Penuh)",
+        perfBalanced: "⚖️ Seimbang (Mode Hemat 30 FPS, Preload Metadata)",
+        perfLow: "🔋 Mode Penghemat Baterai (Visualizer Nonaktif)",
+        lblVizQuality: "Kualitas Visualisator Audio:",
+        viz60: "Tinggi (Render Kanvas 60 FPS)",
+        viz30: "Sedang (Mode Hemat 30 FPS)",
+        viz0: "Mati (Nonaktifkan Kanvas Visualisator)",
+        lblBgPause: "Penghemat Baterai Latar Belakang:",
+        bgTrue: "Aktif (Jeda visualisator saat tab tersembunyi)",
+        bgFalse: "Nonaktif (Selalu render visualisator)",
+        lblPreload: "Mode Pra-muat Audio:",
+        preloadMetadata: "Hemat Data (Hanya Pra-muat Metadata - Disarankan Seluler)",
+        preloadAuto: "Penyangga Cepat (Pra-muat Aliran Audio - Disarankan Komputer)",
+
+        // Modal Texts & Forms
+        navHelpTitle: "Pintasan Kibor",
+        hkPlay: "Putar / Jeda", hkNext: "Lagu Selanjutnya", hkPrev: "Lagu Sebelumnya", hkVol: "Volume Naik / Turun",
+        hkSearch: "Cari Daftar Putar", hkRand: "Putar Lagu Acak", hkLoopAll: "Ulang Semua", hkLoopOne: "Ulang Satu",
+        hkShuffle: "Acak", hkMute: "Bisukan", hkUpload: "Impor Musik", hkSettings: "Pengaturan Kinerja",
+        hkClear: "Hapus Pustaka", hkEsc: "Tutup Modal", hkLang: "Ganti Bahasa", hkHelp: "Tampilkan Bantuan",
+
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
-        tosTitle: "Peraturan",
-        tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:
+        contactSuccess: "Terima kasih! Pesan Anda telah diterima.",
+        tosTitle: "Ketentuan Layanan",
+        tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:<br><br>
 
-Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.
+Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.<br><br>
 
-Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.
+Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.<br><br>
 
 Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, platform ini secara tegas melarang Penggunaan Atmosfer Komersial. Antarmuka, pemrosesan audio resolusi tinggi, dan rangkaian visualisasi uniknya dirancang khusus untuk kenikmatan pribadi dan tidak boleh digunakan untuk menyediakan musik latar untuk ritel, bisnis publik, atau ruang komersial. Dengan membatasi penggunaan pada konteks pribadi dan non-komersial, platform ini mempertahankan identitasnya sebagai alat pribadi yang ampuh yang didedikasikan untuk penggemar musik individu, bukan sebagai utilitas penyiaran publik.</p>`,
         privacyTitle: "Kebijakan Privasi",
-        privacyBody: `<p>AndreMusic beroperasi dengan Mandat Tanpa Pelacakan, memastikan bahwa kebiasaan mendengarkan, jumlah pemutaran, dan preferensi perpustakaan Anda tidak pernah dipantau, diunggah, atau dijual kepada pihak ketiga. Setiap file yang Anda interaksi dikelola melalui Penyimpanan Lokal Terisolasi, menggunakan IndexedDB browser Anda sehingga koleksi audio Anda tetap sepenuhnya berada di perangkat keras Anda dan tidak pernah menyentuh server pusat. Komitmen terhadap anonimitas ini diperkuat oleh Lingkungan Tanpa Cookie, yang menghilangkan piksel pelacakan pihak ketiga dan pengidentifikasi tetap untuk menjamin sesi pribadi setiap kali Anda mendengarkan. Lebih lanjut, jika terjadi komunikasi langsung, detail pribadi apa pun seperti Nama atau Alamat Email yang diberikan melalui formulir kontak hanya digunakan untuk menanggapi pertanyaan Anda dan tidak pernah digunakan kembali untuk pemasaran atau pembuatan profil data. Bersama-sama, aturan-aturan ini memastikan bahwa interaksi Anda dengan platform ini sama pribadinya dengan mendengarkan rekaman fisik di rumah Anda sendiri.</p>`
+        privacyBody: `<p>AndreMusic beroperasi dengan Mandat Tanpa Pelacakan, memastikan bahwa kebiasaan mendengarkan, jumlah pemutaran, dan preferensi perpustakaan Anda tidak pernah dipantau, diunggah, atau dijual kepada pihak ketiga. Setiap file yang Anda interaksi dikelola melalui Penyimpanan Lokal Terisolasi, menggunakan IndexedDB browser Anda sehingga koleksi audio Anda tetap sepenuhnya berada di perangkat keras Anda dan tidak pernah menyentuh server pusat. Komitmen terhadap anonimitas ini diperkuat oleh Lingkungan Tanpa Cookie, yang menghilangkan piksel pelacaking pihak ketiga dan pengidentifikasi tetap untuk menjamin sesi pribadi setiap kali Anda mendengarkan. Lebih lanjut, jika terjadi komunikasi langsung, detail pribadi apa pun seperti Nama atau Alamat Email yang diberikan melalui formulir kontak hanya digunakan untuk menanggapi pertanyaan Anda dan tidak pernah digunakan kembali untuk pemasaran atau pembuatan profil data. Bersama-sama, aturan-aturan ini memastikan bahwa interaksi Anda dengan platform ini sama pribadinya dengan mendengarkan rekaman fisik di rumah Anda sendiri.</p>`
     }
 };
 
@@ -697,12 +844,79 @@ let animFrameId = null;
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
+// --- Performance Settings State ---
+let perfSettings = {
+    preset: 'auto',
+    fps: 60,
+    bgPause: true,
+    preload: 'metadata'
+};
+
 // --- Theme Switcher Function ---
 function changeTheme(themeKey) {
     document.body.setAttribute('data-theme', themeKey);
     localStorage.setItem('andre_music_theme', themeKey);
     const themeSelect = document.getElementById('themeSelect');
     if (themeSelect) themeSelect.value = themeKey;
+}
+
+// --- Device Detection and Settings Management ---
+function detectSystemPerformance() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const cores = navigator.hardwareConcurrency || 4;
+    const deviceEl = document.getElementById('detected-device');
+    
+    let deviceText = isMobile ? "Mobile Device" : "Desktop System";
+    deviceText += ` (${cores} CPU Cores)`;
+    if(deviceEl) deviceEl.textContent = deviceText;
+
+    if (perfSettings.preset === 'auto') {
+        if (isMobile || cores <= 2) {
+            perfSettings.fps = 30;
+            perfSettings.preload = 'metadata';
+        } else {
+            perfSettings.fps = 60;
+            perfSettings.preload = 'auto';
+        }
+    }
+    applyPerfSettingsToUI();
+}
+
+function applyPerfSettingsToUI() {
+    document.getElementById('perfPreset').value = perfSettings.preset;
+    document.getElementById('visualizerQuality').value = perfSettings.fps;
+    document.getElementById('bgPauseSetting').value = perfSettings.bgPause ? 'true' : 'false';
+    document.getElementById('preloadSetting').value = perfSettings.preload;
+    audio.preload = perfSettings.preload;
+}
+
+function changePerfPreset(val) {
+    perfSettings.preset = val;
+    if (val === 'high') {
+        perfSettings.fps = 60;
+        perfSettings.preload = 'auto';
+    } else if (val === 'balanced') {
+        perfSettings.fps = 30;
+        perfSettings.preload = 'metadata';
+    } else if (val === 'low') {
+        perfSettings.fps = 0;
+        perfSettings.preload = 'metadata';
+    } else {
+        detectSystemPerformance();
+    }
+    savePerfSettings();
+}
+
+function savePerfSettings() {
+    perfSettings.fps = parseInt(document.getElementById('visualizerQuality').value, 10);
+    perfSettings.bgPause = document.getElementById('bgPauseSetting').value === 'true';
+    perfSettings.preload = document.getElementById('preloadSetting').value;
+    audio.preload = perfSettings.preload;
+
+    localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
+    if (perfSettings.fps === 0) {
+        stopVisualizer();
+    }
 }
 
 // --- Audio Visualizer with High-DPI support & CPU Saver ---
@@ -725,9 +939,11 @@ function initAudioContext() {
     }
 }
 
+let lastFrameTime = 0;
 function startVisualizer() {
+    if (perfSettings.fps === 0) return;
     if (!animFrameId) {
-        drawVisualizer();
+        drawVisualizer(0);
     }
 }
 
@@ -740,9 +956,13 @@ function stopVisualizer() {
     }
 }
 
-function drawVisualizer() {
+function drawVisualizer(timestamp) {
     animFrameId = requestAnimationFrame(drawVisualizer);
-    if (!analyser) return;
+    if (!analyser || perfSettings.fps === 0) return;
+
+    const targetInterval = 1000 / perfSettings.fps;
+    if (timestamp - lastFrameTime < targetInterval) return;
+    lastFrameTime = timestamp;
 
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width / dpr;
@@ -774,6 +994,19 @@ function resizeCanvas() {
 
 const debouncedResize = debounce(resizeCanvas, 100);
 
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && perfSettings.bgPause) {
+        if (animFrameId) {
+            cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+        }
+    } else {
+        if (!audio.paused) {
+            startVisualizer();
+        }
+    }
+});
+
 // --- IndexedDB Helpers ---
 function openDB() {
     return new Promise((res, rej) => {
@@ -787,7 +1020,6 @@ function openDB() {
     });
 }
 
-// Fetch track blob on demand to save RAM
 async function getTrackBlob(id) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -806,11 +1038,75 @@ function setLanguage(lang) {
     const targetBtn = document.getElementById(`lang-${lang}`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const ids = ['label-upload', 'clearBtn', 'label-playlist', 'prevBtn', 'nextBtn', 'randomBtn', 'loopAllBtn', 'loopOneBtn', 'shuffleBtn', 'muteBtn', 'label-count', 'nav-tos', 'nav-privacy', 'nav-contact'];
-    ids.forEach(id => {
+    const map = {
+        'drop-overlay': 'dropOverlay',
+        'loading-text': 'loadingText',
+        'settingsBtn': 'settingsBtn',
+        'label-upload': 'upload',
+        'clearBtn': 'clear',
+        'label-playlist': 'playlist',
+        'prevBtn': 'back',
+        'nextBtn': 'next',
+        'randomBtn': 'random',
+        'loopAllBtn': 'loopAll',
+        'loopOneBtn': 'loopOne',
+        'shuffleBtn': 'shuffle',
+        'muteBtn': 'mute',
+        'label-count': 'total',
+        'nav-tos': 'navTos',
+        'nav-privacy': 'navPrivacy',
+        'nav-contact': 'navContact',
+        'nav-help': 'navHelp',
+        'downloadAppBtn': 'downloadAppBtn',
+        
+        'title-settings': 'settingsTitle',
+        'lbl-detected-system': 'lblDetectedSystem',
+        'lbl-theme': 'lblTheme',
+        'opt-theme-default': 'themeDefault',
+        'opt-theme-2ch': 'theme2ch',
+        'opt-theme-cyber': 'themeCyber',
+        'opt-theme-vkei': 'themeVkei',
+        'opt-theme-kawaii': 'themeKawaii',
+        'opt-theme-galgame': 'themeGalgame',
+        'lbl-preset': 'lblPreset',
+        'opt-perf-auto': 'perfAuto',
+        'opt-perf-high': 'perfHigh',
+        'opt-perf-balanced': 'perfBalanced',
+        'opt-perf-low': 'perfLow',
+        'lbl-viz-quality': 'lblVizQuality',
+        'opt-viz-60': 'viz60',
+        'opt-viz-30': 'viz30',
+        'opt-viz-0': 'viz0',
+        'lbl-bg-pause': 'lblBgPause',
+        'opt-bg-true': 'bgTrue',
+        'opt-bg-false': 'bgFalse',
+        'lbl-preload': 'lblPreload',
+        'opt-preload-metadata': 'preloadMetadata',
+        'opt-preload-auto': 'preloadAuto',
+
+        'title-help': 'navHelpTitle',
+        'hk-play': 'hkPlay',
+        'hk-next': 'hkNext',
+        'hk-prev': 'hkPrev',
+        'hk-vol': 'hkVol',
+        'hk-search': 'hkSearch',
+        'hk-rand': 'hkRand',
+        'hk-loopall': 'hkLoopAll',
+        'hk-loopone': 'hkLoopOne',
+        'hk-shuffle': 'hkShuffle',
+        'hk-mute': 'hkMute',
+        'hk-upload': 'hkUpload',
+        'hk-settings': 'hkSettings',
+        'hk-clear': 'hkClear',
+        'hk-esc': 'hkEsc',
+        'hk-lang': 'hkLang',
+        'hk-help': 'hkHelp'
+    };
+
+    Object.keys(map).forEach(id => {
         const el = document.getElementById(id);
-        const key = id.replace('label-', '').replace('nav-', '').replace('Btn', '');
-        if(el && t[key]) el.textContent = t[key];
+        const key = map[id];
+        if (el && t[key]) el.textContent = t[key];
     });
 
     document.getElementById('searchInput').placeholder = t.searchPh;
@@ -823,6 +1119,10 @@ function setLanguage(lang) {
     document.getElementById('body-tos').innerHTML = t.tosBody;
     document.getElementById('title-privacy').textContent = t.privacyTitle;
     document.getElementById('body-privacy').innerHTML = t.privacyBody;
+    
+    if (currentIndex === -1) {
+        document.getElementById('nowTitle').textContent = t.noTrack;
+    }
     document.getElementById('playLabel').textContent = audio.paused ? t.play : t.pause;
 }
 
@@ -830,7 +1130,6 @@ function openModal(id) { document.getElementById(id).style.display = "block"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
 window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; };
 
-// --- Efficient Playlist Rendering using DocumentFragment & Event Delegation ---
 function renderLibrary() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
@@ -866,7 +1165,6 @@ function renderLibrary() {
     document.getElementById('count').textContent = library.length;
 }
 
-// Global Event Delegation Listener for Playlist
 document.getElementById('trackList').addEventListener('click', (e) => {
     const delBtn = e.target.closest('.del-btn');
     if (delBtn) {
@@ -884,7 +1182,6 @@ document.getElementById('trackList').addEventListener('click', (e) => {
     }
 });
 
-// Debounced Search Query Listener
 document.getElementById('searchInput').oninput = debounce((e) => {
     searchQuery = e.target.value;
     renderLibrary();
@@ -894,7 +1191,6 @@ function cleanFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
 }
 
-// Audio Error Alert (Handles Safari OGG and Playback Failures)
 audio.onerror = () => {
     if (audio.error) {
         if (audio.error.code === 4) {
@@ -905,7 +1201,6 @@ audio.onerror = () => {
     }
 };
 
-// --- Audio Playback Functions ---
 async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
     initAudioContext();
@@ -1005,7 +1300,6 @@ function getNext() {
     return (currentIndex + 1) % library.length;
 }
 
-// --- Audio Event Listeners ---
 audio.onloadedmetadata = () => {
     if (audio.duration) {
         const durM = Math.floor(audio.duration / 60);
@@ -1033,7 +1327,6 @@ seekInput.oninput = (e) => {
     }
 };
 
-// --- Volume Control & State Restoration ---
 const volumeSlider = document.getElementById('volumeSlider');
 const savedVolume = localStorage.getItem('andre_music_volume');
 if (savedVolume !== null) {
@@ -1048,10 +1341,7 @@ volumeSlider.oninput = (e) => {
     localStorage.setItem('andre_music_volume', audio.volume);
 };
 
-// --- Updated File Import & Processing ---
-// --- File Import & Processing ---
 async function handleFilesImport(files) {
-    // Snapshot files into a standard Array before any 'await' pause
     const fileList = Array.from(files);
     const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
     
@@ -1063,7 +1353,6 @@ async function handleFilesImport(files) {
         const store = tx.objectStore(STORE_NAME);
         const req = store.add({ name: f.name, blob: f });
         req.onsuccess = (ev) => {
-            // Keep lightweight metadata object in RAM
             library.push({ id: ev.target.result, name: f.name });
             renderLibrary();
         };
@@ -1072,13 +1361,11 @@ async function handleFilesImport(files) {
 
 document.getElementById('fileInput').onchange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-        // Pass a static Array copy so e.target.value = '' doesn't erase the file reference
         handleFilesImport(Array.from(e.target.files));
     }
     e.target.value = '';
 };
 
-// --- Drag and Drop File Support ---
 window.addEventListener('dragover', (e) => {
     e.preventDefault();
     document.body.classList.add('drag-over');
@@ -1179,15 +1466,13 @@ document.getElementById('muteBtn').onclick = function() {
     this.classList.toggle('active', audio.muted);
 };
 
-// --- Contact Form Submission Handling ---
 document.getElementById('contactForm').onsubmit = (e) => {
     e.preventDefault();
-    alert("Thank you! Your message has been received.");
+    alert(translations[currentLang].contactSuccess);
     closeModal('contact-modal');
     e.target.reset();
 };
 
-// --- Keyboard Navigation & Controls ---
 window.addEventListener('keydown', (e) => {
     if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
         if (e.code === 'Escape') document.activeElement.blur();
@@ -1227,35 +1512,55 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-// --- Initialization ---
+// --- Robust Initialization with Failsafe Timeout ---
 (async function init() {
+    const hideLoading = () => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.style.opacity = 0;
+            setTimeout(() => { overlay.style.display = 'none'; }, 500);
+        }
+    };
+
+    // Safety timeout fallback so the loading screen never gets stuck indefinitely
+    const safetyTimer = setTimeout(() => {
+        hideLoading();
+    }, 3000);
+
     try {
         const savedTheme = localStorage.getItem('andre_music_theme') || 'default';
         changeTheme(savedTheme);
 
+        const savedPerf = localStorage.getItem('andre_music_perf');
+        if (savedPerf) {
+            try { perfSettings = JSON.parse(savedPerf); } catch(e) {}
+        }
+        detectSystemPerformance();
+
         const db = await openDB();
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-            library = e.target.result.map(item => ({ id: item.id, name: item.name }));
-            renderLibrary();
-            setLanguage('ja');
-            
-            setTimeout(() => {
-              const overlay = document.getElementById('loading-overlay');
-              if (overlay) {
-                  overlay.style.opacity = 0;
-                  setTimeout(() => { overlay.style.display = 'none'; }, 500);
-              }
-            }, 300);
-        };
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).getAll();
+            req.onsuccess = (e) => {
+                library = e.target.result.map(item => ({ id: item.id, name: item.name }));
+                renderLibrary();
+                setLanguage('ja');
+                resolve();
+            };
+            req.onerror = (e) => reject(e.target.error);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+
+        clearTimeout(safetyTimer);
+        hideLoading();
 
         window.addEventListener('resize', debouncedResize);
         resizeCanvas();
     } catch(e) {
-        console.error("Init Error", e);
-        const overlay = document.getElementById('loading-overlay');
-        document.getElementById('loading-text').textContent = "Loading Failed :(";
-        if(overlay) overlay.style.background = "#fff6f6";
+        console.warn("Init Warning / Storage Error:", e);
+        clearTimeout(safetyTimer);
+        hideLoading();
+        setLanguage('ja');
     }
 })();
 </script>
