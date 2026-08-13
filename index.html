@@ -1191,16 +1191,6 @@ function cleanFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
 }
 
-audio.onerror = () => {
-    if (audio.error) {
-        if (audio.error.code === 4) {
-            alert("Your browser cannot decode this audio format. Note: Safari/iOS does not support .ogg files; please use .mp3, .m4a, or .wav on Safari.");
-        } else {
-            alert("Error loading audio file. Please try another track.");
-        }
-    }
-};
-
 async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
     initAudioContext();
