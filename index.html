@@ -476,7 +476,7 @@
     <div style="display:flex; gap:10px; flex-wrap: wrap;">
       <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
       <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁</label>
-      <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
+      <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.webm" multiple style="display:none" />
       <button class="btn" id="clearBtn">Clear Library</button>
     </div>
   </header>
@@ -606,7 +606,7 @@
 <div id="help-modal" class="modal"><div class="modal-content"><div class="modal-header"><span>Keyboard Shortcuts</span><span class="close-btn" onclick="closeModal('help-modal')">[X]</span></div><div class="modal-scroll"><table style="width:100%; border-collapse: collapse; font-size: 13px;"><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Space</strong></td><td>Play / Pause</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>→</strong></td><td>Next Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>←</strong></td><td>Previous Track</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>↑ / ↓</strong></td><td>Volume Up / Down</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>/</strong></td><td>Search Playlist</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>R</strong></td><td>Play Random Song</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>L</strong></td><td>Loop All</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>O</strong></td><td>Loop One</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>S</strong></td><td>Shuffle</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>M</strong></td><td>Mute</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>U</strong></td><td>Import Music</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>P</strong></td><td>Performance Settings</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Delete</strong></td><td>Clear Library</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>Esc</strong></td><td>Close Modals</td></tr><tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;"><strong>J / E / I</strong></td><td>Switch Language</td></tr><tr><td style="padding:8px;"><strong>H</strong></td><td>Show Help</td></tr></table></div></div></div>
 <div id="contact-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div><form id="contactForm" class="contact-form"><input type="text" id="contact-name" placeholder="Your Name" required><input type="email" id="contact-email" placeholder="Your Email Address" required><textarea id="contact-message" placeholder="Your Message..." required></textarea><button type="submit" class="btn btn-upload" id="contact-send">Send Message</button></form><p style="text-align:center; font-size:11px; margin-top:15px; color:#555;">YouTube: <a href="https://www.youtube.com/@AndrewSudiro" target="_blank">@AndrewSudiro</a></p></div></div>
 
-<audio id="audio" crossorigin="anonymous" preload="metadata"></audio>
+<audio id="audio" preload="metadata"></audio>
 
 <script>
 // --- Debounce Utility ---
@@ -679,7 +679,6 @@ const DB_NAME = 'music-library-db';
 const STORE_NAME = 'tracks';
 const audio = document.getElementById('audio');
 
-// Array now stores lightweight track objects: { id, name } without keeping full blobs in RAM
 let library = []; 
 let currentIndex = -1;
 let mode = 'normal';
@@ -752,7 +751,6 @@ function drawVisualizer() {
     analyser.getByteFrequencyData(dataArray);
     ctx.clearRect(0, 0, width, height);
 
-    // Get active visualizer color dynamically from CSS custom properties
     const activeAccent = getComputedStyle(document.body).getPropertyValue('--accent-blue').trim() || '#0066cc';
 
     const barWidth = (width / analyser.frequencyBinCount) * 2.2;
@@ -892,10 +890,20 @@ document.getElementById('searchInput').oninput = debounce((e) => {
     renderLibrary();
 }, 150);
 
-// --- Clean track name display helper ---
 function cleanFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
 }
+
+// Audio Error Alert (Handles Safari OGG and Playback Failures)
+audio.onerror = () => {
+    if (audio.error) {
+        if (audio.error.code === 4) {
+            alert("Your browser cannot decode this audio format. Note: Safari/iOS does not support .ogg files; please use .mp3, .m4a, or .wav on Safari.");
+        } else {
+            alert("Error loading audio file. Please try another track.");
+        }
+    }
+};
 
 // --- Audio Playback Functions ---
 async function playTrack(index, isRandom = false) {
@@ -910,12 +918,10 @@ async function playTrack(index, isRandom = false) {
     currentIndex = index;
     const t = library[currentIndex];
 
-    // Reset UI before load
     document.getElementById('seek').value = 0;
     document.getElementById('currentTime').textContent = "0:00";
 
     try {
-        // Fetch audio file Blob lazily from IndexedDB
         const blob = await getTrackBlob(t.id);
         if (!blob) throw new Error("Audio blob missing in IndexedDB");
 
@@ -1042,11 +1048,16 @@ volumeSlider.oninput = (e) => {
     localStorage.setItem('andre_music_volume', audio.volume);
 };
 
+// --- Updated File Import & Processing ---
 // --- File Import & Processing ---
 async function handleFilesImport(files) {
-    const db = await openDB();
-    const audioFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
+    // Snapshot files into a standard Array before any 'await' pause
+    const fileList = Array.from(files);
+    const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
     
+    if (audioFiles.length === 0) return;
+
+    const db = await openDB();
     for (const f of audioFiles) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
@@ -1060,7 +1071,10 @@ async function handleFilesImport(files) {
 }
 
 document.getElementById('fileInput').onchange = (e) => {
-    handleFilesImport(e.target.files);
+    if (e.target.files && e.target.files.length > 0) {
+        // Pass a static Array copy so e.target.value = '' doesn't erase the file reference
+        handleFilesImport(Array.from(e.target.files));
+    }
     e.target.value = '';
 };
 
@@ -1216,19 +1230,16 @@ window.addEventListener('keydown', (e) => {
 // --- Initialization ---
 (async function init() {
     try {
-        // Load stored theme or default to Heisei Classic
         const savedTheme = localStorage.getItem('andre_music_theme') || 'default';
         changeTheme(savedTheme);
 
         const db = await openDB();
         const tx = db.transaction(STORE_NAME, 'readonly');
         tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-            // Load lightweight track metadata only into memory
             library = e.target.result.map(item => ({ id: item.id, name: item.name }));
             renderLibrary();
             setLanguage('ja');
             
-            // Hide loading overlay smoothly
             setTimeout(() => {
               const overlay = document.getElementById('loading-overlay');
               if (overlay) {
