@@ -38,8 +38,6 @@
   }
 
   /* --- 2000s JAPANESE WEB THEMES --- */
-
-  /* 1. 2channel BBS Board Theme (2ちゃんねる掲示板) */
   body[data-theme="2ch"] {
     --accent-red: #800000;
     --accent-blue: #0000ee;
@@ -69,7 +67,6 @@
     --modal-border: #800000;
   }
 
-  /* 2. Cyber Otaku 200X Theme (サイバーオタク 200X) */
   body[data-theme="cyber"] {
     --accent-red: #ff007f;
     --accent-blue: #00e5ff;
@@ -99,7 +96,6 @@
     --modal-border: #00e5ff;
   }
 
-  /* 3. Visual Kei / Gothic Theme (V系・ゴシック) */
   body[data-theme="vkei"] {
     --accent-red: #cc0033;
     --accent-blue: #8b008b;
@@ -129,7 +125,6 @@
     --modal-border: #cc0033;
   }
 
-  /* 4. Decora Pop Gal Theme (平成ギャル・デコポップ) */
   body[data-theme="kawaii"] {
     --accent-red: #ff1493;
     --accent-blue: #00bfff;
@@ -159,7 +154,6 @@
     --modal-border: #ff1493;
   }
 
-  /* 5. Visual Novel / Galgame Blue (ギャルゲー・美少女ゲーム) */
   body[data-theme="galgame"] {
     --accent-red: #ff6600;
     --accent-blue: #0066cc;
@@ -200,7 +194,6 @@
     transition: background-color 0.3s, color 0.3s;
   }
 
-  /* Drag and drop overlay */
   #drop-overlay {
     display: none;
     position: fixed;
@@ -476,7 +469,7 @@
     <div style="display:flex; gap:10px; flex-wrap: wrap;">
       <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
       <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁</label>
-      <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.webm" multiple style="display:none" />
+      <input id="fileInput" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac" multiple style="display:none" />
       <button class="btn" id="clearBtn">Clear Library</button>
     </div>
   </header>
@@ -657,7 +650,6 @@ const translations = {
         navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ", navHelp: "[ショートカットキー] [H]",
         downloadAppBtn: "AndreMusicをダウンロード",
         
-        // Settings Modal
         settingsTitle: "⚙️ パフォーマンス・スマート設定",
         lblDetectedSystem: "検出されたシステム:",
         analyzingSystem: "システムを解析中...",
@@ -684,7 +676,6 @@ const translations = {
         preloadMetadata: "データセーバー (メタデータのみ事前読み込み - モバイル推奨)",
         preloadAuto: "高速バッファリング (音声ストリーム事前読み込み - PC推奨)",
 
-        // Modal Texts & Forms
         navHelpTitle: "ショートカットキー一覧",
         hkPlay: "再生 / 一時停止", hkNext: "次の曲", hkPrev: "前の曲", hkVol: "音量 上げ / 下げ",
         hkSearch: "プレイリスト検索", hkRand: "ランダム再生", hkLoopAll: "全曲ループ", hkLoopOne: "１曲ループ",
@@ -694,13 +685,7 @@ const translations = {
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
         contactSuccess: "ありがとうございます！メッセージを受け付けました。",
         tosTitle: "利用規約",
-        tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。<br><br>
-
-プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。<br><br>
-
-プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。<br><br>
-
-このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
+        tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。<br><br>プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。<br><br>プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。<br><br>このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
         privacyTitle: "プライバシーポリシー",
         privacyBody: `<p>AndreMusicはトラッキングゼロを徹底しており、リスニング習慣、再生回数、ライブラリ設定などが第三者に監視、アップロード、販売されることは一切ありません。操作するすべてのファイルは、ブラウザのIndexedDBを利用した隔離されたローカルストレージで管理されるため、オーディオコレクションは完全にユーザーのハードウェア上に保存され、中央サーバーにアクセスすることはありません。この匿名性への取り組みは、サードパーティのトラッキングピクセルや永続的な識別子を排除し、リスニングのたびにプライベートなセッションを保証するノークッキー環境によってさらに強化されています。さらに、直接連絡を取る場合、お問い合わせフォームから提供された氏名やメールアドレスなどの個人情報は、お問い合わせへの対応のみに使用され、マーケティングやデータプロファイリングに再利用されることは一切ありません。これらのルールにより、プラットフォームとのやり取りは、自宅でレコードを聴くのと同じくらいプライベートなものとなります。</p>`
     },
@@ -715,7 +700,6 @@ const translations = {
         navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact", navHelp: "[Keyboard Shortcuts] [H]",
         downloadAppBtn: "Download AndreMusic",
 
-        // Settings Modal
         settingsTitle: "⚙️ Performance & Smart Settings",
         lblDetectedSystem: "Detected System:",
         analyzingSystem: "Analyzing system...",
@@ -742,7 +726,6 @@ const translations = {
         preloadMetadata: "Data Saver (Preload Metadata Only - Mobile Recommended)",
         preloadAuto: "Fast Buffering (Preload Audio Stream - Desktop Recommended)",
 
-        // Modal Texts & Forms
         navHelpTitle: "Keyboard Shortcuts",
         hkPlay: "Play / Pause", hkNext: "Next Track", hkPrev: "Previous Track", hkVol: "Volume Up / Down",
         hkSearch: "Search Playlist", hkRand: "Play Random Song", hkLoopAll: "Loop All", hkLoopOne: "Loop One",
@@ -752,13 +735,7 @@ const translations = {
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
         contactSuccess: "Thank you! Your message has been received.",
         tosTitle: "Terms of Service",
-        tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:<br><br>
-
-The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.<br><br>
-
-To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.<br><br>
-
-While the platform offers deep aesthetic and technical customization, it strictly prohibits Commercial Atmosphere Usage. The interface, its high-resolution audio processing, and its unique visualizer suites are designed exclusively for private enjoyment and may not be used to provide background music for retail, public business, or commercial spaces. By restricting usage to personal, non-commercial contexts, the platform preserves its identity as a powerful, private tool dedicated to the individual music enthusiast rather than a public broadcasting utility.</p>`,
+        tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:<br><br>The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.<br><br>To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.<br><br>While the platform offers deep aesthetic and technical customization, it strictly prohibits Commercial Atmosphere Usage. The interface, its high-resolution audio processing, and its unique visualizer suites are designed exclusively for private enjoyment and may not be used to provide background music for retail, public business, or commercial spaces. By restricting usage to personal, non-commercial contexts, the platform preserves its identity as a powerful, private tool dedicated to the individual music enthusiast rather than a public broadcasting utility.</p>`,
         privacyTitle: "Privacy Policy",
         privacyBody: `<p>AndreMusic operates with a Zero-Tracking Mandate, ensuring that your listening habits, play counts, and library preferences are never monitored, uploaded, or sold to third parties. Every file you interact with is managed via Isolated Local Storage, utilizing your browser’s IndexedDB so that your audio collection remains entirely on your hardware and never touches a central server. This commitment to anonymity is reinforced by a No-Cookie Environment, which strips away third-party tracking pixels and persistent identifiers to guarantee a private session every time you listen. Furthermore, in the event of direct communication, any personal details such as Names or Email Addresses provided through contact forms are strictly reserved for responding to your inquiries and are never repurposed for marketing or data profiling. Together, these rules ensure that your interaction with the platform is as private as listening to a physical record in your own home.</p>`
     },
@@ -773,7 +750,6 @@ While the platform offers deep aesthetic and technical customization, it strictl
         navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak", navHelp: "[Pintasan Kibor] [H]",
         downloadAppBtn: "Unduh AndreMusic",
 
-        // Settings Modal
         settingsTitle: "⚙️ Pengaturan Kinerja & Cerdas",
         lblDetectedSystem: "Sistem Terdeteksi:",
         analyzingSystem: "Menganalisis sistem...",
@@ -800,7 +776,6 @@ While the platform offers deep aesthetic and technical customization, it strictl
         preloadMetadata: "Hemat Data (Hanya Pra-muat Metadata - Disarankan Seluler)",
         preloadAuto: "Penyangga Cepat (Pra-muat Aliran Audio - Disarankan Komputer)",
 
-        // Modal Texts & Forms
         navHelpTitle: "Pintasan Kibor",
         hkPlay: "Putar / Jeda", hkNext: "Lagu Selanjutnya", hkPrev: "Lagu Sebelumnya", hkVol: "Volume Naik / Turun",
         hkSearch: "Cari Daftar Putar", hkRand: "Putar Lagu Acak", hkLoopAll: "Ulang Semua", hkLoopOne: "Ulang Satu",
@@ -810,13 +785,7 @@ While the platform offers deep aesthetic and technical customization, it strictl
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
         contactSuccess: "Terima kasih! Pesan Anda telah diterima.",
         tosTitle: "Ketentuan Layanan",
-        tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:<br><br>
-
-Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.<br><br>
-
-Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.<br><br>
-
-Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, platform ini secara tegas melarang Penggunaan Atmosfer Komersial. Antarmuka, pemrosesan audio resolusi tinggi, dan rangkaian visualisasi uniknya dirancang khusus untuk kenikmatan pribadi dan tidak boleh digunakan untuk menyediakan musik latar untuk ritel, bisnis publik, atau ruang komersial. Dengan membatasi penggunaan pada konteks pribadi dan non-komersial, platform ini mempertahankan identitasnya sebagai alat pribadi yang ampuh yang didedikasikan untuk penggemar musik individu, bukan sebagai utilitas penyiaran publik.</p>`,
+        tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:<br><br>Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.<br><br>Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.<br><br>Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, platform ini secara tegas melarang Penggunaan Atmosfer Komersial. Antarmuka, pemrosesan audio resolusi tinggi, dan rangkaian visualisasi uniknya dirancang khusus untuk kenikmatan pribadi dan tidak boleh digunakan untuk menyediakan musik latar untuk ritel, bisnis publik, atau ruang komersial. Dengan membatasi penggunaan pada konteks pribadi dan non-komersial, platform ini mempertahankan identitasnya sebagai alat pribadi yang ampuh yang didedikasikan untuk penggemar musik individu, bukan sebagai utilitas penyiaran publik.</p>`,
         privacyTitle: "Kebijakan Privasi",
         privacyBody: `<p>AndreMusic beroperasi dengan Mandat Tanpa Pelacakan, memastikan bahwa kebiasaan mendengarkan, jumlah pemutaran, dan preferensi perpustakaan Anda tidak pernah dipantau, diunggah, atau dijual kepada pihak ketiga. Setiap file yang Anda interaksi dikelola melalui Penyimpanan Lokal Terisolasi, menggunakan IndexedDB browser Anda sehingga koleksi audio Anda tetap sepenuhnya berada di perangkat keras Anda dan tidak pernah menyentuh server pusat. Komitmen terhadap anonimitas ini diperkuat oleh Lingkungan Tanpa Cookie, yang menghilangkan piksel pelacaking pihak ketiga dan pengidentifikasi tetap untuk menjamin sesi pribadi setiap kali Anda mendengarkan. Lebih lanjut, jika terjadi komunikasi langsung, detail pribadi apa pun seperti Nama atau Alamat Email yang diberikan melalui formulir kontak hanya digunakan untuk menanggapi pertanyaan Anda dan tidak pernah digunakan kembali untuk pemasaran atau pembuatan profil data. Bersama-sama, aturan-aturan ini memastikan bahwa interaksi Anda dengan platform ini sama pribadinya dengan mendengarkan rekaman fisik di rumah Anda sendiri.</p>`
     }
@@ -834,7 +803,6 @@ let currentLang = 'ja';
 let isSeeking = false;
 let searchQuery = "";
 
-// Web Audio API State
 let audioCtx = null;
 let analyser = null;
 let mediaSource = null;
@@ -844,7 +812,6 @@ let animFrameId = null;
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
-// --- Performance Settings State ---
 let perfSettings = {
     preset: 'auto',
     fps: 60,
@@ -852,7 +819,6 @@ let perfSettings = {
     preload: 'metadata'
 };
 
-// --- Theme Switcher Function ---
 function changeTheme(themeKey) {
     document.body.setAttribute('data-theme', themeKey);
     localStorage.setItem('andre_music_theme', themeKey);
@@ -860,7 +826,6 @@ function changeTheme(themeKey) {
     if (themeSelect) themeSelect.value = themeKey;
 }
 
-// --- Device Detection and Settings Management ---
 function detectSystemPerformance() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const cores = navigator.hardwareConcurrency || 4;
@@ -919,7 +884,6 @@ function savePerfSettings() {
     }
 }
 
-// --- Audio Visualizer with High-DPI support & CPU Saver ---
 function initAudioContext() {
     if (!audioCtx) {
         try {
@@ -1007,7 +971,6 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// --- IndexedDB Helpers ---
 function openDB() {
     return new Promise((res, rej) => {
         const req = indexedDB.open(DB_NAME, 1);
@@ -1030,7 +993,6 @@ async function getTrackBlob(id) {
     });
 }
 
-// --- UI & Language Management ---
 function setLanguage(lang) {
     currentLang = lang;
     const t = translations[lang];
@@ -1331,11 +1293,23 @@ volumeSlider.oninput = (e) => {
     localStorage.setItem('andre_music_volume', audio.volume);
 };
 
+// --- Strict File Filtering to Block Videos and Ensure Audio Only ---
 async function handleFilesImport(files) {
     const fileList = Array.from(files);
-    const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
     
-    if (audioFiles.length === 0) return;
+    // Explicitly filter out any video types or video extensions (.mp4, .mov, .avi, .mkv, .webm, etc.)
+    const audioFiles = fileList.filter(f => {
+        const isVideo = f.type.startsWith('video/') || /\.(mp4|mov|avi|mkv|wmv|flv|webm|m4v)$/i.test(f.name);
+        if (isVideo) return false;
+        return f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name);
+    });
+
+    if (audioFiles.length === 0) {
+        if (fileList.length > 0) {
+            alert("Only audio files (.mp3, .wav, .m4a, .aac, .ogg, .flac) are supported. Video files are blocked.");
+        }
+        return;
+    }
 
     const db = await openDB();
     for (const f of audioFiles) {
@@ -1502,7 +1476,6 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-// --- Robust Initialization with Failsafe Timeout ---
 (async function init() {
     const hideLoading = () => {
         const overlay = document.getElementById('loading-overlay');
@@ -1512,7 +1485,6 @@ window.addEventListener('keydown', (e) => {
         }
     };
 
-    // Safety timeout fallback so the loading screen never gets stuck indefinitely
     const safetyTimer = setTimeout(() => {
         hideLoading();
     }, 3000);
