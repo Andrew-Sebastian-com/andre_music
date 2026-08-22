@@ -437,6 +437,182 @@
     .track-list { max-height: 320px !important; }
     #visualizer { height: 110px; }
   }
+
+  /* --- UX POLISH / CUSTOM SYSTEM FEEDBACK --- */
+  html { scroll-behavior: smooth; }
+  body { min-height: 100vh; }
+  button, input, select, textarea { font: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px dotted var(--accent-blue);
+    outline-offset: 2px;
+  }
+  .app {
+    border-width: 1px;
+    box-shadow: 0 3px 0 rgba(0,0,0,.08), 0 10px 28px rgba(0,0,0,.08);
+  }
+  .logo-header { min-height: 48px; box-shadow: inset 0 -1px 0 rgba(255,255,255,.12); }
+  header {
+    padding: 12px 18px;
+    gap: 12px;
+    position: relative;
+  }
+  .logo-area { gap: 10px; align-items: center; min-width: 0; }
+  .logo { line-height: 1; text-shadow: 1px 1px 0 rgba(0,0,0,.08); }
+  header > div:last-child { justify-content: flex-end; }
+  .lang-switcher { white-space: nowrap; }
+  .btn {
+    min-height: 32px;
+    transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 1px 1px rgba(0,0,0,.08);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 2px 4px rgba(0,0,0,.12); }
+  .btn:active { transform: translateY(0); box-shadow: inset 0 1px 2px rgba(0,0,0,.16); }
+  .btn-upload { text-shadow: 0 1px 0 rgba(0,0,0,.24); }
+  .container { min-width: 0; }
+  .sidebar { min-width: 0; }
+  .search-container { position: sticky; top: 0; z-index: 2; box-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .search-input { min-height: 34px; }
+  .track-list { scrollbar-width: thin; }
+  .track-item {
+    min-height: 36px;
+    gap: 8px;
+    padding: 7px 9px;
+    border-left: 3px solid transparent;
+  }
+  .track-item:hover { border-left-color: var(--accent-blue); }
+  .track-item.active { border-left-width: 5px; }
+  .track-info { min-width: 0; }
+  .del-btn { flex: 0 0 auto; opacity: .58; transition: opacity .12s ease, transform .08s ease; }
+  .track-item:hover .del-btn, .del-btn:focus-visible { opacity: 1; }
+  .main-player { min-width: 0; }
+  .player-frame { padding: 14px; }
+  .now-playing-display { padding: 16px; margin-bottom: 14px; }
+  .song-title {
+    margin: 2px 0 12px;
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  #visualizer { height: 128px; border: 1px solid var(--display-border); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
+  .control-group { gap: 8px; margin: 12px 0; }
+  .control-group .btn { flex: 0 0 auto; }
+  .volume-container { min-height: 32px; }
+  .status-bar {
+    margin-top: 14px;
+    min-width: 0;
+    width: min(100%, 520px);
+    padding: 8px 12px;
+    justify-content: space-between;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .status-bar::before {
+    content: '●';
+    color: #00aa55;
+    font-size: 9px;
+    margin-right: 2px;
+  }
+  .legal-nav { margin: 10px 8px 8px; }
+  .legal-nav a { padding: 2px 4px; }
+  .modal { backdrop-filter: blur(1px); }
+  .modal-content {
+    margin: clamp(28px, 7vh, 70px) auto;
+    width: min(92vw, 620px);
+    max-height: calc(100vh - 56px);
+    overflow: auto;
+    border-width: 1px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.22), 0 12px 40px rgba(0,0,0,.18);
+  }
+  .modal-header { position: sticky; top: -20px; background: var(--app-bg); z-index: 3; }
+  .close-btn {
+    padding: 1px 5px;
+    border: 1px solid transparent;
+  }
+  .close-btn:hover { border-color: var(--accent-red); background: var(--hover-bg); }
+
+  /* Custom in-page notifications; intentionally retro/system-like rather than browser chrome. */
+  #notification-stack {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: min(360px, calc(100vw - 24px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 40000;
+    pointer-events: none;
+  }
+  .site-notification {
+    position: relative;
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 8px;
+    align-items: start;
+    padding: 9px 10px;
+    background: var(--app-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-gray);
+    border-left: 4px solid var(--accent-blue);
+    box-shadow: 4px 4px 0 rgba(0,0,0,.18), 0 6px 18px rgba(0,0,0,.12);
+    font-size: 12px;
+    line-height: 1.35;
+    animation: notifIn .16s ease-out;
+  }
+  .site-notification.success { border-left-color: #008844; }
+  .site-notification.warning { border-left-color: #cc6600; }
+  .site-notification.error { border-left-color: var(--accent-red); }
+  .site-notification.info { border-left-color: var(--accent-blue); }
+  .site-notification-title { font-weight: bold; margin-bottom: 2px; }
+  .site-notification-icon { font-family: monospace; font-weight: bold; text-align: center; }
+  .site-notification-close {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0 4px;
+    font-weight: bold;
+  }
+  .site-notification-close:hover { color: var(--accent-red); border-color: var(--border-gray); background: var(--hover-bg); }
+  .site-notification-bar {
+    position: absolute;
+    left: 0; bottom: 0; height: 2px;
+    background: var(--accent-blue);
+    width: 100%; transform-origin: left center;
+    animation: notifLife var(--notif-life, 4s) linear forwards;
+  }
+  .site-notification.success .site-notification-bar { background: #008844; }
+  .site-notification.warning .site-notification-bar { background: #cc6600; }
+  .site-notification.error .site-notification-bar { background: var(--accent-red); }
+  @keyframes notifIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes notifOut { to { opacity: 0; transform: translateX(14px); } }
+  @keyframes notifLife { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+  #confirm-modal .modal-content { max-width: 480px; }
+  .confirm-copy { margin: 0 0 16px; line-height: 1.55; }
+  .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .btn-danger { background: linear-gradient(to bottom, #ff5c5c, #b30000); color: #fff; border-color: var(--accent-red); }
+  .empty-library {
+    padding: 22px 14px;
+    color: #777;
+    text-align: center;
+    font-size: 11px;
+    border-top: 1px dotted var(--border-gray);
+    line-height: 1.5;
+  }
+  @media (max-width: 700px) {
+    #notification-stack { top: 10px; right: 10px; left: 10px; width: auto; }
+    .app { width: min(100vw, 1080px); }
+    header > div:last-child { width: 100%; justify-content: stretch; }
+    header > div:last-child .btn, header > div:last-child label.btn { flex: 1 1 auto; text-align: center; }
+    .player-frame { padding: 10px; }
+    .control-group { margin: 9px 0; }
+    .control-group .btn { min-width: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  }
+
 </style>
 </head>
 <body data-theme="default">
@@ -534,6 +710,23 @@
     <a href="files/AndreMusic.zip" download="AndreMusic.zip">
       <button class="btn" id="downloadAppBtn">Download AndreMusic</button>
     </a>
+  </div>
+</div>
+
+
+<div id="notification-stack" aria-live="polite" aria-atomic="false"></div>
+
+<div id="confirm-modal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal-header">
+      <span id="confirm-title">AndreMusic</span>
+      <span class="close-btn" id="confirm-close" role="button" tabindex="0" aria-label="Close">[X]</span>
+    </div>
+    <p class="confirm-copy" id="confirm-message"></p>
+    <div class="confirm-actions">
+      <button class="btn" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-accept">Confirm</button>
+    </div>
   </div>
 </div>
 
@@ -654,7 +847,7 @@ const translations = {
         upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
         noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "前へ", next: "次へ", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
-        total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？",
+        total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？", notifyTitle: "AndreMusic", cancel: "キャンセル", accept: "確認", invalidAudio: "対応しているのは音声ファイル（mp3, wav, m4a, aac, ogg, flac）のみです。動画ファイルはブロックされました。", emptyLibrary: "ライブラリは空です。音声ファイルを取り込んでください。", noResults: "検索結果に一致する曲はありません。",
         navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ", navHelp: "[ショートカットキー] [H]",
         downloadAppBtn: "AndreMusicをダウンロード",
         
@@ -704,7 +897,7 @@ const translations = {
         upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
         noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "Back", next: "Next", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
-        total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?",
+        total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?", notifyTitle: "AndreMusic", cancel: "Cancel", accept: "Confirm", invalidAudio: "Only audio files (.mp3, .wav, .m4a, .aac, .ogg, .flac) are supported. Video files are blocked.", emptyLibrary: "Your library is empty. Import audio to get started.", noResults: "No tracks match your search.",
         navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact", navHelp: "[Keyboard Shortcuts] [H]",
         downloadAppBtn: "Download AndreMusic",
 
@@ -754,7 +947,7 @@ const translations = {
         upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
         noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "Sebelumnya", next: "Selanjutnya", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
-        total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?",
+        total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?", notifyTitle: "AndreMusic", cancel: "Batal", accept: "Konfirmasi", invalidAudio: "Hanya berkas audio (.mp3, .wav, .m4a, .aac, .ogg, .flac) yang didukung. Berkas video diblokir.", emptyLibrary: "Pustaka Anda kosong. Impor audio untuk memulai.", noResults: "Tidak ada lagu yang cocok dengan pencarian.",
         navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak", navHelp: "[Pintasan Kibor] [H]",
         downloadAppBtn: "Unduh AndreMusic",
 
@@ -1096,9 +1289,89 @@ function setLanguage(lang) {
     document.getElementById('playLabel').textContent = audio.paused ? t.play : t.pause;
 }
 
-function openModal(id) { document.getElementById(id).style.display = "block"; }
-function closeModal(id) { document.getElementById(id).style.display = "none"; }
-window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display = "none"; };
+
+let confirmResolver = null;
+let notificationSeq = 0;
+
+function notify(message, type = 'info', options = {}) {
+    const stack = document.getElementById('notification-stack');
+    if (!stack) return;
+    const t = translations[currentLang] || translations.en;
+    const title = options.title || t.notifyTitle || 'AndreMusic';
+    const life = Math.max(1800, options.duration || 4200);
+    const icons = { success: 'OK', warning: '!', error: 'X', info: 'i' };
+    const item = document.createElement('div');
+    const id = ++notificationSeq;
+    item.className = `site-notification ${type}`;
+    item.dataset.notificationId = id;
+    item.style.setProperty('--notif-life', `${life}ms`);
+    item.innerHTML = `
+      <div class="site-notification-icon">${icons[type] || icons.info}</div>
+      <div><div class="site-notification-title"></div><div class="site-notification-message"></div></div>
+      <button class="site-notification-close" type="button" aria-label="Close">[X]</button>
+      <div class="site-notification-bar"></div>`;
+    item.querySelector('.site-notification-title').textContent = title;
+    item.querySelector('.site-notification-message').textContent = message;
+    const close = () => {
+        item.style.animation = 'notifOut .14s ease-in forwards';
+        setTimeout(() => item.remove(), 140);
+    };
+    item.querySelector('.site-notification-close').addEventListener('click', close);
+    stack.appendChild(item);
+    setTimeout(close, life);
+}
+
+function customConfirm(message, options = {}) {
+    const modal = document.getElementById('confirm-modal');
+    const title = document.getElementById('confirm-title');
+    const copy = document.getElementById('confirm-message');
+    const accept = document.getElementById('confirm-accept');
+    const cancel = document.getElementById('confirm-cancel');
+    const close = document.getElementById('confirm-close');
+    const t = translations[currentLang] || translations.en;
+    title.textContent = options.title || t.notifyTitle || 'AndreMusic';
+    copy.textContent = message;
+    accept.textContent = options.acceptLabel || t.accept || 'Confirm';
+    cancel.textContent = options.cancelLabel || t.cancel || 'Cancel';
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => (options.focusCancel !== false ? cancel : accept).focus());
+
+    return new Promise(resolve => {
+        confirmResolver = resolve;
+        const finish = value => {
+            if (!confirmResolver) return;
+            const resolver = confirmResolver;
+            confirmResolver = null;
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            resolver(value);
+        };
+        accept.onclick = () => finish(true);
+        cancel.onclick = () => finish(false);
+        close.onclick = () => finish(false);
+        close.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finish(false); } };
+        modal.onclick = e => { if (e.target === modal) finish(false); };
+    });
+}
+
+function openModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = "block";
+    el.setAttribute("aria-hidden", "false");
+}
+function closeModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+}
+window.addEventListener("click", (e) => {
+    if (e.target.classList && e.target.classList.contains("modal") && e.target.id !== "confirm-modal") closeModal(e.target.id);
+});
 
 function renderLibrary() {
     const list = document.getElementById('trackList');
@@ -1132,6 +1405,13 @@ function renderLibrary() {
     });
 
     list.appendChild(fragment);
+    if (filtered.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'empty-library';
+        const t = translations[currentLang] || translations.en;
+        empty.textContent = library.length ? (t.noResults || 'No tracks match your search.') : (t.emptyLibrary || 'Your library is empty. Import audio to get started.');
+        list.appendChild(empty);
+    }
     document.getElementById('count').textContent = library.length;
 }
 
@@ -1187,6 +1467,7 @@ async function playTrack(index, isRandom = false) {
         await audio.play();
     } catch(e) {
         console.warn("User interaction needed or playback error: ", e);
+        notify("Unable to start this track. The audio file may be unavailable or blocked by the browser.", "error");
     }
 
     document.getElementById('nowTitle').textContent = cleanFileName(t.name);
@@ -1314,19 +1595,24 @@ async function handleFilesImport(files) {
 
     if (audioFiles.length === 0) {
         if (fileList.length > 0) {
-            alert("Only audio files (.mp3, .wav, .m4a, .aac, .ogg, .flac) are supported. Video files are blocked.");
+            notify((translations[currentLang] || translations.en).invalidAudio, "error");
         }
         return;
     }
 
     const db = await openDB();
+    let importedCount = 0;
     for (const f of audioFiles) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
         const req = store.add({ name: f.name, blob: f });
         req.onsuccess = (ev) => {
             library.push({ id: ev.target.result, name: f.name });
+            importedCount++;
             renderLibrary();
+            if (importedCount === audioFiles.length) {
+                notify(`${importedCount} track${importedCount === 1 ? '' : 's'} imported successfully.`, 'success');
+            }
         };
     }
 }
@@ -1358,7 +1644,8 @@ window.addEventListener('drop', (e) => {
 });
 
 document.getElementById('clearBtn').onclick = async () => {
-    if(confirm(translations[currentLang].confirm)) {
+    const confirmed = await customConfirm(translations[currentLang].confirm, { focusCancel: true });
+    if (confirmed) {
         const db = await openDB();
         await new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -1373,11 +1660,15 @@ document.getElementById('clearBtn').onclick = async () => {
         if(currentUrl) URL.revokeObjectURL(currentUrl);
         renderLibrary();
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+        notify(translations[currentLang].status, 'success');
     }
 };
 
 document.getElementById('playBtn').onclick = () => {
-    if (library.length === 0) return;
+    if (library.length === 0) {
+        notify((translations[currentLang] || translations.en).emptyLibrary || 'Your library is empty.', 'warning', { duration: 2600 });
+        return;
+    }
     initAudioContext();
     if (!audio.src || currentIndex === -1) {
         playTrack(0);
@@ -1428,6 +1719,8 @@ function toggleMode(newMode, btnId) {
         mode = newMode;
         document.getElementById(btnId).classList.add('active');
     }
+    const labels = { loopAllBtn: translations[currentLang].loopAll, loopOneBtn: translations[currentLang].loopOne, shuffleBtn: translations[currentLang].shuffle };
+    notify(mode === 'normal' ? translations[currentLang].status : `${labels[btnId]}: ON`, mode === 'normal' ? 'info' : 'success', { duration: 2200 });
 }
 
 document.getElementById('loopAllBtn').onclick = () => toggleMode('loopAll', 'loopAllBtn');
@@ -1440,7 +1733,7 @@ document.getElementById('muteBtn').onclick = function() {
 
 document.getElementById('contactForm').onsubmit = (e) => {
     e.preventDefault();
-    alert(translations[currentLang].contactSuccess);
+    notify(translations[currentLang].contactSuccess, "success");
     closeModal('contact-modal');
     e.target.reset();
 };
@@ -1476,7 +1769,15 @@ window.addEventListener('keydown', (e) => {
         case 'KeyU': document.getElementById('fileInput').click(); break;
         case 'KeyP': openModal('settings-modal'); break;
         case 'KeyH': openModal('help-modal'); break;
-        case 'Escape': document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); break;
+        case 'Escape':
+            if (document.getElementById('confirm-modal').style.display === 'block' && confirmResolver) {
+                document.getElementById('confirm-cancel').click();
+            } else {
+                document.querySelectorAll('.modal').forEach(m => {
+                    if (m.id !== 'confirm-modal') closeModal(m.id);
+                });
+            }
+            break;
         case 'Delete': document.getElementById('clearBtn').click(); break;
         case 'KeyJ': setLanguage('ja'); break;
         case 'KeyE': setLanguage('en'); break;
