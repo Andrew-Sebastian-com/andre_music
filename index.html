@@ -321,7 +321,135 @@
   .now-playing-display { background: var(--display-bg); border: 1px solid var(--display-border); padding: 20px; margin-bottom: 20px; text-align: center; }
   .song-title { font-size: 18px; font-weight: bold; color: var(--title-color); margin-bottom: 15px; word-break: break-all; min-height: 1.2em; }
 
-  #visualizer { width: 100%; height: 120px; background: var(--viz-bg); border-radius: 4px; margin-bottom: 15px; display: block; }
+  #visualizer { width: 100%; height: 180px; background: var(--viz-bg); border-radius: 4px; display: block; }
+
+  .audio-dashboard {
+    margin-bottom: 15px;
+    border: 1px solid var(--display-border);
+    background: var(--viz-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .audio-dashboard-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 9px;
+    border-bottom: 1px solid var(--display-border);
+    background: var(--player-frame-bg);
+    font: 11px/1.2 monospace;
+    font-weight: bold;
+    letter-spacing: .2px;
+  }
+  .audio-readouts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .audio-readout { white-space: nowrap; }
+  .audio-readout strong { color: var(--title-color); min-width: 42px; display: inline-block; text-align: right; }
+  .audio-spectrum-wrap { padding: 7px 7px 0; }
+  .audio-bands {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 7px;
+  }
+  .audio-band { min-width: 0; }
+  .audio-band-label {
+    display: flex; justify-content: space-between; gap: 8px;
+    margin-bottom: 3px; font: 10px/1.1 monospace; font-weight: bold;
+  }
+  .audio-meter {
+    height: 9px; border: 1px solid var(--border-gray); background: var(--input-bg); overflow: hidden;
+  }
+  .audio-meter > span {
+    display: block; height: 100%; width: 0%;
+    transform-origin: left center;
+    transform: scaleX(0);
+    background: var(--accent-blue);
+    will-change: transform;
+  }
+  .audio-level-row {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+    padding: 0 7px 7px; font: 10px/1.2 monospace; font-weight: bold;
+  }
+  .audio-level-track { height: 10px; border: 1px solid var(--border-gray); background: var(--input-bg); overflow: hidden; }
+  .audio-level-fill {
+    height: 100%; width: 0%; transform-origin: left center; transform: scaleX(0);
+    background: var(--accent-red); will-change: transform;
+  }
+  .audio-level-fill.safe { background: var(--accent-blue); }
+  .audio-level-fill.hot { background: var(--accent-red); }
+  .audio-volume-chip {
+    min-width: 50px; text-align: right;
+  }
+  @media (max-width: 600px) {
+    #visualizer { height: 132px; }
+    .audio-dashboard-head { grid-template-columns: 1fr; }
+    .audio-readouts { justify-content: space-between; gap: 6px; }
+    .audio-bands { gap: 4px; }
+  }
+
+  /* Lightweight visual layer: transform/opacity only, so it stays cheap on the compositor. */
+  .viz-shell {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    isolation: isolate;
+  }
+  .viz-shell #visualizer { margin-bottom: 0; }
+  .viz-sheen {
+    position: absolute;
+    inset: -30% auto -30% -35%;
+    width: 22%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+    transform: translateX(-220%) skewX(-18deg);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+  }
+  .now-playing-display { position: relative; overflow: hidden; }
+  .now-playing-display::before {
+    content: '';
+    position: absolute;
+    inset: 12% 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,102,204,.16), transparent 68%);
+    transform: scale(.92);
+    opacity: .35;
+    pointer-events: none;
+  }
+  .now-playing-display > * { position: relative; z-index: 1; }
+  .now-playing-display.is-playing::before {
+    animation: ambientPulse var(--motion-speed, 3.2s) ease-in-out infinite;
+  }
+  .now-playing-display.is-playing .viz-sheen {
+    opacity: .75;
+    animation: vizSheen var(--motion-sheen, 4.6s) ease-in-out infinite;
+  }
+  .song-title {
+    position: relative;
+    transition: transform .18s ease, text-shadow .18s ease;
+  }
+  .now-playing-display.is-playing .song-title {
+    animation: titleFloat var(--motion-speed, 3.2s) ease-in-out infinite;
+  }
+  .now-playing-display.is-playing #visualizer {
+    filter: saturate(1.08);
+  }
+  @keyframes ambientPulse {
+    0%, 100% { transform: scale(.92); opacity: .24; }
+    50% { transform: scale(1); opacity: .48; }
+  }
+  @keyframes vizSheen {
+    0%, 24% { transform: translateX(-220%) skewX(-18deg); }
+    46%, 70% { transform: translateX(520%) skewX(-18deg); }
+    100% { transform: translateX(520%) skewX(-18deg); }
+  }
+  @keyframes titleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-1px); }
+  }
+  body.perf-low .decorative-motion { animation: none !important; }
 
   .timer-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
   input[type=range] { width: 100%; cursor: pointer; accent-color: var(--accent-blue); }
@@ -613,6 +741,294 @@
     *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   }
 
+
+
+  /* --- UX REVAMP: keep the retro theme, reduce manual work --- */
+  .ux-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .btn-icon { min-width:36px; padding:6px 9px; }
+  .shortcut-hint { font-size:10px; opacity:.58; margin-left:4px; }
+  .search-container { display:flex; gap:6px; align-items:center; }
+  .search-input { flex:1 1 auto; }
+  .search-clear { min-width:34px; padding:6px 8px; opacity:.72; }
+  .search-clear[hidden] { display:none; }
+  .sidebar-tools { display:flex; gap:6px; padding:7px 8px; border-bottom:1px solid var(--border-gray); background:var(--sidebar-bg); }
+  .sidebar-tools .btn { flex:1 1 0; }
+  .library-summary { font-size:10px; opacity:.7; padding:6px 10px; border-bottom:1px dotted var(--border-gray); display:flex; justify-content:space-between; gap:8px; }
+  .track-item { position:relative; transition:background .14s ease, transform .12s ease, border-color .14s ease; }
+  .track-item:active { transform:translateX(2px); }
+  .track-item.active::after { content:'▶'; margin-left:5px; color:var(--accent-red); font-size:9px; animation:uxPulse 1.4s ease-in-out infinite; }
+  @keyframes uxPulse { 0%,100%{opacity:.45} 50%{opacity:1} }
+  .now-playing-display { position:relative; overflow:hidden; }
+  .now-playing-display::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); transform:translateX(-120%); opacity:0; }
+  .now-playing-display.is-playing::before { opacity:.35; animation:uxSweep var(--motion-sheen,6.8s) linear infinite; }
+  @keyframes uxSweep { to { transform:translateX(120%); } }
+  .song-meta { display:flex; justify-content:center; align-items:center; gap:7px; flex-wrap:wrap; margin:-3px 0 11px; font:10px monospace; opacity:.68; }
+  .song-meta-chip { padding:2px 6px; border:1px solid var(--border-gray); background:var(--input-bg); border-radius:2px; }
+  .quick-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin:8px 0 2px; }
+  .quick-actions .btn { width:100%; }
+  .progress-wrap { position:relative; }
+  .progress-shortcuts { display:flex; justify-content:space-between; gap:8px; font:9px monospace; opacity:.5; margin-top:3px; }
+  .volume-container { flex:1 1 220px; }
+  .volume-label { min-width:45px; font:10px monospace; opacity:.7; }
+  .auto-badge { display:inline-flex; align-items:center; gap:5px; font:10px monospace; padding:4px 7px; border:1px solid var(--border-gray); background:var(--status-bg); }
+  .auto-badge::before { content:'●'; color:#00aa55; font-size:8px; }
+  #loading-overlay { will-change:opacity; }
+  #loading-overlay > img { max-width:80vw; height:auto !important; }
+  @media (max-width:700px) {
+    .quick-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .sidebar-tools { flex-wrap:wrap; }
+    .sidebar-tools .btn { flex:1 1 45%; }
+    .shortcut-hint { display:none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track-item.active::after, .now-playing-display.is-playing::before { animation:none !important; }
+  }
+
+
+
+  /* UI declutter: keep primary playback obvious, move secondary actions behind More. */
+  .primary-controls { display:flex; justify-content:center; align-items:center; gap:8px; margin:12px 0 8px; }
+  .primary-controls .btn { min-width:48px; }
+  .primary-controls .btn-primary { min-width:118px; font-size:13px; }
+  .btn-secondary { font-size:14px; padding-inline:14px; }
+  .compact-tools { display:flex; align-items:center; justify-content:center; gap:8px; margin:4px 0 10px; flex-wrap:wrap; }
+  .compact-tools .volume-container { flex:0 1 430px; min-width:240px; margin:0; }
+  .btn-quiet { padding:4px 9px; font-size:10px; }
+  .focus-quick { min-width:78px; }
+  .more-controls { margin:4px auto 0; width:min(720px,100%); }
+  .more-controls summary { list-style:none; cursor:pointer; text-align:center; }
+  .more-controls summary::-webkit-details-marker { display:none; }
+  .more-toggle { display:block; width:100%; padding:6px 10px; font-size:11px; opacity:.82; }
+  .more-controls[open] .more-toggle { color:var(--accent-red); }
+  .more-controls-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:7px 0 2px; }
+  .more-controls-grid .btn { width:100%; }
+  @media (max-width:700px) {
+    .primary-controls .btn-primary { min-width:104px; }
+    .compact-tools .volume-container { min-width:min(100%,280px); }
+    .more-controls-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+
+  /* Focus mode: listening-first workspace with a fixed bottom controller dock. */
+  body.focus-mode { overflow-x: hidden; overflow-y: auto; }
+  body.focus-mode .app { width: 100%; max-width: none; margin: 0; min-height: 100vh; border: 0; box-shadow: none; }
+  body.focus-mode .logo-header,
+  body.focus-mode > .app > header,
+  body.focus-mode .sidebar,
+  body.focus-mode .status-bar,
+  body.focus-mode .legal-nav,
+  body.focus-mode footer,
+  body.focus-mode .app > div[style*="text-align: center"] { display: none !important; }
+  body.focus-mode .container { display: block; min-height: 100vh; }
+  body.focus-mode .main-player { min-height: 100vh; min-height: 100dvh; padding: clamp(10px, 2vw, 24px); background: var(--bg-main); display:flex; align-items:center; justify-content:center; }
+  body.focus-mode .player-frame { width: min(1100px, 100%); padding: clamp(10px, 2vw, 22px); margin: 0 auto 88px; box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+  body.focus-mode .now-playing-display { padding: clamp(14px, 3vw, 28px); }
+  body.focus-mode .song-title { font-size: clamp(22px, 4vw, 42px); margin-bottom: 14px; }
+  body.focus-mode .audio-dashboard { min-height: clamp(260px, 42vh, 470px); display:flex; flex-direction:column; justify-content:center; }
+  body.focus-mode .audio-spectrum-wrap { min-height: clamp(170px, 28vh, 300px); }
+  body.focus-mode .focus-dock {
+    position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    z-index: 25000; width: min(980px, calc(100vw - 20px));
+    display: grid; grid-template-columns: auto minmax(120px,1fr) auto; align-items:center; gap:10px;
+    padding: 9px 10px; background: color-mix(in srgb, var(--app-bg) 92%, transparent);
+    border: 1px solid var(--border-gray); box-shadow: 0 8px 28px rgba(0,0,0,.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  body:not(.focus-mode) .focus-dock { display:none; }
+  .focus-dock .dock-main { display:flex; justify-content:center; align-items:center; gap:7px; min-width:0; }
+  .focus-dock .dock-main .btn { min-width:44px; }
+  .focus-dock .dock-progress { min-width:0; display:grid; grid-template-columns:auto 1fr auto; gap:7px; align-items:center; font:10px monospace; }
+  .focus-dock .dock-volume { display:flex; align-items:center; gap:6px; min-width:150px; }
+  .focus-dock .dock-volume input[type=range] { width:100px; }
+  .focus-exit { margin-left:auto; }
+  #focusModeBtn.active { background: var(--accent-red); color:#fff; border-color:var(--accent-red); }
+  @media (max-width: 760px) {
+    body.focus-mode .main-player { padding: 8px; align-items:flex-start; padding-top: max(8px, env(safe-area-inset-top)); }
+    body.focus-mode .player-frame { margin-bottom: 118px; }
+    body.focus-mode .audio-dashboard { min-height: 250px; }
+    body.focus-mode .audio-spectrum-wrap { min-height: 150px; }
+    body.focus-mode .focus-dock { grid-template-columns: 1fr; gap:7px; padding:8px; }
+    .focus-dock .dock-main { order:1; }
+    .focus-dock .dock-progress { order:2; }
+    .focus-dock .dock-volume { order:3; }
+    .focus-exit { position:absolute; top:5px; right:5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.focus-mode .focus-dock { backdrop-filter:none; -webkit-backdrop-filter:none; }
+  }
+
+
+/* Advanced settings */
+.settings-divider { border-top: 1px dotted var(--border-gray); margin: 3px 0; }
+.settings-section-title { font-weight: bold; color: var(--accent-red); font-size: 12px; letter-spacing: .02em; margin-top: 2px; }
+.settings-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.settings-label { display:block; font-weight:bold; font-size:11px; margin-bottom:4px; }
+.settings-check { display:flex; align-items:center; gap:8px; padding:7px 8px; border:1px solid var(--border-gray); background:var(--status-bg); font-size:11px; cursor:pointer; }
+.settings-check input { accent-color: var(--accent-blue); }
+.settings-actions { display:flex; justify-content:flex-end; }
+body.no-ui-motion .btn, body.no-ui-motion .track-item, body.no-ui-motion .site-notification { transition:none !important; animation:none !important; }
+body.ui-compact .player-frame { padding:10px; }
+body.ui-compact .now-playing-display { padding:11px; margin-bottom:9px; }
+body.ui-compact .control-group { margin:8px 0; gap:6px; }
+body.ui-compact .audio-dashboard { min-height:unset; }
+@media (max-width:700px) { .settings-grid { grid-template-columns:1fr; } }
+
+
+
+  /* --- Small-screen / small-window hardening --- */
+  :root {
+    --ui-gutter: clamp(8px, 2vw, 18px);
+    --control-height: 36px;
+  }
+  html, body { min-width: 0; overflow-x: hidden; }
+  .app, .container, .main-player, .player-frame, .now-playing-display,
+  .audio-dashboard, .audio-spectrum-wrap { min-width: 0; max-width: 100%; }
+  img, canvas, input, select, textarea { max-width: 100%; }
+  .audio-dashboard-head { gap: 8px; flex-wrap: wrap; }
+  .audio-readouts { display:flex; gap:8px; flex-wrap:wrap; min-width:0; }
+  .audio-readout { white-space:nowrap; }
+  .audio-bands { min-width:0; }
+  .progress-wrap { min-width:0; }
+
+  /* Laptop-sized windows and narrow desktop layouts. */
+  @media (max-width: 1100px) {
+    .app { width: calc(100vw - 14px); }
+    .container { grid-template-columns: 220px minmax(0,1fr); }
+    .main-player { padding: 12px; }
+    .player-frame { padding: 10px; }
+    .now-playing-display { padding: 12px; }
+    .audio-dashboard { padding: 10px; }
+    #visualizer { height: clamp(90px, 16vw, 128px); }
+    .primary-controls { margin: 8px 0 6px; }
+    .compact-tools { margin-bottom: 6px; }
+    .status-bar { margin-top: 8px; }
+    header { padding: 9px 12px; }
+    header > div:last-child { min-width:0; }
+    .ux-toolbar { width:100%; }
+    .ux-toolbar .btn, .ux-toolbar .btn-upload { min-width:0; }
+  }
+
+  /* Short windows: reduce vertical chrome before reducing control size. */
+  @media (max-height: 720px) and (min-width: 701px) {
+    .logo-header { min-height: 38px; padding: 4px 0; }
+    .logo-header .site-logo { height: 24px; }
+    header { padding: 7px 12px; gap: 7px; }
+    .main-player { padding-block: 7px; }
+    .player-frame { padding: 8px; }
+    .now-playing-display { padding: 10px; margin-bottom: 8px; }
+    .song-title { margin-bottom: 7px; font-size: clamp(15px, 2vw, 18px); }
+    .audio-dashboard { min-height:0 !important; }
+    .audio-dashboard-head { padding: 4px 6px; }
+    #visualizer { height: 80px; }
+    .audio-band { gap: 3px; }
+    .audio-level-row { margin-top: 4px; }
+    .progress-wrap { margin: 8px 0 !important; }
+    .progress-shortcuts { display:none; }
+    .primary-controls { margin: 5px 0; }
+    .compact-tools { margin: 4px 0; }
+    .more-controls { margin-top: 2px; }
+    .status-bar, .legal-nav, footer { margin-top: 5px; }
+  }
+
+  /* Phones / narrow windows: single-column flow with no accidental overflow. */
+  @media (max-width: 700px) {
+    body { font-size: 14px; }
+    .app { width:100%; max-width:none; }
+    header { padding: 8px var(--ui-gutter); }
+    .logo-area { width:100%; flex-wrap:wrap; row-gap:6px; }
+    .logo { font-size: clamp(18px, 6vw, 22px); }
+    .ux-toolbar { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:6px; width:100%; }
+    .ux-toolbar .auto-badge { grid-column:1/-1; justify-content:center; }
+    .ux-toolbar .btn, .ux-toolbar .btn-upload { width:100%; min-height:var(--control-height); }
+    .container { display:block; }
+    .sidebar { width:100%; }
+    .sidebar-tools { padding:6px; }
+    .library-summary { padding:5px 8px; }
+    .track-list { max-height:30vh !important; }
+    .main-player { padding:6px; }
+    .player-frame { padding:6px; border-width:1px; }
+    .now-playing-display { padding:8px; }
+    .song-meta { gap:4px; margin-bottom:7px; }
+    .song-meta-chip { padding:2px 5px; }
+    .audio-dashboard { padding:7px; }
+    .audio-dashboard-head { font-size:10px; padding:5px; }
+    .audio-readouts { width:100%; justify-content:space-between; }
+    .audio-spectrum-wrap { min-height:0 !important; }
+    #visualizer { height:clamp(74px, 19vw, 106px); }
+    .audio-bands { grid-template-columns:1fr !important; gap:5px; }
+    .audio-level-row { grid-template-columns:auto minmax(0,1fr) auto !important; gap:6px; font-size:9px; }
+    .progress-wrap { margin:10px 0 !important; }
+    .progress-shortcuts { display:none; }
+    .primary-controls { gap:6px; }
+    .primary-controls .btn { flex:1 1 0; min-width:0; }
+    .primary-controls .btn-primary { min-width:0; }
+    .compact-tools { align-items:stretch; }
+    .compact-tools .volume-container { min-width:0; width:100%; flex:1 1 100%; }
+    .compact-tools .focus-quick { width:100%; }
+    .volume-container { padding:4px 7px; }
+    .volume-container input[type=range] { width:min(44vw,180px); }
+    .more-controls-grid { gap:5px; }
+    .more-controls-grid .btn { min-width:0; }
+    .status-bar { width:100%; }
+    .modal-content { width:calc(100vw - 12px) !important; max-width:none !important; margin:6vh auto; }
+    .modal-scroll { max-height:58vh; }
+    #settings-modal .modal-content { margin:3vh auto; }
+  }
+
+  /* Very narrow phones / split-screen panes. */
+  @media (max-width: 420px) {
+    .ux-toolbar { grid-template-columns:1fr; }
+    .ux-toolbar .auto-badge { grid-column:auto; }
+    .lang-switcher { font-size:10px; }
+    .sidebar-tools { gap:5px; }
+    .sidebar-tools .btn { min-height:32px; }
+    .track-list { max-height:27vh !important; }
+    .audio-dashboard-head { align-items:flex-start; }
+    .audio-readouts { gap:4px; }
+    .audio-band-label { font-size:9px; }
+    .primary-controls { gap:4px; }
+    .primary-controls .btn-secondary { padding-inline:10px; }
+    .compact-tools { gap:5px; }
+    .volume-container { flex-wrap:wrap; justify-content:center; }
+    .volume-label { min-width:auto; }
+    .volume-container input[type=range] { width:60vw; max-width:220px; }
+    .more-controls-grid { grid-template-columns:1fr !important; }
+    .focus-dock .dock-main { flex-wrap:wrap; }
+    .focus-dock .dock-main .btn { flex:1 1 calc(33.333% - 6px); min-width:0; }
+  }
+
+  /* Tiny vertical space: preserve usability by hiding only secondary decoration. */
+  @media (max-height: 560px) {
+    .legal-nav, footer, .status-bar { display:none; }
+    .track-list { max-height:170px !important; }
+    .audio-dashboard-head { display:none; }
+    .audio-spectrum-wrap { margin-top:0; }
+    .audio-bands { gap:3px; }
+    .audio-level-row { margin-top:3px; }
+  }
+
+  /* Focus dock: reserve safe space and compress gracefully on small screens. */
+  body.focus-mode .main-player { padding-bottom: max(96px, calc(88px + env(safe-area-inset-bottom))); }
+  @media (max-width: 760px) {
+    body.focus-mode .main-player { padding-bottom: max(150px, calc(132px + env(safe-area-inset-bottom))); }
+    body.focus-mode .player-frame { width:100%; }
+    body.focus-mode .song-title { font-size:clamp(18px, 7vw, 30px); }
+  }
+  @media (max-width: 420px) {
+    body.focus-mode .main-player { padding-bottom: max(188px, calc(170px + env(safe-area-inset-bottom))); }
+    body.focus-mode .focus-dock { width:calc(100vw - 10px); }
+    body.focus-mode .dock-progress { grid-template-columns:38px minmax(0,1fr) 38px; }
+    body.focus-mode .dock-volume { min-width:0; flex-wrap:wrap; justify-content:center; }
+    body.focus-mode .dock-volume input[type=range] { width:56vw; max-width:200px; }
+  }
+
+  /* Settings remain scrollable on small devices and short windows. */
+  @media (max-width: 600px), (max-height: 700px) {
+    #settings-modal .modal-content { max-height:calc(100dvh - 20px); overflow:hidden; }
+    #settings-modal .modal-scroll { max-height:calc(100dvh - 95px); overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:12px; }
+    #settings-modal .settings-grid { gap:7px; }
+    #settings-modal .settings-check { min-height:36px; }
+    #settings-modal .search-input { min-height:36px; }
+  }
+
 </style>
 </head>
 <body data-theme="default">
@@ -651,10 +1067,13 @@
       </div>
     </div>
     <div style="display:flex; gap:10px; flex-wrap: wrap;">
-      <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
-      <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁</label>
-      <input id="fileInput" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac" multiple style="display:none" />
-      <button class="btn" id="clearBtn">Clear Library</button>
+      <div class="ux-toolbar">
+        <span class="auto-badge" id="uxAutoBadge">SMART UI</span>
+        <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
+        <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁 <span class="shortcut-hint">U</span></label>
+        <input id="fileInput" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac" multiple style="display:none" />
+        <button class="btn" id="clearBtn">Clear Library</button>
+      </div>
     </div>
   </header>
 
@@ -662,8 +1081,14 @@
     <aside class="sidebar">
       <div class="panel-header" id="label-playlist">♫ PLAYLIST LIBRARY</div>
       <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search track..." />
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search track..." aria-label="Search tracks" />
+        <button class="btn search-clear" id="searchClearBtn" type="button" hidden aria-label="Clear search">✕</button>
       </div>
+      <div class="sidebar-tools">
+        <button class="btn" id="sortBtn" type="button">A→Z</button>
+        <button class="btn" id="focusCurrentBtn" type="button">Current</button>
+      </div>
+      <div class="library-summary"><span id="librarySummary">0 tracks</span><span id="libraryHint">/ Search · U Import</span></div>
       <ul class="track-list" id="trackList"></ul>
     </aside>
 
@@ -671,26 +1096,93 @@
       <div class="player-frame">
         <div class="now-playing-display">
           <div class="song-title" id="nowTitle">No track selected</div>
-          <canvas id="visualizer"></canvas>
-          <div style="margin: 20px 0;">
+          <div class="song-meta" aria-live="polite">
+            <span class="song-meta-chip" id="trackIndexBadge">TRACK 0 / 0</span>
+            <span class="song-meta-chip" id="playStateBadge">READY</span>
+            <span class="song-meta-chip" id="modeBadge">NORMAL</span>
+          </div>
+          <div class="audio-dashboard decorative-motion">
+            <div class="audio-dashboard-head">
+              <span id="vizMonitorTitle">REAL-TIME AUDIO / FREQUENCY MONITOR</span>
+              <div class="audio-readouts">
+                <span class="audio-readout"><span id="vizPeakLabel">PEAK</span> <strong id="peakReadout">-∞ dB</strong></span>
+                <span class="audio-readout"><span id="vizRmsLabel">RMS</span> <strong id="rmsReadout">-∞ dB</strong></span>
+              </div>
+            </div>
+            <div class="audio-spectrum-wrap viz-shell">
+              <canvas id="visualizer"></canvas>
+              <span class="viz-sheen" aria-hidden="true"></span>
+            </div>
+            <div class="audio-bands" aria-label="Frequency bands">
+              <div class="audio-band">
+                <div class="audio-band-label"><span id="vizBassLabel">BASS</span><strong id="bassReadout">0%</strong></div>
+                <div class="audio-meter"><span id="bassMeter"></span></div>
+              </div>
+              <div class="audio-band">
+                <div class="audio-band-label"><span id="vizMidLabel">MID</span><strong id="midReadout">0%</strong></div>
+                <div class="audio-meter"><span id="midMeter"></span></div>
+              </div>
+              <div class="audio-band">
+                <div class="audio-band-label"><span id="vizTrebleLabel">TREBLE</span><strong id="trebleReadout">0%</strong></div>
+                <div class="audio-meter"><span id="trebleMeter"></span></div>
+              </div>
+            </div>
+            <div class="audio-level-row">
+              <span id="vizAmpLabel">AMP / OUTPUT</span>
+              <div class="audio-level-track"><span id="levelMeter" class="audio-level-fill safe"></span></div>
+              <span id="volumeReadout" class="audio-volume-chip">100%</span>
+            </div>
+          </div>
+          <div class="progress-wrap" style="margin: 20px 0;">
             <div class="timer-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
-            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" />
+            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek through track" />
+            <div class="progress-shortcuts"><span id="seekHint">← / → skip</span><span id="playHint">Space play/pause</span></div>
           </div>
-          <div class="control-group">
-            <button class="btn" id="prevBtn">Back</button>
-            <button class="btn" id="playBtn" style="min-width:100px;"><span id="playLabel">PLAY</span></button>
-            <button class="btn" id="nextBtn">Next</button>
-            <button class="btn" id="randomBtn">Random 🎲</button>
+          <div class="primary-controls">
+            <button class="btn btn-secondary" id="prevBtn" title="Previous track">◀</button>
+            <button class="btn btn-primary" id="playBtn"><span id="playLabel">PLAY</span></button>
+            <button class="btn btn-secondary" id="nextBtn" title="Next track">▶</button>
           </div>
+          <div class="compact-tools">
+            <div class="volume-container">
+              <button class="btn btn-quiet" id="muteBtn" title="Mute / unmute">Mute</button>
+              <span class="volume-label" id="volumeLabel">VOL 100%</span>
+              <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume" />
+            </div>
+            <button class="btn focus-quick" id="focusModeBtn" type="button" aria-pressed="false">Focus</button>
+          </div>
+          <details class="more-controls">
+            <summary class="btn more-toggle" id="moreControls">More controls</summary>
+            <div class="more-controls-grid">
+              <button class="btn" id="randomBtn">Random 🎲</button>
+              <button class="btn" id="rewind10Btn" type="button">↶ 10s</button>
+              <button class="btn" id="forward10Btn" type="button">10s ↷</button>
+              <button class="btn" id="loopAllBtn">Loop All</button>
+              <button class="btn" id="loopOneBtn">Loop One</button>
+              <button class="btn" id="shuffleBtn">Shuffle</button>
+              <button class="btn" id="resetVolumeBtn" type="button">Reset volume</button>
+              <button class="btn" id="focusPlayerBtn" type="button">Focus player</button>
+            </div>
+          </details>
+      </div>
+      <div class="focus-dock" id="focusDock" aria-label="Focus mode controller">
+        <div class="dock-main">
+          <button class="btn" id="dockPrevBtn" type="button" aria-label="Previous track">◀</button>
+          <button class="btn" id="dockPlayBtn" type="button" aria-label="Play or pause"><span id="dockPlayLabel">PLAY</span></button>
+          <button class="btn" id="dockNextBtn" type="button" aria-label="Next track">▶</button>
+          <button class="btn" id="dockRewindBtn" type="button" aria-label="Rewind 10 seconds">−10</button>
+          <button class="btn" id="dockForwardBtn" type="button" aria-label="Forward 10 seconds">+10</button>
+          <button class="btn focus-exit" id="dockExitBtn" type="button">Exit</button>
         </div>
-        <div class="control-group">
-          <button class="btn" id="loopAllBtn">Loop All</button>
-          <button class="btn" id="loopOneBtn">Loop One</button>
-          <button class="btn" id="shuffleBtn">Shuffle</button>
-          <div class="volume-container">
-            <button class="btn" id="muteBtn" style="padding: 2px 8px; font-size: 11px;">Mute</button>
-            <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" title="Volume" />
-          </div>
+        <div class="dock-progress">
+          <span id="dockCurrentTime">0:00</span>
+          <input id="dockSeek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Focus mode seek" />
+          <span id="dockDuration">0:00</span>
+        </div>
+        <div class="dock-volume">
+          <button class="btn" id="dockMuteBtn" type="button">Mute</button>
+          <span id="dockVolumeReadout">VOL 100%</span>
+          <input id="dockVolumeSlider" type="range" min="0" max="1" step="0.01" value="1" aria-label="Focus mode volume" />
         </div>
       </div>
       <div class="status-bar">
@@ -706,11 +1198,6 @@
     <a onclick="openModal('help-modal')" id="nav-help" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
   </nav>
   <footer>Copyright &copy; 2026 AndrewSudiro</footer>
-  <div style="text-align: center; margin-bottom: 15px;">
-    <a href="files/AndreMusic.zip" download="AndreMusic.zip">
-      <button class="btn" id="downloadAppBtn">Download AndreMusic</button>
-    </a>
-  </div>
 </div>
 
 
@@ -789,6 +1276,65 @@
             <option value="auto" id="opt-preload-auto">Fast Buffering (Preload Audio Stream - Desktop Recommended)</option>
           </select>
         </div>
+
+        <div class="settings-divider"></div>
+        <div class="settings-section-title" id="lbl-viz-custom">Visualizer Customization</div>
+
+        <div class="settings-grid">
+          <div>
+            <label class="settings-label" id="lbl-viz-style">Visualizer Style:</label>
+            <select id="visualizerStyle" class="search-input" onchange="savePerfSettings()">
+              <option value="spectrum" id="opt-viz-style-spectrum">Spectrum Bars</option>
+              <option value="mirror" id="opt-viz-style-mirror">Mirror Spectrum</option>
+              <option value="scope" id="opt-viz-style-scope">Oscilloscope</option>
+            </select>
+          </div>
+          <div>
+            <label class="settings-label" id="lbl-fft-size">Frequency Detail:</label>
+            <select id="fftSizeSetting" class="search-input" onchange="savePerfSettings()">
+              <option value="128" id="opt-fft-128">Low (fast)</option>
+              <option value="256" id="opt-fft-256">Standard</option>
+              <option value="512" id="opt-fft-512">High</option>
+              <option value="1024" id="opt-fft-1024">Very High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div>
+            <label class="settings-label"><span id="lbl-viz-sensitivity">Visualizer Sensitivity:</span> <output id="vizSensitivityValue">100%</output></label>
+            <input id="vizSensitivity" type="range" min="50" max="160" step="5" value="100" />
+          </div>
+          <div>
+            <label class="settings-label"><span id="lbl-viz-smoothing">Signal Smoothing:</span> <output id="vizSmoothingValue">78%</output></label>
+            <input id="vizSmoothing" type="range" min="0" max="95" step="5" value="78" />
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div>
+            <label class="settings-label" id="lbl-canvas-dpr">Canvas Quality:</label>
+            <select id="canvasDprSetting" class="search-input" onchange="savePerfSettings()">
+              <option value="1" id="opt-dpr-1">Eco (lowest GPU use)</option>
+              <option value="1.5" id="opt-dpr-15">Balanced</option>
+              <option value="2" id="opt-dpr-2">Sharp (up to 2×)</option>
+            </select>
+          </div>
+          <div>
+            <label class="settings-label" id="lbl-ui-density">Player Density:</label>
+            <select id="uiDensity" class="search-input" onchange="savePerfSettings()">
+              <option value="compact" id="opt-density-compact">Compact</option>
+              <option value="comfortable" id="opt-density-comfortable">Comfortable</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="settings-check"><input id="vizGlowSetting" type="checkbox" checked> <span id="lbl-viz-glow">Visualizer highlight</span></label>
+        <label class="settings-check"><input id="uiMotionSetting" type="checkbox" checked> <span id="lbl-ui-motion">Interface motion</span></label>
+
+        <div class="settings-actions">
+          <button class="btn" id="resetPerfBtn" type="button">Reset performance settings</button>
+        </div>
       </div>
 
     </div>
@@ -825,7 +1371,46 @@
     </div>
   </div>
 </div>
-<div id="contact-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-contact">Contact Inquiry</span><span class="close-btn" onclick="closeModal('contact-modal')">[X]</span></div><form id="contactForm" class="contact-form"><input type="text" id="contact-name" placeholder="Your Name" required><input type="email" id="contact-email" placeholder="Your Email Address" required><textarea id="contact-message" placeholder="Your Message..." required></textarea><button type="submit" class="btn btn-upload" id="contact-send">Send Message</button></form><p style="text-align:center; font-size:11px; margin-top:15px; color:#555;">YouTube: <a href="https://www.youtube.com/@AndrewSudiro" target="_blank">@AndrewSudiro</a></p></div></div>
+<div id="contact-modal" class="modal">
+  <div class="modal-content contact-modal-card">
+    <div class="modal-header">
+      <span id="title-contact">Contact Inquiry</span>
+      <span class="close-btn" onclick="closeModal('contact-modal')">[X]</span>
+    </div>
+    <p class="contact-intro" id="contact-intro">Send a message directly to Andrew. You will receive a confirmation when the message is accepted.</p>
+    <form id="contactForm" class="contact-form" novalidate>
+      <div class="contact-field-row">
+        <label class="contact-field"><span id="contact-name-label">Name</span><input type="text" id="contact-name" name="name" autocomplete="name" placeholder="Your Name" required maxlength="120"></label>
+        <label class="contact-field"><span id="contact-email-label">Email</span><input type="email" id="contact-email" name="email" autocomplete="email" placeholder="Your Email Address" required maxlength="200"></label>
+      </div>
+      <label class="contact-field"><span id="contact-subject-label">Subject</span><input type="text" id="contact-subject" name="subject" placeholder="What is this about?" maxlength="160"></label>
+      <label class="contact-field"><span id="contact-message-label">Message</span><textarea id="contact-message" name="message" placeholder="Write your message..." required maxlength="5000"></textarea></label>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+      <input type="hidden" name="_subject" value="AndreMusic Contact Message">
+      <input type="hidden" name="_template" value="table">
+      <div class="contact-actions">
+        <span id="contact-status" class="contact-status" role="status" aria-live="polite"></span>
+        <button type="submit" class="btn btn-upload" id="contact-send">Send Message</button>
+      </div>
+    </form>
+    <p class="contact-footer" id="contact-footer">Messages are delivered to <strong>andrew.sbstian@gmail.com</strong> via the configured form service.</p>
+  </div>
+</div>
+
+<style>
+.contact-modal-card { width:min(92vw, 680px); }
+.contact-intro { margin:0 0 16px; color:var(--text-color); font-size:12px; line-height:1.55; }
+.contact-field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.contact-field { display:flex; flex-direction:column; gap:5px; font-size:11px; font-weight:bold; }
+.contact-field input, .contact-field textarea { width:100%; box-sizing:border-box; }
+.contact-field textarea { min-height:150px; resize:vertical; }
+.contact-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:4px; }
+.contact-status { min-height:18px; font-size:11px; line-height:1.4; }
+.contact-status.success { color:#008844; font-weight:bold; }
+.contact-status.error { color:var(--accent-red); font-weight:bold; }
+.contact-footer { text-align:center; font-size:10px; margin:14px 0 0; color:#777; }
+@media (max-width:600px) { .contact-field-row { grid-template-columns:1fr; } .contact-actions { align-items:stretch; flex-direction:column; } .contact-actions .btn { width:100%; } }
+</style>
 
 <audio id="audio" preload="metadata"></audio>
 
@@ -847,7 +1432,7 @@ const translations = {
         upload: "音楽を取り込む 📁", clear: "ライブラリ消去", playlist: "♫ プレイリスト ライブラリ", searchPh: "🔍 曲名を検索...",
         noTrack: "曲が選択されていません", play: "再生", pause: "一時停止", back: "前へ", next: "次へ", random: "ランダム再生 🎲",
         loopAll: "全曲ループ", loopOne: "１曲ループ", shuffle: "シャッフル", mute: "消音",
-        total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？", notifyTitle: "AndreMusic", cancel: "キャンセル", accept: "確認", invalidAudio: "対応しているのは音声ファイル（mp3, wav, m4a, aac, ogg, flac）のみです。動画ファイルはブロックされました。", emptyLibrary: "ライブラリは空です。音声ファイルを取り込んでください。", noResults: "検索結果に一致する曲はありません。",
+        total: "合計トラック数", status: "システム正常", confirm: "ライブラリをすべて削除しますか？", notifyTitle: "AndreMusic", cancel: "キャンセル", accept: "確認", invalidAudio: "対応しているのは音声ファイル（mp3, wav, m4a, aac, ogg, flac）のみです。動画ファイルはブロックされました。", emptyLibrary: "ライブラリは空です。音声ファイルを取り込んでください。", noResults: "検索結果に一致する曲はありません。", emptyPlaylist: "プレイリストは空です。ファイルから音楽をインポートしてください。",
         navTos: "利用規約", navPrivacy: "プライバシーポリシー", navContact: "お問い合わせ", navHelp: "[ショートカットキー] [H]",
         downloadAppBtn: "AndreMusicをダウンロード",
         
@@ -876,6 +1461,7 @@ const translations = {
         lblPreload: "オーディオ 事前読み込みモード:",
         preloadMetadata: "データセーバー (メタデータのみ事前読み込み - モバイル推奨)",
         preloadAuto: "高速バッファリング (音声ストリーム事前読み込み - PC推奨)",
+        vizCustom: "ビジュアライザー カスタマイズ", vizStyle: "ビジュアライザー スタイル:", vizStyleSpectrum: "スペクトラム バー", vizStyleMirror: "ミラー スペクトラム", vizStyleScope: "オシロスコープ", fftSize: "周波数ディテール:", fft128: "低 (高速)", fft256: "標準", fft512: "高", fft1024: "非常に高", vizSensitivity: "感度:", vizSmoothing: "信号スムージング:", canvasDpr: "キャンバス画質:", dpr1: "エコ (最低GPU負荷)", dpr15: "バランス", dpr2: "シャープ (最大2×)", uiDensity: "プレイヤー密度:", densityCompact: "コンパクト", densityComfortable: "快適", vizGlow: "ビジュアライザー強調", uiMotion: "インターフェース アニメーション", resetPerf: "パフォーマンス設定をリセット",
 
         navHelpTitle: "ショートカットキー一覧",
         hkPlay: "再生 / 一時停止", hkNext: "次の曲", hkPrev: "前の曲", hkVol: "音量 上げ / 下げ",
@@ -885,6 +1471,7 @@ const translations = {
 
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
         contactSuccess: "ありがとうございます！メッセージを受け付けました。",
+        uxAutoBadge: "スマートUI", trackLabel: "TRACK", current: "現在", tracks: "曲", hint: "/ 検索 · U インポート", vizMonitorTitle: "リアルタイム オーディオ / 周波数モニター", vizPeakLabel: "ピーク", vizRmsLabel: "RMS", vizBassLabel: "低音", vizMidLabel: "中音", vizTrebleLabel: "高音", vizAmpLabel: "アンプ / 出力", seekHint: "← / → スキップ", playHint: "Space 再生/一時停止", moreControls: "その他の操作", rewind10: "↶ 10秒", forward10: "10秒 ↷", resetVolume: "音量をリセット", focusPlayer: "プレーヤーにフォーカス", focus: "フォーカス", exit: "終了", ready: "待機", playing: "再生中", normal: "通常", contactIntro: "Andrewへ直接メッセージを送信できます。受信が完了すると確認が表示されます。", nameLabel: "名前", emailLabel: "メール", subjectLabel: "件名", messageLabel: "メッセージ", contactFooter: "メッセージは設定されたフォームサービスを通じて andrew.sbstian@gmail.com に配信されます。", langJapanese: "日本語", langEnglish: "英語", langIndonesian: "インドネシア語",
         tosTitle: "利用規約",
         tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。<br><br>プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。<br><br>プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。<br><br>このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
         privacyTitle: "プライバシーポリシー",
@@ -897,7 +1484,7 @@ const translations = {
         upload: "Import Music 📁", clear: "Clear Library", playlist: "♫ PLAYLIST LIBRARY", searchPh: "🔍 Search track...",
         noTrack: "No track selected", play: "PLAY", pause: "PAUSE", back: "Back", next: "Next", random: "Random Song 🎲",
         loopAll: "Loop All", loopOne: "Loop One", shuffle: "Shuffle", mute: "Mute",
-        total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?", notifyTitle: "AndreMusic", cancel: "Cancel", accept: "Confirm", invalidAudio: "Only audio files (.mp3, .wav, .m4a, .aac, .ogg, .flac) are supported. Video files are blocked.", emptyLibrary: "Your library is empty. Import audio to get started.", noResults: "No tracks match your search.",
+        total: "Total Tracks", status: "System Ready", confirm: "Delete all music from library?", notifyTitle: "AndreMusic", cancel: "Cancel", accept: "Confirm", invalidAudio: "Only audio files (.mp3, .wav, .m4a, .aac, .ogg, .flac) are supported. Video files are blocked.", emptyLibrary: "Your library is empty. Import audio to get started.", noResults: "No tracks match your search.", emptyPlaylist: "You have an empty playlist. Import music from your files.",
         navTos: "Terms of Service", navPrivacy: "Privacy Policy", navContact: "Contact", navHelp: "[Keyboard Shortcuts] [H]",
         downloadAppBtn: "Download AndreMusic",
 
@@ -926,6 +1513,7 @@ const translations = {
         lblPreload: "Audio Preload Mode:",
         preloadMetadata: "Data Saver (Preload Metadata Only - Mobile Recommended)",
         preloadAuto: "Fast Buffering (Preload Audio Stream - Desktop Recommended)",
+        vizCustom: "Visualizer Customization", vizStyle: "Visualizer Style:", vizStyleSpectrum: "Spectrum Bars", vizStyleMirror: "Mirror Spectrum", vizStyleScope: "Oscilloscope", fftSize: "Frequency Detail:", fft128: "Low (fast)", fft256: "Standard", fft512: "High", fft1024: "Very High", vizSensitivity: "Sensitivity:", vizSmoothing: "Signal Smoothing:", canvasDpr: "Canvas Quality:", dpr1: "Eco (lowest GPU use)", dpr15: "Balanced", dpr2: "Sharp (up to 2×)", uiDensity: "Player Density:", densityCompact: "Compact", densityComfortable: "Comfortable", vizGlow: "Visualizer highlight", uiMotion: "Interface motion", resetPerf: "Reset performance settings",
 
         navHelpTitle: "Keyboard Shortcuts",
         hkPlay: "Play / Pause", hkNext: "Next Track", hkPrev: "Previous Track", hkVol: "Volume Up / Down",
@@ -935,6 +1523,7 @@ const translations = {
 
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
         contactSuccess: "Thank you! Your message has been received.",
+        uxAutoBadge: "SMART UI", trackLabel: "TRACK", current: "Current", tracks: "tracks", hint: "/ Search · U Import", vizMonitorTitle: "REAL-TIME AUDIO / FREQUENCY MONITOR", vizPeakLabel: "PEAK", vizRmsLabel: "RMS", vizBassLabel: "BASS", vizMidLabel: "MID", vizTrebleLabel: "TREBLE", vizAmpLabel: "AMP / OUTPUT", seekHint: "← / → skip", playHint: "Space play/pause", moreControls: "More controls", rewind10: "↶ 10s", forward10: "10s ↷", resetVolume: "Reset volume", focusPlayer: "Focus player", focus: "Focus", exit: "Exit", ready: "READY", playing: "PLAYING", normal: "NORMAL", contactIntro: "Send a message directly to Andrew. You will receive a confirmation when the message is accepted.", nameLabel: "Name", emailLabel: "Email", subjectLabel: "Subject", messageLabel: "Message", contactFooter: "Messages are delivered to andrew.sbstian@gmail.com via the configured form service.", langJapanese: "Japanese", langEnglish: "English", langIndonesian: "Indonesian",
         tosTitle: "Terms of Service",
         tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:<br><br>The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.<br><br>To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.<br><br>While the platform offers deep aesthetic and technical customization, it strictly prohibits Commercial Atmosphere Usage. The interface, its high-resolution audio processing, and its unique visualizer suites are designed exclusively for private enjoyment and may not be used to provide background music for retail, public business, or commercial spaces. By restricting usage to personal, non-commercial contexts, the platform preserves its identity as a powerful, private tool dedicated to the individual music enthusiast rather than a public broadcasting utility.</p>`,
         privacyTitle: "Privacy Policy",
@@ -947,7 +1536,7 @@ const translations = {
         upload: "Impor Musik 📁", clear: "Hapus Pustaka", playlist: "♫ PERPUSTAKAAN DAFTAR PUTAR", searchPh: "🔍 Cari lagu...",
         noTrack: "Tidak ada lagu terpilih", play: "PUTAR", pause: "JEDA", back: "Sebelumnya", next: "Selanjutnya", random: "Lagu Acak 🎲",
         loopAll: "Ulang Semua", loopOne: "Ulang Satu", shuffle: "Acak", mute: "Bisukan",
-        total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?", notifyTitle: "AndreMusic", cancel: "Batal", accept: "Konfirmasi", invalidAudio: "Hanya berkas audio (.mp3, .wav, .m4a, .aac, .ogg, .flac) yang didukung. Berkas video diblokir.", emptyLibrary: "Pustaka Anda kosong. Impor audio untuk memulai.", noResults: "Tidak ada lagu yang cocok dengan pencarian.",
+        total: "Total Lagu", status: "Sistem Siap", confirm: "Hapus semua musik dari perpustakaan?", notifyTitle: "AndreMusic", cancel: "Batal", accept: "Konfirmasi", invalidAudio: "Hanya berkas audio (.mp3, .wav, .m4a, .aac, .ogg, .flac) yang didukung. Berkas video diblokir.", emptyLibrary: "Pustaka Anda kosong. Impor audio untuk memulai.", noResults: "Tidak ada lagu yang cocok dengan pencarian.", emptyPlaylist: "Daftar putar Anda kosong. Impor musik dari file Anda.",
         navTos: "Ketentuan Layanan", navPrivacy: "Kebijakan Privasi", navContact: "Kontak", navHelp: "[Pintasan Kibor] [H]",
         downloadAppBtn: "Unduh AndreMusic",
 
@@ -976,6 +1565,7 @@ const translations = {
         lblPreload: "Mode Pra-muat Audio:",
         preloadMetadata: "Hemat Data (Hanya Pra-muat Metadata - Disarankan Seluler)",
         preloadAuto: "Penyangga Cepat (Pra-muat Aliran Audio - Disarankan Komputer)",
+        vizCustom: "Kustomisasi Visualisator", vizStyle: "Gaya Visualisator:", vizStyleSpectrum: "Batang Spektrum", vizStyleMirror: "Spektrum Cermin", vizStyleScope: "Osiloskop", fftSize: "Detail Frekuensi:", fft128: "Rendah (cepat)", fft256: "Standar", fft512: "Tinggi", fft1024: "Sangat Tinggi", vizSensitivity: "Sensitivitas:", vizSmoothing: "Penghalusan Sinyal:", canvasDpr: "Kualitas Kanvas:", dpr1: "Hemat (GPU minimum)", dpr15: "Seimbang", dpr2: "Tajam (hingga 2×)", uiDensity: "Kepadatan Pemutar:", densityCompact: "Kompak", densityComfortable: "Nyaman", vizGlow: "Penyorotan visualisator", uiMotion: "Animasi antarmuka", resetPerf: "Atur ulang pengaturan kinerja",
 
         navHelpTitle: "Pintasan Kibor",
         hkPlay: "Putar / Jeda", hkNext: "Lagu Selanjutnya", hkPrev: "Lagu Sebelumnya", hkVol: "Volume Naik / Turun",
@@ -985,6 +1575,7 @@ const translations = {
 
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
         contactSuccess: "Terima kasih! Pesan Anda telah diterima.",
+        uxAutoBadge: "UI CERDAS", trackLabel: "LAGU", current: "Sekarang", tracks: "lagu", hint: "/ Cari · U Impor", vizMonitorTitle: "MONITOR AUDIO / FREKUENSI REAL-TIME", vizPeakLabel: "PUNCAK", vizRmsLabel: "RMS", vizBassLabel: "BASS", vizMidLabel: "MID", vizTrebleLabel: "TREBLE", vizAmpLabel: "AMP / OUTPUT", seekHint: "← / → lewati", playHint: "Space putar/jeda", moreControls: "Kontrol lainnya", rewind10: "↶ 10 dtk", forward10: "10 dtk ↷", resetVolume: "Atur ulang volume", focusPlayer: "Fokus ke pemutar", focus: "Fokus", exit: "Keluar", ready: "SIAP", playing: "DIPUTAR", normal: "NORMAL", contactIntro: "Kirim pesan langsung ke Andrew. Anda akan menerima konfirmasi saat pesan diterima.", nameLabel: "Nama", emailLabel: "Email", subjectLabel: "Subjek", messageLabel: "Pesan", contactFooter: "Pesan dikirim ke andrew.sbstian@gmail.com melalui layanan formulir yang dikonfigurasi.", langJapanese: "Jepang", langEnglish: "Inggris", langIndonesian: "Indonesia",
         tosTitle: "Ketentuan Layanan",
         tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:<br><br>Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.<br><br>Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.<br><br>Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, platform ini secara tegas melarang Penggunaan Atmosfer Komersial. Antarmuka, pemrosesan audio resolusi tinggi, dan rangkaian visualisasi uniknya dirancang khusus untuk kenikmatan pribadi dan tidak boleh digunakan untuk menyediakan musik latar untuk ritel, bisnis publik, atau ruang komersial. Dengan membatasi penggunaan pada konteks pribadi dan non-komersial, platform ini mempertahankan identitasnya sebagai alat pribadi yang ampuh yang didedikasikan untuk penggemar musik individu, bukan sebagai utilitas penyiaran publik.</p>`,
         privacyTitle: "Kebijakan Privasi",
@@ -1008,6 +1599,7 @@ let audioCtx = null;
 let analyser = null;
 let mediaSource = null;
 let dataArray = null;
+let timeArray = null;
 let animFrameId = null;
 
 const canvas = document.getElementById('visualizer');
@@ -1017,12 +1609,37 @@ let perfSettings = {
     preset: 'auto',
     fps: 60,
     bgPause: true,
-    preload: 'metadata'
+    preload: 'metadata',
+    fftSize: 512,
+    sensitivity: 1,
+    smoothing: 0.78,
+    style: 'spectrum',
+    canvasDpr: 2,
+    density: 'comfortable',
+    glow: true,
+    uiMotion: true
 };
+
+function normalizePerfSettings() {
+    perfSettings.preset = ['auto','high','balanced','low'].includes(perfSettings.preset) ? perfSettings.preset : 'auto';
+    perfSettings.fps = [0,30,60].includes(Number(perfSettings.fps)) ? Number(perfSettings.fps) : 60;
+    perfSettings.bgPause = perfSettings.bgPause !== false;
+    perfSettings.preload = ['metadata','auto'].includes(perfSettings.preload) ? perfSettings.preload : 'metadata';
+    perfSettings.fftSize = [128,256,512,1024].includes(Number(perfSettings.fftSize)) ? Number(perfSettings.fftSize) : 512;
+    perfSettings.sensitivity = Math.max(0.5, Math.min(1.6, Number(perfSettings.sensitivity) || 1));
+    perfSettings.smoothing = Math.max(0, Math.min(0.95, Number(perfSettings.smoothing) || 0.78));
+    perfSettings.style = ['spectrum','mirror','scope'].includes(perfSettings.style) ? perfSettings.style : 'spectrum';
+    perfSettings.canvasDpr = [1,1.5,2].includes(Number(perfSettings.canvasDpr)) ? Number(perfSettings.canvasDpr) : 2;
+    perfSettings.density = ['compact','comfortable'].includes(perfSettings.density) ? perfSettings.density : 'comfortable';
+    perfSettings.glow = perfSettings.glow !== false;
+    perfSettings.uiMotion = perfSettings.uiMotion !== false;
+}
+normalizePerfSettings();
 
 function changeTheme(themeKey) {
     document.body.setAttribute('data-theme', themeKey);
     localStorage.setItem('andre_music_theme', themeKey);
+    refreshVisualizerTheme?.();
     const themeSelect = document.getElementById('themeSelect');
     if (themeSelect) themeSelect.value = themeKey;
 }
@@ -1053,7 +1670,25 @@ function applyPerfSettingsToUI() {
     document.getElementById('visualizerQuality').value = perfSettings.fps;
     document.getElementById('bgPauseSetting').value = perfSettings.bgPause ? 'true' : 'false';
     document.getElementById('preloadSetting').value = perfSettings.preload;
+    document.getElementById('visualizerStyle').value = perfSettings.style;
+    document.getElementById('fftSizeSetting').value = String(perfSettings.fftSize);
+    document.getElementById('vizSensitivity').value = Math.round(perfSettings.sensitivity * 100);
+    document.getElementById('vizSmoothing').value = Math.round(perfSettings.smoothing * 100);
+    document.getElementById('canvasDprSetting').value = String(perfSettings.canvasDpr);
+    document.getElementById('uiDensity').value = perfSettings.density;
+    document.getElementById('vizGlowSetting').checked = perfSettings.glow;
+    document.getElementById('uiMotionSetting').checked = perfSettings.uiMotion;
+    document.getElementById('vizSensitivityValue').textContent = `${Math.round(perfSettings.sensitivity * 100)}%`;
+    document.getElementById('vizSmoothingValue').textContent = `${Math.round(perfSettings.smoothing * 100)}%`;
     audio.preload = perfSettings.preload;
+    if (analyser) { analyser.fftSize = perfSettings.fftSize; analyser.smoothingTimeConstant = perfSettings.smoothing; dataArray = new Uint8Array(analyser.frequencyBinCount); timeArray = new Uint8Array(analyser.fftSize); }
+    const root = document.body;
+    root.classList.toggle('perf-low', perfSettings.fps === 0);
+    root.classList.toggle('no-ui-motion', !perfSettings.uiMotion);
+    root.classList.toggle('ui-compact', perfSettings.density === 'compact');
+    root.classList.toggle('viz-glow-off', !perfSettings.glow);
+    root.style.setProperty('--motion-speed', perfSettings.fps >= 60 ? '3.2s' : '4.6s');
+    root.style.setProperty('--motion-sheen', perfSettings.fps >= 60 ? '4.6s' : '6.8s');
 }
 
 function changePerfPreset(val) {
@@ -1077,8 +1712,19 @@ function savePerfSettings() {
     perfSettings.fps = parseInt(document.getElementById('visualizerQuality').value, 10);
     perfSettings.bgPause = document.getElementById('bgPauseSetting').value === 'true';
     perfSettings.preload = document.getElementById('preloadSetting').value;
+    perfSettings.style = document.getElementById('visualizerStyle').value;
+    perfSettings.fftSize = parseInt(document.getElementById('fftSizeSetting').value, 10);
+    perfSettings.sensitivity = parseInt(document.getElementById('vizSensitivity').value, 10) / 100;
+    perfSettings.smoothing = parseInt(document.getElementById('vizSmoothing').value, 10) / 100;
+    perfSettings.canvasDpr = parseFloat(document.getElementById('canvasDprSetting').value);
+    perfSettings.density = document.getElementById('uiDensity').value;
+    perfSettings.glow = document.getElementById('vizGlowSetting').checked;
+    perfSettings.uiMotion = document.getElementById('uiMotionSetting').checked;
+    document.getElementById('vizSensitivityValue').textContent = `${Math.round(perfSettings.sensitivity * 100)}%`;
+    document.getElementById('vizSmoothingValue').textContent = `${Math.round(perfSettings.smoothing * 100)}%`;
     audio.preload = perfSettings.preload;
-
+    applyPerfSettingsToUI();
+    if (canvas) resizeCanvas();
     localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
     if (perfSettings.fps === 0) {
         stopVisualizer();
@@ -1090,11 +1736,13 @@ function initAudioContext() {
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 256;
+            analyser.fftSize = perfSettings.fftSize;
+            analyser.smoothingTimeConstant = perfSettings.smoothing;
             mediaSource = audioCtx.createMediaElementSource(audio);
             mediaSource.connect(analyser);
             analyser.connect(audioCtx.destination);
             dataArray = new Uint8Array(analyser.frequencyBinCount);
+            timeArray = new Uint8Array(analyser.fftSize);
         } catch(e) {
             console.warn("AudioContext setup error:", e);
         }
@@ -1105,59 +1753,190 @@ function initAudioContext() {
 }
 
 let lastFrameTime = 0;
+const MAX_CANVAS_DPR = 2;
+let visualizerAccent = '#0066cc';
+const peakState = { value: 0, hold: 0 };
+function refreshVisualizerTheme() {
+    visualizerAccent = getComputedStyle(document.body).getPropertyValue('--accent-blue').trim() || '#0066cc';
+}
+function setMeter(el, value, max = 1) {
+    if (!el) return;
+    const pct = Math.max(0, Math.min(100, (value / max) * 100));
+    el.style.transform = `scaleX(${pct / 100})`;
+}
+function avgBand(startHz, endHz) {
+    if (!analyser || !dataArray || !audioCtx) return 0;
+    const binHz = audioCtx.sampleRate / analyser.fftSize;
+    const start = Math.max(0, Math.floor(startHz / binHz));
+    const end = Math.min(analyser.frequencyBinCount - 1, Math.ceil(endHz / binHz));
+    let sum = 0;
+    let count = 0;
+    for (let i = start; i <= end; i++) { sum += dataArray[i]; count++; }
+    return count ? (sum / count) / 255 : 0;
+}
+function dbFromLinear(value) {
+    return value > 0.00001 ? 20 * Math.log10(value) : -Infinity;
+}
+function formatDb(db) {
+    return Number.isFinite(db) ? `${db.toFixed(1)} dB` : '-∞ dB';
+}
+function updateAudioReadouts(rmsLinear, peakLinear) {
+    const peakDb = dbFromLinear(peakLinear);
+    const rmsDb = dbFromLinear(rmsLinear);
+    const peakEl = document.getElementById('peakReadout');
+    const rmsEl = document.getElementById('rmsReadout');
+    if (peakEl) peakEl.textContent = formatDb(peakDb);
+    if (rmsEl) rmsEl.textContent = formatDb(rmsDb);
+
+    const bass = avgBand(20, 250);
+    const mid = avgBand(250, 2000);
+    const treble = avgBand(2000, 16000);
+    setMeter(document.getElementById('bassMeter'), bass);
+    setMeter(document.getElementById('midMeter'), mid);
+    setMeter(document.getElementById('trebleMeter'), treble);
+    const b = document.getElementById('bassReadout');
+    const m = document.getElementById('midReadout');
+    const t = document.getElementById('trebleReadout');
+    if (b) b.textContent = `${Math.round(bass * 100)}%`;
+    if (m) m.textContent = `${Math.round(mid * 100)}%`;
+    if (t) t.textContent = `${Math.round(treble * 100)}%`;
+
+    const volume = audio.muted ? 0 : audio.volume;
+    const perceptual = Math.sqrt(Math.max(0, rmsLinear)) * volume;
+    setMeter(document.getElementById('levelMeter'), perceptual);
+    const vr = document.getElementById('volumeReadout');
+    if (vr) vr.textContent = `${Math.round(volume * 100)}%`;
+    const level = document.getElementById('levelMeter');
+    if (level) {
+        level.classList.toggle('hot', peakLinear > 0.85);
+        level.classList.toggle('safe', peakLinear <= 0.85);
+    }
+}
+function drawVisualizer(timestamp) {
+    animFrameId = requestAnimationFrame(drawVisualizer);
+    if (!analyser || perfSettings.fps === 0) return;
+    const targetInterval = 1000 / perfSettings.fps;
+    if (timestamp - lastFrameTime < targetInterval) return;
+    lastFrameTime = timestamp;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const styles = getComputedStyle(document.body);
+    const bg = styles.getPropertyValue('--viz-bg').trim() || '#fafafa';
+    const text = styles.getPropertyValue('--text-color').trim() || '#333';
+    const red = styles.getPropertyValue('--accent-red').trim() || '#cc0000';
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, width, height);
+
+    analyser.getByteFrequencyData(dataArray);
+    const sensitivity = perfSettings.sensitivity || 1;
+    const bars = Math.min(64, analyser.frequencyBinCount);
+    const gap = 2;
+    const barWidth = Math.max(2, width / bars - gap);
+    const step = analyser.frequencyBinCount / bars;
+
+    let peakLinear = 0; let sumSquares = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+        const n = dataArray[i] / 255; sumSquares += n * n; if (n > peakLinear) peakLinear = n;
+    }
+    const rmsLinear = Math.sqrt(sumSquares / dataArray.length);
+
+    if (perfSettings.style === 'scope') {
+        analyser.getByteTimeDomainData(timeArray);
+        ctx.strokeStyle = visualizerAccent; ctx.lineWidth = 1.5; ctx.beginPath();
+        for (let i = 0; i < timeArray.length; i++) {
+            const x = (i / (timeArray.length - 1)) * width;
+            const v = (timeArray[i] - 128) / 128;
+            const y = height * 0.5 + v * height * 0.42 * sensitivity;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    } else {
+        ctx.fillStyle = visualizerAccent;
+        for (let i = 0; i < bars; i++) {
+            const idx = Math.min(dataArray.length - 1, Math.floor(i * step));
+            const n = Math.min(1.15, (dataArray[idx] / 255) * sensitivity);
+            const barHeight = Math.max(2, n * (height - 12));
+            const x = i * (barWidth + gap);
+            const y = height - barHeight;
+            ctx.globalAlpha = 0.42 + Math.min(0.58, n * 0.6);
+            ctx.fillRect(x, y, barWidth, barHeight);
+            if (perfSettings.style === 'mirror') {
+                ctx.globalAlpha = 0.14 + Math.min(0.18, n * 0.2);
+                ctx.fillRect(x, height, barWidth, -Math.min(height - 4, barHeight * 0.42));
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // Readable frequency landmarks.
+    const nyquist = audioCtx ? audioCtx.sampleRate / 2 : 24000;
+    ctx.font = '9px monospace';
+    [250, 2000, 8000].forEach(freq => {
+        const x = Math.max(0, Math.min(width, Math.log10(freq / 20) / Math.log10(nyquist / 20) * width));
+        ctx.fillStyle = text; ctx.globalAlpha = 0.3; ctx.fillRect(x, 0, 1, height);
+        ctx.globalAlpha = 0.72; ctx.fillText(freq >= 1000 ? `${freq/1000}k` : `${freq}`, Math.min(width - 28, x + 3), 11);
+    });
+    ctx.globalAlpha = 1;
+
+    if (perfSettings.glow && peakLinear > 0.72) {
+        ctx.fillStyle = peakLinear > 0.9 ? red : visualizerAccent;
+        ctx.globalAlpha = 0.55;
+        ctx.fillRect(0, 0, width * Math.min(1, peakLinear), 2);
+        ctx.globalAlpha = 1;
+    }
+
+    if (peakLinear >= peakState.value || timestamp > peakState.hold) {
+        peakState.value = peakLinear; peakState.hold = timestamp + 650;
+    } else { peakState.value *= 0.985; }
+    const peakY = height - Math.max(2, Math.min(1, peakState.value) * (height - 10));
+    ctx.fillStyle = peakState.value > 0.85 ? red : visualizerAccent;
+    ctx.fillRect(0, peakY, width, 2);
+
+    updateAudioReadouts(rmsLinear, peakLinear);
+}
+
 function startVisualizer() {
     if (perfSettings.fps === 0) return;
-    if (!animFrameId) {
-        drawVisualizer(0);
-    }
+    if (!animFrameId) drawVisualizer(0);
 }
 
 function stopVisualizer() {
     if (animFrameId) {
         cancelAnimationFrame(animFrameId);
         animFrameId = null;
-        const dpr = window.devicePixelRatio || 1;
-        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
     }
-}
-
-function drawVisualizer(timestamp) {
-    animFrameId = requestAnimationFrame(drawVisualizer);
-    if (!analyser || perfSettings.fps === 0) return;
-
-    const targetInterval = 1000 / perfSettings.fps;
-    if (timestamp - lastFrameTime < targetInterval) return;
-    lastFrameTime = timestamp;
-
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.width / dpr;
-    const height = canvas.height / dpr;
-
-    analyser.getByteFrequencyData(dataArray);
-    ctx.clearRect(0, 0, width, height);
-
-    const activeAccent = getComputedStyle(document.body).getPropertyValue('--accent-blue').trim() || '#0066cc';
-
-    const barWidth = (width / analyser.frequencyBinCount) * 2.2;
-    let x = 0;
-
-    for (let i = 0; i < analyser.frequencyBinCount; i++) {
-        let barHeight = (dataArray[i] / 255) * height;
-        ctx.fillStyle = activeAccent;
-        ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight);
-        x += barWidth;
-    }
+    peakState.value = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    updateAudioReadouts(0, 0);
 }
 
 function resizeCanvas() {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    refreshVisualizerTheme();
 }
 
 const debouncedResize = debounce(resizeCanvas, 100);
+
+['vizSensitivity','vizSmoothing'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', savePerfSettings);
+});
+const resetPerfBtn = document.getElementById('resetPerfBtn');
+if (resetPerfBtn) resetPerfBtn.addEventListener('click', () => {
+    perfSettings = { preset:'auto', fps:60, bgPause:true, preload:'metadata', fftSize:512, sensitivity:1, smoothing:0.78, style:'spectrum', canvasDpr:2, density:'comfortable', glow:true, uiMotion:true };
+    normalizePerfSettings();
+    localStorage.removeItem('andre_music_perf');
+    detectSystemPerformance();
+    notify('Performance and visual settings restored to defaults.', 'success', { duration:2200 });
+});
 
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && perfSettings.bgPause) {
@@ -1195,8 +1974,10 @@ async function getTrackBlob(id) {
 }
 
 function setLanguage(lang) {
+    if (!translations[lang]) lang = 'en';
     currentLang = lang;
     const t = translations[lang];
+    localStorage.setItem('andre_music_lang', lang);
     document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
     const targetBtn = document.getElementById(`lang-${lang}`);
     if (targetBtn) targetBtn.classList.add('active');
@@ -1220,7 +2001,9 @@ function setLanguage(lang) {
         'nav-privacy': 'navPrivacy',
         'nav-contact': 'navContact',
         'nav-help': 'navHelp',
+        'uxAutoBadge': 'uxAutoBadge', 'focusCurrentBtn': 'current', 'libraryHint': 'hint', 'vizMonitorTitle': 'vizMonitorTitle', 'vizPeakLabel': 'vizPeakLabel', 'vizRmsLabel': 'vizRmsLabel', 'vizBassLabel': 'vizBassLabel', 'vizMidLabel': 'vizMidLabel', 'vizTrebleLabel': 'vizTrebleLabel', 'vizAmpLabel': 'vizAmpLabel', 'seekHint': 'seekHint', 'playHint': 'playHint', 'moreControls': 'moreControls', 'rewind10Btn': 'rewind10', 'forward10Btn': 'forward10', 'resetVolumeBtn': 'resetVolume', 'focusPlayerBtn': 'focusPlayer', 'focusModeBtn': 'focus', 'dockExitBtn': 'exit', 'contact-intro': 'contactIntro', 'contact-name-label': 'nameLabel', 'contact-email-label': 'emailLabel', 'contact-subject-label': 'subjectLabel', 'contact-message-label': 'messageLabel', 'contact-footer': 'contactFooter',
         'downloadAppBtn': 'downloadAppBtn',
+        'lang-ja': 'langJapanese', 'lang-en': 'langEnglish', 'lang-id': 'langIndonesian',
         
         'title-settings': 'settingsTitle',
         'lbl-detected-system': 'lblDetectedSystem',
@@ -1246,6 +2029,7 @@ function setLanguage(lang) {
         'lbl-preload': 'lblPreload',
         'opt-preload-metadata': 'preloadMetadata',
         'opt-preload-auto': 'preloadAuto',
+        'lbl-viz-custom': 'vizCustom', 'lbl-viz-style': 'vizStyle', 'opt-viz-style-spectrum': 'vizStyleSpectrum', 'opt-viz-style-mirror': 'vizStyleMirror', 'opt-viz-style-scope': 'vizStyleScope', 'lbl-fft-size': 'fftSize', 'opt-fft-128': 'fft128', 'opt-fft-256': 'fft256', 'opt-fft-512': 'fft512', 'opt-fft-1024': 'fft1024', 'lbl-viz-sensitivity': 'vizSensitivity', 'lbl-viz-smoothing': 'vizSmoothing', 'lbl-canvas-dpr': 'canvasDpr', 'opt-dpr-1': 'dpr1', 'opt-dpr-15': 'dpr15', 'opt-dpr-2': 'dpr2', 'lbl-ui-density': 'uiDensity', 'opt-density-compact': 'densityCompact', 'opt-density-comfortable': 'densityComfortable', 'lbl-viz-glow': 'vizGlow', 'lbl-ui-motion': 'uiMotion', 'resetPerfBtn': 'resetPerf',
 
         'title-help': 'navHelpTitle',
         'hk-play': 'hkPlay',
@@ -1287,6 +2071,9 @@ function setLanguage(lang) {
         document.getElementById('nowTitle').textContent = t.noTrack;
     }
     document.getElementById('playLabel').textContent = audio.paused ? t.play : t.pause;
+    // Re-render dynamic playlist/empty-state text so language changes are immediate.
+    if (typeof renderLibrary === 'function') renderLibrary();
+    if (typeof updateUXState === 'function') updateUXState();
 }
 
 
@@ -1373,6 +2160,119 @@ window.addEventListener("click", (e) => {
     if (e.target.classList && e.target.classList.contains("modal") && e.target.id !== "confirm-modal") closeModal(e.target.id);
 });
 
+
+function updateVolumeUI() {
+    const vol = audio.muted ? 0 : Math.round(audio.volume * 100);
+    const label = document.getElementById('volumeLabel');
+    if (label) label.textContent = `VOL ${vol}%`;
+    const readout = document.getElementById('volumeReadout');
+    if (readout) readout.textContent = `${vol}%`;
+    const reset = document.getElementById('resetVolumeBtn');
+    if (reset) reset.textContent = `VOL ${vol}%`;
+    const dockReadout = document.getElementById('dockVolumeReadout');
+    if (dockReadout) dockReadout.textContent = `VOL ${vol}%`;
+    const dockVol = document.getElementById('dockVolumeSlider');
+    if (dockVol) dockVol.value = String(audio.volume);
+    const mute = document.getElementById('muteBtn');
+    if (mute) mute.classList.toggle('active', audio.muted);
+    const dockMute = document.getElementById('dockMuteBtn');
+    if (dockMute) dockMute.classList.toggle('active', audio.muted);
+}
+
+function updateUXState() {
+    const count = library.length;
+    const summary = document.getElementById('librarySummary');
+    const t = translations[currentLang] || translations.en;
+    if (summary) summary.textContent = `${count} ${t.tracks}`;
+    const badge = document.getElementById('trackIndexBadge');
+    if (badge) badge.textContent = `${t.trackLabel || 'TRACK'} ${currentIndex >= 0 ? currentIndex + 1 : 0} / ${count}`;
+    const modeBadge = document.getElementById('modeBadge');
+    if (modeBadge) modeBadge.textContent = mode === 'loopAll' ? t.loopAll : mode === 'loopOne' ? t.loopOne : mode === 'shuffle' ? t.shuffle : t.normal;
+    const playBadge = document.getElementById('playStateBadge');
+    if (playBadge) playBadge.textContent = audio.paused ? t.ready : t.playing;
+    updateVolumeUI();
+    const clear = document.getElementById('searchClearBtn');
+    if (clear) clear.hidden = !searchQuery;
+}
+function focusCurrentTrack() {
+    const active = document.querySelector('.track-item.active');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function seekBy(seconds) {
+    if (!audio.duration || Number.isNaN(audio.duration)) return;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
+}
+function setupUXControls() {
+    const search = document.getElementById('searchInput');
+    const clear = document.getElementById('searchClearBtn');
+    const sortBtn = document.getElementById('sortBtn');
+    const focusBtn = document.getElementById('focusCurrentBtn');
+    const rewind = document.getElementById('rewind10Btn');
+    const forward = document.getElementById('forward10Btn');
+    const resetVolume = document.getElementById('resetVolumeBtn');
+    const focusPlayer = document.getElementById('focusPlayerBtn');
+    const focusModeBtn = document.getElementById('focusModeBtn');
+    const dockPlay = document.getElementById('dockPlayBtn');
+    const dockPrev = document.getElementById('dockPrevBtn');
+    const dockNext = document.getElementById('dockNextBtn');
+    const dockRewind = document.getElementById('dockRewindBtn');
+    const dockForward = document.getElementById('dockForwardBtn');
+    const dockExit = document.getElementById('dockExitBtn');
+    const dockMute = document.getElementById('dockMuteBtn');
+    const dockSeek = document.getElementById('dockSeek');
+    const dockVol = document.getElementById('dockVolumeSlider');
+    if (clear) clear.onclick = () => { search.value = ''; searchQuery = ''; renderLibrary(); search.focus(); updateUXState(); };
+    if (sortBtn) sortBtn.onclick = () => {
+        library = [...library].sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
+        currentIndex = library.length ? Math.max(0, Math.min(currentIndex, library.length - 1)) : -1;
+        sortBtn.textContent = sortBtn.textContent === 'A→Z' ? 'Z→A' : 'A→Z';
+        if (sortBtn.textContent === 'Z→A') library.reverse();
+        renderLibrary();
+        focusCurrentTrack();
+    };
+    if (focusBtn) focusBtn.onclick = focusCurrentTrack;
+    if (rewind) rewind.onclick = () => seekBy(-10);
+    if (forward) forward.onclick = () => seekBy(10);
+    if (resetVolume) resetVolume.onclick = () => { audio.muted = false; audio.volume = 1; volumeSlider.value = '1'; volumeSlider.dispatchEvent(new Event('input')); };
+    if (focusPlayer) focusPlayer.onclick = () => document.querySelector('.main-player')?.scrollIntoView({behavior:'smooth', block:'center'});
+    const setFocusMode = (enabled) => {
+        document.body.classList.toggle('focus-mode', enabled);
+        if (focusModeBtn) { focusModeBtn.classList.toggle('active', enabled); focusModeBtn.setAttribute('aria-pressed', String(enabled)); }
+        localStorage.setItem('andre_music_focus_mode', enabled ? '1' : '0');
+        if (enabled) { document.getElementById('dockSeek')?.focus({preventScroll:true}); document.getElementById('dockPlayBtn')?.focus({preventScroll:true}); }
+        updateFocusDock();
+    };
+    const updateFocusDock = () => {
+        const cur = document.getElementById('dockCurrentTime');
+        const dur = document.getElementById('dockDuration');
+        const seek = document.getElementById('dockSeek');
+        const label = document.getElementById('dockPlayLabel');
+        const vol = document.getElementById('dockVolumeSlider');
+        const vr = document.getElementById('dockVolumeReadout');
+        if (cur) cur.textContent = document.getElementById('currentTime')?.textContent || '0:00';
+        if (dur) dur.textContent = document.getElementById('duration')?.textContent || '0:00';
+        if (seek && audio.duration) seek.value = String((audio.currentTime / audio.duration) * 100);
+        if (label) label.textContent = audio.paused ? 'PLAY' : 'PAUSE';
+        if (vol) vol.value = String(audio.volume);
+        if (vr) vr.textContent = `VOL ${audio.muted ? 0 : Math.round(audio.volume*100)}%`;
+    };
+    window.setFocusMode = setFocusMode;
+    window.updateFocusDock = updateFocusDock;
+    if (focusModeBtn) focusModeBtn.onclick = () => setFocusMode(!document.body.classList.contains('focus-mode'));
+    if (dockExit) dockExit.onclick = () => setFocusMode(false);
+    if (dockPlay) dockPlay.onclick = () => document.getElementById('playBtn')?.click();
+    if (dockPrev) dockPrev.onclick = () => document.getElementById('prevBtn')?.click();
+    if (dockNext) dockNext.onclick = () => document.getElementById('nextBtn')?.click();
+    if (dockRewind) dockRewind.onclick = () => seekBy(-10);
+    if (dockForward) dockForward.onclick = () => seekBy(10);
+    if (dockMute) dockMute.onclick = () => document.getElementById('muteBtn')?.click();
+    if (dockSeek) dockSeek.oninput = (e) => { if (audio.duration) audio.currentTime = (Number(e.target.value)/100)*audio.duration; };
+    if (dockVol) dockVol.oninput = (e) => { volumeSlider.value = e.target.value; volumeSlider.dispatchEvent(new Event('input')); };
+    updateUXState();
+    updateFocusDock();
+    if (localStorage.getItem('andre_music_focus_mode') === '1') setFocusMode(true);
+}
+
 function renderLibrary() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
@@ -1409,10 +2309,11 @@ function renderLibrary() {
         const empty = document.createElement('li');
         empty.className = 'empty-library';
         const t = translations[currentLang] || translations.en;
-        empty.textContent = library.length ? (t.noResults || 'No tracks match your search.') : (t.emptyLibrary || 'Your library is empty. Import audio to get started.');
+        empty.textContent = library.length ? (t.noResults || 'No tracks match your search.') : (t.emptyPlaylist || t.emptyLibrary || 'You have an empty playlist. Import music from your files.');
         list.appendChild(empty);
     }
     document.getElementById('count').textContent = library.length;
+    updateUXState();
 }
 
 document.getElementById('trackList').addEventListener('click', (e) => {
@@ -1433,8 +2334,9 @@ document.getElementById('trackList').addEventListener('click', (e) => {
 });
 
 document.getElementById('searchInput').oninput = debounce((e) => {
-    searchQuery = e.target.value;
+    searchQuery = e.target.value.trim();
     renderLibrary();
+    updateUXState();
 }, 150);
 
 function cleanFileName(filename) {
@@ -1521,6 +2423,7 @@ async function deleteTrack(dbId, arrayIndex) {
         audio.src = ""; 
         currentIndex = -1;
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+        document.querySelector('.now-playing-display')?.classList.remove('is-playing');
         stopVisualizer();
     } else if (arrayIndex < currentIndex) {
         currentIndex--;
@@ -1555,6 +2458,7 @@ audio.ontimeupdate = () => {
     const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
     document.getElementById('currentTime').textContent = `${curM}:${curS}`;
     document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
+    window.updateFocusDock?.();
 };
 
 const seekInput = document.getElementById('seek');
@@ -1576,11 +2480,13 @@ if (savedVolume !== null) {
 }
 
 volumeSlider.oninput = (e) => {
-    audio.volume = e.target.value;
+    audio.volume = Number(e.target.value);
     audio.muted = (audio.volume === 0);
-    document.getElementById('muteBtn').classList.toggle('active', audio.muted);
-    localStorage.setItem('andre_music_volume', audio.volume);
+    localStorage.setItem('andre_music_volume', String(audio.volume));
+    updateVolumeUI();
+    window.updateFocusDock?.();
 };
+updateVolumeUI();
 
 // --- Strict File Filtering to Block Videos and Ensure Audio Only ---
 async function handleFilesImport(files) {
@@ -1656,6 +2562,7 @@ document.getElementById('clearBtn').onclick = async () => {
         currentIndex = -1; 
         audio.pause(); 
         audio.src = "";
+        document.querySelector('.now-playing-display')?.classList.remove('is-playing');
         stopVisualizer();
         if(currentUrl) URL.revokeObjectURL(currentUrl);
         renderLibrary();
@@ -1680,11 +2587,15 @@ document.getElementById('playBtn').onclick = () => {
 audio.onplay = () => {
     document.getElementById('playLabel').textContent = translations[currentLang].pause;
     document.getElementById('playBtn').classList.add('active');
+    window.updateFocusDock?.();
+    document.querySelector('.now-playing-display')?.classList.add('is-playing');
     startVisualizer();
 };
 audio.onpause = () => {
     document.getElementById('playLabel').textContent = translations[currentLang].play;
     document.getElementById('playBtn').classList.remove('active');
+    window.updateFocusDock?.();
+    document.querySelector('.now-playing-display')?.classList.remove('is-playing');
     stopVisualizer();
 };
 audio.onended = () => {
@@ -1720,6 +2631,7 @@ function toggleMode(newMode, btnId) {
         document.getElementById(btnId).classList.add('active');
     }
     const labels = { loopAllBtn: translations[currentLang].loopAll, loopOneBtn: translations[currentLang].loopOne, shuffleBtn: translations[currentLang].shuffle };
+    updateUXState();
     notify(mode === 'normal' ? translations[currentLang].status : `${labels[btnId]}: ON`, mode === 'normal' ? 'info' : 'success', { duration: 2200 });
 }
 
@@ -1728,14 +2640,52 @@ document.getElementById('loopOneBtn').onclick = () => toggleMode('loopOne', 'loo
 document.getElementById('shuffleBtn').onclick = () => toggleMode('shuffle', 'shuffleBtn');
 document.getElementById('muteBtn').onclick = function() {
     audio.muted = !audio.muted;
-    this.classList.toggle('active', audio.muted);
+    updateVolumeUI();
+    window.updateFocusDock?.();
 };
 
-document.getElementById('contactForm').onsubmit = (e) => {
+document.getElementById('contactForm').onsubmit = async (e) => {
     e.preventDefault();
-    notify(translations[currentLang].contactSuccess, "success");
-    closeModal('contact-modal');
-    e.target.reset();
+    const form = e.currentTarget;
+    const status = document.getElementById('contact-status');
+    const submit = document.getElementById('contact-send');
+    const data = new FormData(form);
+    const name = String(data.get('name') || '').trim();
+    const email = String(data.get('email') || '').trim();
+    const message = String(data.get('message') || '').trim();
+
+    if (!name || !email || !message) {
+        status.textContent = 'Please complete your name, email, and message.';
+        status.className = 'contact-status error';
+        return;
+    }
+
+    if (data.get('_honey')) return;
+
+    status.textContent = 'Sending...';
+    status.className = 'contact-status';
+    submit.disabled = true;
+    try {
+        const response = await fetch('https://formsubmit.co/ajax/andrew.sbstian@gmail.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(data.entries()))
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Submission failed');
+
+        status.textContent = 'Message sent successfully.';
+        status.className = 'contact-status success';
+        notify('Message sent successfully.', 'success');
+        setTimeout(() => { closeModal('contact-modal'); form.reset(); status.textContent = ''; status.className = 'contact-status'; }, 900);
+    } catch (err) {
+        console.warn('Contact submission error:', err);
+        status.textContent = 'Could not send right now. Please try again.';
+        status.className = 'contact-status error';
+        notify('Unable to send the message. Please try again.', 'error');
+    } finally {
+        submit.disabled = false;
+    }
 };
 
 window.addEventListener('keydown', (e) => {
@@ -1745,17 +2695,21 @@ window.addEventListener('keydown', (e) => {
     }
     switch (e.code) {
         case 'Space': e.preventDefault(); document.getElementById('playBtn').click(); break;
-        case 'ArrowRight': document.getElementById('nextBtn').click(); break;
-        case 'ArrowLeft': document.getElementById('prevBtn').click(); break;
+        case 'ArrowRight': e.shiftKey ? seekBy(10) : document.getElementById('nextBtn').click(); break;
+        case 'ArrowLeft': e.shiftKey ? seekBy(-10) : document.getElementById('prevBtn').click(); break;
         case 'ArrowUp': 
             e.preventDefault();
             audio.volume = Math.min(1, audio.volume + 0.05);
+            audio.muted = false;
             volumeSlider.value = audio.volume;
+            volumeSlider.dispatchEvent(new Event('input'));
             break;
         case 'ArrowDown': 
             e.preventDefault();
             audio.volume = Math.max(0, audio.volume - 0.05);
+            audio.muted = (audio.volume === 0);
             volumeSlider.value = audio.volume;
+            volumeSlider.dispatchEvent(new Event('input'));
             break;
         case 'Slash': 
             e.preventDefault(); 
@@ -1786,6 +2740,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 (async function init() {
+    setupUXControls();
     const hideLoading = () => {
         const overlay = document.getElementById('loading-overlay');
         if (overlay) {
@@ -1804,8 +2759,9 @@ window.addEventListener('keydown', (e) => {
 
         const savedPerf = localStorage.getItem('andre_music_perf');
         if (savedPerf) {
-            try { perfSettings = JSON.parse(savedPerf); } catch(e) {}
+            try { perfSettings = { ...perfSettings, ...JSON.parse(savedPerf) }; } catch(e) {}
         }
+        normalizePerfSettings();
         detectSystemPerformance();
 
         const db = await openDB();
@@ -1814,8 +2770,9 @@ window.addEventListener('keydown', (e) => {
             const req = tx.objectStore(STORE_NAME).getAll();
             req.onsuccess = (e) => {
                 library = e.target.result.map(item => ({ id: item.id, name: item.name }));
-                renderLibrary();
-                setLanguage('ja');
+                const savedLang = localStorage.getItem('andre_music_lang');
+                const initialLang = savedLang && translations[savedLang] ? savedLang : 'ja';
+                setLanguage(initialLang);
                 resolve();
             };
             req.onerror = (e) => reject(e.target.error);
@@ -1831,7 +2788,8 @@ window.addEventListener('keydown', (e) => {
         console.warn("Init Warning / Storage Error:", e);
         clearTimeout(safetyTimer);
         hideLoading();
-        setLanguage('ja');
+        const fallbackLang = localStorage.getItem('andre_music_lang');
+        setLanguage(fallbackLang && translations[fallbackLang] ? fallbackLang : 'ja');
     }
 })();
 </script>
