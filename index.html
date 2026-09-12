@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <link rel="manifest" href="manifest.json">
 <script>
       if ('serviceWorker' in navigator) {
@@ -541,7 +541,7 @@
     .song-title { font-size: 14px; }
     .btn, .btn-upload, .del-btn { min-height: 38px; font-size: 13px; padding: 8px 12px !important;}
     .del-btn { font-size: 11px; padding: 4px 8px !important; min-height: auto;}
-    .modal-content { width: 98% !important; max-width: 98vw !important; padding: 4vw !important; font-size: 13px !important;}
+    .modal-content { width: min(98vw, 680px) !important; max-width: 98vw !important; padding: 4vw !important; font-size: 13px !important; margin: 0 auto !important; }
     .modal-scroll { height: 240px !important; }
     .track-item { min-height: 40px; font-size: 13px; }
     .track-info { font-size: 13px; }
@@ -968,9 +968,9 @@ body.ui-compact .audio-dashboard { min-height:unset; }
     .more-controls-grid { gap:5px; }
     .more-controls-grid .btn { min-width:0; }
     .status-bar { width:100%; }
-    .modal-content { width:calc(100vw - 12px) !important; max-width:none !important; margin:6vh auto; }
+    .modal-content { width:calc(100vw - 12px) !important; max-width:none !important; margin:0 auto !important; }
     .modal-scroll { max-height:58vh; }
-    #settings-modal .modal-content { margin:3vh auto; }
+    #settings-modal .modal-content { margin:0 auto !important; }
   }
 
   /* Very narrow phones / split-screen panes. */
@@ -1029,7 +1029,1217 @@ body.ui-compact .audio-dashboard { min-height:unset; }
     #settings-modal .search-input { min-height:36px; }
   }
 
+
+  /* =========================================================
+     MODERN UI OVERRIDES
+  /* Fallbacks for browsers without color-mix. */
+  body { background-color: var(--bg-main); }
+  .app, .modal-content, .site-notification, .focus-dock { background-color: var(--app-bg); }
+  .search-input, .contact-form input, .contact-form textarea, #settings-modal select { background-color: var(--input-bg); }
+
+  /* Prevent modern surfaces from creating horizontal overflow. */
+  .modal, .modal-content, .main-player, .player-frame, .audio-dashboard, .focus-dock { max-width: 100%; }
+  .modal-content { overflow-wrap: anywhere; }
+  button, input, select, textarea { max-width: 100%; }
+
+     Visual-only refresh: preserves existing markup + behavior.
+     ========================================================= */
+  :root {
+    --modern-radius-sm: 10px;
+    --modern-radius-md: 16px;
+    --modern-radius-lg: 22px;
+    --modern-shadow-sm: 0 2px 10px rgba(15, 23, 42, .06);
+    --modern-shadow-md: 0 10px 30px rgba(15, 23, 42, .09);
+    --modern-shadow-lg: 0 18px 50px rgba(15, 23, 42, .12);
+    --modern-border: rgba(100, 116, 139, .18);
+    --modern-muted: rgba(100, 116, 139, .72);
+    --modern-surface: rgba(255, 255, 255, .78);
+    --modern-glass: rgba(255, 255, 255, .68);
+  }
+
+  html {
+    background: var(--bg-main);
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent-blue) 10%, transparent) 0, transparent 32%),
+      radial-gradient(circle at 100% 10%, color-mix(in srgb, var(--accent-red) 8%, transparent) 0, transparent 28%),
+      linear-gradient(180deg, var(--bg-main) 0%, color-mix(in srgb, var(--bg-main) 88%, #ffffff) 100%);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  .app {
+    width: min(1180px, calc(100% - 28px));
+    margin: 18px auto;
+    background: color-mix(in srgb, var(--app-bg) 92%, transparent);
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--modern-shadow-lg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .logo-header {
+    min-height: 54px;
+    padding: 10px 20px;
+    background:
+      linear-gradient(120deg,
+        color-mix(in srgb, var(--header-bg) 96%, #fff) 0%,
+        var(--header-bg) 55%,
+        color-mix(in srgb, var(--header-bg) 82%, var(--accent-blue)) 100%);
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.12);
+  }
+
+  .site-logo {
+    height: 34px;
+    max-width: min(70vw, 260px);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,.18));
+  }
+
+  header {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--modern-border);
+    background: color-mix(in srgb, var(--app-bg) 88%, transparent);
+  }
+
+  .logo {
+    font-size: clamp(24px, 3vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-shadow: none;
+  }
+
+  .lang-switcher {
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--modern-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--input-bg) 78%, transparent);
+    box-shadow: var(--modern-shadow-sm);
+  }
+
+  .lang-btn {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 3px 5px;
+    border-radius: 999px;
+    transition: background .18s ease, color .18s ease;
+  }
+
+  .lang-btn:hover {
+    background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
+  }
+
+  .lang-btn.active {
+    padding: 4px 8px;
+    color: var(--text-color);
+    background: color-mix(in srgb, var(--accent-blue) 12%, var(--input-bg));
+  }
+
+  .container {
+    grid-template-columns: 300px minmax(0, 1fr);
+    background: transparent;
+  }
+
+  .sidebar {
+    background: color-mix(in srgb, var(--sidebar-bg) 90%, transparent);
+    border-right: 1px solid var(--modern-border);
+  }
+
+  .panel-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--modern-border);
+    background: color-mix(in srgb, var(--player-frame-bg) 86%, var(--app-bg));
+    color: var(--text-color);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .search-container {
+    padding: 12px;
+    background: transparent;
+    border-bottom: 1px solid var(--modern-border);
+  }
+
+  .search-input {
+    min-height: 42px;
+    padding: 9px 13px;
+    border: 1px solid var(--modern-border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+
+  .search-input:focus {
+    border-color: color-mix(in srgb, var(--accent-blue) 55%, var(--modern-border));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-blue) 12%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .search-clear {
+    min-height: 42px;
+    border-radius: 12px;
+  }
+
+  .sidebar-tools {
+    gap: 8px;
+    padding: 10px 12px;
+    background: transparent;
+    border-bottom: 1px solid var(--modern-border);
+  }
+
+  .library-summary {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--modern-border);
+    font-size: 10px;
+    color: var(--modern-muted);
+  }
+
+  .track-list {
+    padding: 6px;
+    scrollbar-color: color-mix(in srgb, var(--text-color) 24%, transparent) transparent;
+  }
+
+  .track-item {
+    min-height: 46px;
+    margin: 2px 0;
+    padding: 9px 11px;
+    gap: 10px;
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
+    border-radius: 10px;
+    font-size: 12px;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+
+  .track-item:hover {
+    background: color-mix(in srgb, var(--accent-blue) 7%, var(--sidebar-bg));
+    border-color: color-mix(in srgb, var(--accent-blue) 12%, transparent);
+    border-left-color: var(--accent-blue);
+    transform: translateX(2px);
+  }
+
+  .track-item.active {
+    background: color-mix(in srgb, var(--accent-red) 9%, var(--sidebar-bg));
+    border-color: color-mix(in srgb, var(--accent-red) 15%, transparent);
+    border-left: 4px solid var(--accent-red);
+    box-shadow: var(--modern-shadow-sm);
+  }
+
+  .del-btn {
+    min-height: 30px;
+    padding: 5px 8px;
+    border: 1px solid var(--modern-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--input-bg) 88%, transparent);
+  }
+
+  .del-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .main-player {
+    padding: 22px;
+    background: transparent;
+  }
+
+  .player-frame {
+    padding: 18px;
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius-md);
+    background:
+      linear-gradient(145deg,
+        color-mix(in srgb, var(--player-frame-bg) 86%, var(--app-bg)),
+        color-mix(in srgb, var(--app-bg) 92%, transparent));
+    box-shadow: var(--modern-shadow-md);
+  }
+
+  .now-playing-display {
+    padding: 24px 22px 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius-md);
+    background:
+      radial-gradient(circle at 50% 0%,
+        color-mix(in srgb, var(--accent-blue) 8%, transparent),
+        transparent 48%),
+      color-mix(in srgb, var(--display-bg) 90%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.42), var(--modern-shadow-sm);
+  }
+
+  .now-playing-display::before {
+    inset: 6% 20%;
+    background: radial-gradient(circle,
+      color-mix(in srgb, var(--accent-blue) 14%, transparent),
+      transparent 70%);
+  }
+
+  .song-title {
+    margin: 4px 0 10px;
+    font-size: clamp(18px, 2.5vw, 26px);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    text-shadow: none;
+  }
+
+  .song-meta {
+    margin: 0 0 14px;
+    font-size: 10px;
+  }
+
+  .song-meta-chip,
+  .auto-badge {
+    padding: 5px 8px;
+    border: 1px solid var(--modern-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--input-bg) 78%, transparent);
+    box-shadow: var(--modern-shadow-sm);
+  }
+
+  #visualizer {
+    height: 150px;
+    border: 1px solid var(--modern-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--viz-bg) 90%, #0000);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.24), inset 0 0 30px rgba(15,23,42,.04);
+  }
+
+  .viz-shell {
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+
+  .audio-dashboard {
+    margin-bottom: 16px;
+    padding: 0;
+    border: 1px solid var(--modern-border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--viz-bg) 86%, var(--app-bg));
+    box-shadow: var(--modern-shadow-sm);
+  }
+
+  .audio-dashboard-head {
+    padding: 9px 11px;
+    border-bottom: 1px solid var(--modern-border);
+    background: color-mix(in srgb, var(--player-frame-bg) 75%, transparent);
+    border-radius: 14px 14px 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: .03em;
+  }
+
+  .audio-meter,
+  .audio-level-track {
+    height: 10px;
+    border: 1px solid var(--modern-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--input-bg) 88%, transparent);
+  }
+
+  .audio-meter > span,
+  .audio-level-fill {
+    border-radius: inherit;
+  }
+
+  .timer-row {
+    margin: 8px 1px 6px;
+    font-size: 12px;
+    color: var(--modern-muted);
+  }
+
+  input[type=range] {
+    height: 8px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--input-bg);
+    border-radius: 50%;
+    background: var(--accent-blue);
+    box-shadow: 0 2px 7px rgba(0,0,0,.2);
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--input-bg);
+    border-radius: 50%;
+    background: var(--accent-blue);
+    box-shadow: 0 2px 7px rgba(0,0,0,.2);
+  }
+
+  .primary-controls {
+    gap: 10px;
+    margin: 14px 0 10px;
+  }
+
+  .btn {
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid var(--modern-border);
+    border-radius: 11px;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--input-bg) 96%, #fff) 0%,
+        color-mix(in srgb, var(--btn-bg) 78%, var(--input-bg)) 100%);
+    color: var(--btn-text);
+    box-shadow: 0 1px 1px rgba(15,23,42,.04);
+    transition:
+      transform .15s ease,
+      box-shadow .18s ease,
+      border-color .18s ease,
+      background .18s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent-blue) 25%, var(--modern-border));
+    box-shadow: 0 7px 16px rgba(15,23,42,.09);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 5px rgba(15,23,42,.1);
+  }
+
+  /* Tactile UI feedback to match the optional synthesized UI sounds. */
+  button, a[href], input, select, .track-item, .settings-check, .more-controls summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .track-item:active, .settings-check:active, .more-controls summary:active {
+    transform: translateY(0) scale(.995);
+  }
+
+  .btn-primary {
+    border-color: color-mix(in srgb, var(--accent-blue) 46%, var(--modern-border));
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--accent-blue) 92%, #fff),
+      color-mix(in srgb, var(--accent-blue) 72%, #000));
+    color: #fff;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--accent-blue) 20%, transparent);
+  }
+
+  .btn-upload {
+    border-color: transparent;
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--accent-red) 92%, #fff),
+      color-mix(in srgb, var(--accent-red) 72%, #000));
+    border-radius: 11px;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--accent-red) 18%, transparent);
+  }
+
+  .btn.active,
+  #focusModeBtn.active {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    border-color: #059669 !important;
+    box-shadow: 0 8px 18px rgba(5,150,105,.18);
+  }
+
+  .volume-container {
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px solid var(--modern-border);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--input-bg) 75%, transparent);
+    box-shadow: var(--modern-shadow-sm);
+  }
+
+  .more-controls {
+    width: min(760px, 100%);
+  }
+
+  .more-toggle {
+    padding: 8px 12px;
+    border: 1px solid var(--modern-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--input-bg) 66%, transparent);
+  }
+
+  .more-controls[open] .more-toggle {
+    color: var(--accent-blue);
+  }
+
+  .status-bar {
+    margin-top: 16px;
+    width: min(100%, 560px);
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 1px solid var(--modern-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--status-bg) 82%, transparent);
+    box-shadow: var(--modern-shadow-sm);
+    color: var(--modern-muted);
+  }
+
+  .status-bar::before {
+    color: #10b981;
+  }
+
+  .modal {
+    background: rgba(15, 23, 42, .52);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    align-items: center;
+    justify-content: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  .modal[aria-hidden="false"] {
+    display: flex;
+  }
+
+  .modal-content {
+    padding: 22px;
+    border: 1px solid var(--modern-border);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--app-bg) 94%, transparent);
+    box-shadow: 0 24px 70px rgba(15,23,42,.24);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    margin: 0 auto;
+    max-height: min(90vh, 760px);
+    max-height: min(90dvh, 760px);
+    overflow: auto;
+  }
+
+  .modal-header {
+    margin-bottom: 16px;
+    padding-bottom: 11px;
+    border-bottom: 1px solid var(--modern-border);
+    font-size: 18px;
+    letter-spacing: -.02em;
+  }
+
+  .modal-scroll {
+    padding: 4px 12px 4px 2px;
+    border: 0;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .contact-form input,
+  .contact-form textarea,
+  #settings-modal select,
+  #settings-modal input[type="text"],
+  #settings-modal input[type="number"] {
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 1px solid var(--modern-border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    box-shadow: inset 0 1px 1px rgba(15,23,42,.03);
+  }
+
+  .contact-form textarea {
+    min-height: 120px;
+  }
+
+  .settings-check {
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--modern-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--status-bg) 76%, transparent);
+    transition: border-color .18s ease, background .18s ease;
+  }
+
+  .settings-check:hover {
+    border-color: color-mix(in srgb, var(--accent-blue) 30%, var(--modern-border));
+    background: color-mix(in srgb, var(--accent-blue) 6%, var(--status-bg));
+  }
+
+  .site-notification {
+    padding: 11px 12px;
+    border: 1px solid var(--modern-border);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--app-bg) 92%, transparent);
+    box-shadow: 0 16px 30px rgba(15,23,42,.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  footer {
+    padding: 18px;
+    border-top: 1px solid var(--modern-border);
+    color: var(--modern-muted);
+    background: color-mix(in srgb, var(--app-bg) 72%, transparent);
+  }
+
+  .legal-nav {
+    gap: 6px;
+  }
+
+  .legal-nav a {
+    padding: 4px 7px;
+    border-radius: 999px;
+    color: var(--accent-blue);
+    text-decoration: none;
+    transition: background .18s ease;
+  }
+
+  .legal-nav a:hover {
+    background: color-mix(in srgb, var(--accent-blue) 8%, transparent);
+  }
+
+  #loading-overlay {
+    background:
+      radial-gradient(circle at 50% 32%, rgba(0,102,204,.16), transparent 28%),
+      linear-gradient(180deg, #05070b 0%, #0b1120 100%) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  #loading-overlay > img {
+    filter: drop-shadow(0 14px 35px rgba(0,0,0,.35));
+  }
+
+  #loading-overlay > div {
+    letter-spacing: .01em;
+  }
+
+  .focus-dock {
+    border-radius: 16px;
+    border-color: var(--modern-border) !important;
+    background: color-mix(in srgb, var(--app-bg) 84%, transparent) !important;
+    box-shadow: 0 20px 40px rgba(15,23,42,.18) !important;
+  }
+
+  body.focus-mode .player-frame {
+    border-radius: 20px;
+    box-shadow: var(--modern-shadow-lg);
+  }
+
+  body.focus-mode .now-playing-display {
+    border-radius: 18px;
+  }
+
+  @media (max-width: 1100px) {
+    .app {
+      width: min(100% - 18px, 1180px);
+      margin: 12px auto;
+    }
+
+    .container {
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .app {
+      width: 100%;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .logo-header {
+      min-height: 48px;
+      padding: 7px 12px;
+    }
+
+    header {
+      padding: 13px var(--ui-gutter);
+    }
+
+    .container {
+      background: var(--app-bg);
+    }
+
+    .sidebar {
+      border-right: 0 !important;
+      border-bottom: 1px solid var(--modern-border);
+    }
+
+    .main-player {
+      padding: 8px;
+    }
+
+    .player-frame {
+      padding: 8px;
+      border-radius: 14px;
+    }
+
+    .now-playing-display {
+      padding: 15px 12px;
+      border-radius: 14px;
+    }
+
+    #visualizer {
+      height: clamp(86px, 22vw, 120px);
+      border-radius: 10px;
+    }
+
+    .primary-controls {
+      gap: 7px;
+    }
+
+    .primary-controls .btn,
+    .primary-controls .btn-primary {
+      min-height: 44px;
+    }
+
+    .volume-container {
+      border-radius: 10px;
+    }
+
+    .modal-content {
+      width: calc(100vw - 18px) !important;
+      margin: 0 auto;
+      padding: 16px;
+      border-radius: 16px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .track-item {
+      min-height: 44px;
+      border-radius: 9px;
+    }
+
+    .song-title {
+      font-size: clamp(18px, 7vw, 24px);
+    }
+
+    .btn {
+      border-radius: 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .track-item,
+    .search-input,
+    .lang-btn,
+    .settings-check,
+    .legal-nav a {
+      transition: none !important;
+    }
+  }
+
+
+/* =========================================================
+   FOCUS DOCK FIX: viewport-anchored controller
+   ========================================================= */
+.focus-dock#focusDock {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  transform: translate3d(-50%, 0, 0) !important;
+  width: min(980px, calc(100vw - 20px)) !important;
+  max-width: calc(100vw - 20px) !important;
+  margin: 0 !important;
+  z-index: 2147483000 !important;
+  contain: layout paint style;
+  isolation: isolate;
+  will-change: transform;
+}
+
+/* Once moved to <body>, these selectors no longer depend on .app ancestry. */
+body.focus-mode > #focusDock {
+  display: grid !important;
+}
+body:not(.focus-mode) > #focusDock {
+  display: none !important;
+}
+
+/* Prevent viewport/scroll-container interactions from making the dock drift. */
+html, body {
+  overflow-x: hidden;
+}
+body.focus-mode {
+  position: relative;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+}
+
+@media (max-width: 760px) {
+  .focus-dock#focusDock {
+    width: calc(100vw - 10px) !important;
+    max-width: calc(100vw - 10px) !important;
+    bottom: max(5px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-dock#focusDock {
+    will-change: auto;
+  }
+}
+
+
+
+  /* --- CALM UI PASS: lower saturation, flatter surfaces, less playful --- */
+  :root {
+    --ui-ink: #252a31;
+    --ui-muted: #68717d;
+    --ui-surface: #ffffff;
+    --ui-surface-2: #f6f7f9;
+    --ui-border: #d8dde4;
+    --ui-border-strong: #c5ccd5;
+    --ui-accent: #526779;
+    --ui-accent-soft: #e9eef2;
+    --ui-danger: #a64b4b;
+  }
+
+  body {
+    background: #eef1f4 !important;
+    color: var(--ui-ink) !important;
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif !important;
+  }
+
+  /* Keep theme identities, but reduce visual intensity across the board. */
+  body[data-theme="default"], body:not([data-theme]) {
+    --accent-red: #7c4d4d;
+    --accent-blue: #526779;
+    --border-gray: #d8dde4;
+    --bg-main: #eef1f4;
+    --app-bg: #ffffff;
+    --text-color: #252a31;
+    --header-bg: #20252b;
+    --sidebar-bg: #f6f7f9;
+    --panel-header-bg: #eef1f4;
+    --panel-header-text: #39424d;
+    --search-bg: #f6f7f9;
+    --input-bg: #ffffff;
+    --hover-bg: #f0f3f5;
+    --active-bg: #e8edf1;
+    --player-frame-bg: #f6f7f9;
+    --player-frame-border: #d0d7df;
+    --display-bg: #ffffff;
+    --display-border: #d8dde4;
+    --title-color: #334454;
+    --viz-bg: #f7f8fa;
+    --btn-bg: #ffffff;
+    --btn-text: #2f3740;
+    --btn-border: #cfd6de;
+    --btn-upload-bg: #5f6872;
+    --status-bg: #f7f8fa;
+    --modal-border: #cbd2da;
+  }
+
+  /* Softer versions of the stronger presets. */
+  body[data-theme="cyber"] {
+    --accent-red: #a05d80;
+    --accent-blue: #5b8892;
+    --border-gray: #29414b;
+    --bg-main: #10171c;
+    --app-bg: #141c21;
+    --text-color: #d4dde1;
+    --header-bg: #0d1216;
+    --sidebar-bg: #172127;
+    --panel-header-bg: #1d2b31;
+    --panel-header-text: #a9c4cb;
+    --search-bg: #18252b;
+    --input-bg: #11191e;
+    --hover-bg: #1d2b31;
+    --active-bg: #25363d;
+    --player-frame-bg: #172229;
+    --player-frame-border: #375862;
+    --display-bg: #121b20;
+    --display-border: #30464f;
+    --title-color: #b9d0d6;
+    --viz-bg: #0f171b;
+    --btn-bg: #1a252b;
+    --btn-text: #d4dde1;
+    --btn-border: #35474f;
+    --btn-upload-bg: #754f64;
+    --status-bg: #172127;
+    --modal-border: #3b515a;
+  }
+
+  body[data-theme="kawaii"] {
+    --accent-red: #9d6d82;
+    --accent-blue: #63899a;
+    --border-gray: #e1d3db;
+    --bg-main: #f4f1f3;
+    --app-bg: #ffffff;
+    --text-color: #514853;
+    --header-bg: #7a6872;
+    --sidebar-bg: #faf8f9;
+    --panel-header-bg: #eee8ec;
+    --panel-header-text: #5b5159;
+    --search-bg: #f6f2f4;
+    --input-bg: #ffffff;
+    --hover-bg: #f2eef1;
+    --active-bg: #e9e1e6;
+    --player-frame-bg: #f8f5f7;
+    --player-frame-border: #dfd4da;
+    --display-bg: #ffffff;
+    --display-border: #dfd4da;
+    --title-color: #705c68;
+    --viz-bg: #fbf9fa;
+    --btn-bg: #ffffff;
+    --btn-text: #514853;
+    --btn-border: #d8cbd3;
+    --btn-upload-bg: #937280;
+    --status-bg: #faf8f9;
+    --modal-border: #d5c7cf;
+  }
+
+  .app {
+    width: min(1120px, calc(100vw - 28px)) !important;
+    margin: 18px auto !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 14px !important;
+    background: var(--app-bg) !important;
+    box-shadow: 0 12px 34px rgba(25, 35, 45, .08) !important;
+    overflow: hidden;
+  }
+
+  .logo-header {
+    min-height: 42px !important;
+    padding: 8px 18px !important;
+    background: var(--header-bg) !important;
+    box-shadow: none !important;
+  }
+
+  .site-logo { height: 27px !important; }
+
+  header {
+    padding: 14px 18px !important;
+    border-bottom: 1px solid var(--ui-border) !important;
+    background: var(--app-bg) !important;
+  }
+
+  .logo {
+    color: var(--title-color) !important;
+    font-size: 22px !important;
+    text-shadow: none !important;
+    letter-spacing: -.02em;
+  }
+
+  .container { grid-template-columns: 244px minmax(0, 1fr) !important; }
+
+  .sidebar {
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--ui-border) !important;
+  }
+
+  .panel-header {
+    background: var(--panel-header-bg) !important;
+    color: var(--panel-header-text) !important;
+    padding: 10px 12px !important;
+    border-bottom: 1px solid var(--ui-border) !important;
+    font-size: 11px !important;
+    letter-spacing: .06em;
+  }
+
+  .search-container {
+    padding: 9px !important;
+    background: var(--sidebar-bg) !important;
+    border-bottom: 1px solid var(--ui-border) !important;
+    box-shadow: none !important;
+  }
+
+  .search-input {
+    min-height: 36px !important;
+    padding: 8px 11px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 8px !important;
+    background: var(--input-bg) !important;
+  }
+
+  .track-item {
+    min-height: 38px !important;
+    padding: 8px 10px !important;
+    border-bottom: 1px solid rgba(0,0,0,.045) !important;
+    border-left: 3px solid transparent !important;
+    font-size: 12px !important;
+    transition: background-color .14s ease, border-color .14s ease !important;
+  }
+
+  .track-item:hover { border-left-color: var(--accent-blue) !important; }
+  .track-item.active {
+    background: var(--active-bg) !important;
+    border-left-color: var(--accent-blue) !important;
+  }
+
+  .main-player {
+    padding: 16px !important;
+    background: var(--bg-main) !important;
+  }
+
+  .player-frame {
+    padding: 14px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 12px !important;
+    background: var(--app-bg) !important;
+    box-shadow: 0 6px 20px rgba(25,35,45,.05) !important;
+  }
+
+  .now-playing-display {
+    padding: 18px !important;
+    margin-bottom: 12px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 10px !important;
+    background: var(--display-bg) !important;
+  }
+
+  .now-playing-display::before,
+  .now-playing-display::after,
+  .viz-sheen { display: none !important; }
+  .now-playing-display.is-playing .song-title { animation: none !important; }
+
+  .song-title {
+    color: var(--title-color) !important;
+    text-shadow: none !important;
+    font-size: clamp(17px, 2vw, 22px) !important;
+  }
+
+  #visualizer {
+    height: 120px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+
+  .audio-dashboard {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 8px !important;
+    background: var(--viz-bg) !important;
+  }
+
+  .audio-dashboard-head {
+    background: var(--ui-surface-2) !important;
+    border-bottom: 1px solid var(--ui-border) !important;
+  }
+
+  .btn, .btn-upload {
+    min-height: 34px !important;
+    padding: 7px 13px !important;
+    border: 1px solid var(--btn-border) !important;
+    border-radius: 7px !important;
+    background: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    font-weight: 600 !important;
+    transition: background-color .12s ease, border-color .12s ease, transform .08s ease !important;
+  }
+
+  .btn:hover, .btn-upload:hover {
+    transform: none !important;
+    background: var(--hover-bg) !important;
+    border-color: var(--ui-border-strong) !important;
+    box-shadow: none !important;
+  }
+
+  .btn:active, .btn-upload:active { transform: translateY(1px) !important; }
+
+  .btn-upload {
+    background: var(--btn-upload-bg) !important;
+    color: #fff !important;
+  }
+  .btn.active {
+    background: var(--accent-blue) !important;
+    color: #fff !important;
+    border-color: var(--accent-blue) !important;
+  }
+
+  .volume-container,
+  .auto-badge,
+  .settings-check {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 7px !important;
+    background: var(--ui-surface-2) !important;
+    box-shadow: none !important;
+  }
+
+  .status-bar {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 8px !important;
+    background: var(--ui-surface-2) !important;
+    box-shadow: none !important;
+  }
+
+  .modal-content {
+    border: 1px solid var(--ui-border-strong) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 18px 45px rgba(20,28,36,.16) !important;
+  }
+
+  .site-notification {
+    border: 1px solid var(--ui-border) !important;
+    border-left: 3px solid var(--accent-blue) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(20,28,36,.10) !important;
+  }
+
+  .del-btn {
+    border-radius: 6px !important;
+    background: transparent !important;
+  }
+
+  .more-toggle { opacity: .65 !important; }
+  .shortcut-hint { opacity: .48 !important; }
+
+  /* Remove decorative motion that made the interface feel toy-like. */
+  .track-item.active::after { animation: none !important; }
+  .now-playing-display.is-playing::before { animation: none !important; }
+
+  body.focus-mode .player-frame {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 28px rgba(20,28,36,.09) !important;
+  }
+
+  body.focus-mode .focus-dock {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,.94) !important;
+    box-shadow: 0 10px 28px rgba(20,28,36,.12) !important;
+  }
+
+  @media (max-width: 700px) {
+    .app { width: 100% !important; margin: 0 !important; border-radius: 0 !important; }
+
+    /* Mobile-first reading order: show the current track before the playlist.
+       The library remains fully accessible below the player instead of pushing
+       the song title below the fold. */
+    .container {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .main-player {
+      order: 1 !important;
+      padding: 8px !important;
+    }
+    .sidebar {
+      order: 2 !important;
+      width: 100% !important;
+      border-right: 0 !important;
+      border-bottom: 0 !important;
+      border-top: 1px solid var(--ui-border) !important;
+    }
+    .panel-header {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+    .player-frame { padding: 8px !important; border-radius: 10px !important; }
+    .now-playing-display { padding: 12px !important; }
+  }
 </style>
+
+<style id="apple-platform-compat">
+  /* Apple device / WebKit compatibility layer */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    min-height: 100%;
+  }
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-overflow-scrolling: touch;
+  }
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ui-border, #d8dde4);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -6px;
+    border: 2px solid var(--input-bg, #fff);
+    border-radius: 50%;
+    background: var(--accent-blue, #526779);
+  }
+  input[type="range"]::-moz-range-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ui-border, #d8dde4);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--input-bg, #fff);
+    border-radius: 50%;
+    background: var(--accent-blue, #526779);
+  }
+  select {
+    -webkit-appearance: menulist;
+    appearance: menulist;
+  }
+  textarea { -webkit-overflow-scrolling: touch; }
+  .modal {
+    padding:
+      max(12px, env(safe-area-inset-top, 0px))
+      max(12px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
+  }
+  .modal-content {
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .focus-dock#focusDock {
+    padding-bottom: max(9px, env(safe-area-inset-bottom, 9px));
+  }
+  @media (pointer: coarse) {
+    .btn, .btn-upload, .del-btn, .lang-btn, .search-clear, .more-toggle,
+    .track-item, .settings-check {
+      touch-action: manipulation;
+    }
+    .btn, .btn-upload { min-height: 44px; }
+    .del-btn { min-width: 44px; min-height: 44px; }
+  }
+  @media (hover: none) {
+    .btn:hover, .btn-upload:hover, .track-item:hover, .del-btn:hover,
+    .settings-check:hover, .legal-nav a:hover, .lang-btn:hover { transform: none; }
+  }
+  @media (max-width: 700px) {
+    body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .app { margin-top: 0 !important; }
+    .modal-content { width: min(100%, 680px); }
+  }
+  @media (min-width: 701px) and (max-width: 1200px) {
+    .app { width: min(100% - 24px, 1120px); }
+  }
+  @supports (-webkit-touch-callout: none) {
+    input, textarea, select { font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto !important; }
+  }
+</style>
+
 </head>
 <body data-theme="default">
 
@@ -1054,24 +2264,26 @@ body.ui-compact .audio-dashboard { min-height:unset; }
 
 <div class="app">
   <div class="logo-header">
-    <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" style="cursor:pointer;" onclick="location.reload();" onerror="this.style.display='none'">
+    <button class="site-logo-button" type="button" aria-label="AndreMusic home" onclick="location.reload();">
+      <img src="logo.jpg" alt="AndrePictures Logo" class="site-logo" onerror="this.style.display='none'">
+    </button>
   </div>
 
   <header>
     <div class="logo-area">
       <a href="#" class="logo">AndreMusic</a>
       <div class="lang-switcher">
-        <button class="lang-btn active" id="lang-ja" onclick="setLanguage('ja')">Japanese</button> | 
-        <button class="lang-btn" id="lang-en" onclick="setLanguage('en')">English</button> | 
-        <button class="lang-btn" id="lang-id" onclick="setLanguage('id')">Indonesia</button>
+        <button class="lang-btn active" id="lang-ja" type="button" aria-pressed="true" onclick="setLanguage('ja')">Japanese</button> | 
+        <button class="lang-btn" id="lang-en" type="button" aria-pressed="false" onclick="setLanguage('en')">English</button> | 
+        <button class="lang-btn" id="lang-id" type="button" aria-pressed="false" onclick="setLanguage('id')">Indonesia</button>
       </div>
     </div>
     <div style="display:flex; gap:10px; flex-wrap: wrap;">
       <div class="ux-toolbar">
         <span class="auto-badge" id="uxAutoBadge">SMART UI</span>
         <button class="btn" id="settingsBtn" onclick="openModal('settings-modal')">⚙️ Settings</button>
-        <label class="btn btn-upload" for="fileInput" id="label-upload">Import Music 📁 <span class="shortcut-hint">U</span></label>
-        <input id="fileInput" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac" multiple style="display:none" />
+        <label class="btn btn-upload" for="fileInput" id="label-upload"><span id="upload-label-text">Import Music 📁</span> <span class="shortcut-hint">U</span></label>
+        <input id="fileInput" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac" multiple />
         <button class="btn" id="clearBtn">Clear Library</button>
       </div>
     </div>
@@ -1079,7 +2291,7 @@ body.ui-compact .audio-dashboard { min-height:unset; }
 
   <div class="container">
     <aside class="sidebar">
-      <div class="panel-header" id="label-playlist">♫ PLAYLIST LIBRARY</div>
+      <h2 class="panel-header" id="label-playlist">♫ PLAYLIST LIBRARY</h2>
       <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search track..." aria-label="Search tracks" />
         <button class="btn search-clear" id="searchClearBtn" type="button" hidden aria-label="Clear search">✕</button>
@@ -1095,13 +2307,13 @@ body.ui-compact .audio-dashboard { min-height:unset; }
     <main class="main-player">
       <div class="player-frame">
         <div class="now-playing-display">
-          <div class="song-title" id="nowTitle">No track selected</div>
+          <h1 class="song-title" id="nowTitle" aria-live="polite" aria-atomic="true">No track selected</h1>
           <div class="song-meta" aria-live="polite">
             <span class="song-meta-chip" id="trackIndexBadge">TRACK 0 / 0</span>
             <span class="song-meta-chip" id="playStateBadge">READY</span>
             <span class="song-meta-chip" id="modeBadge">NORMAL</span>
           </div>
-          <div class="audio-dashboard decorative-motion">
+          <section class="audio-dashboard decorative-motion" aria-labelledby="vizMonitorTitle">
             <div class="audio-dashboard-head">
               <span id="vizMonitorTitle">REAL-TIME AUDIO / FREQUENCY MONITOR</span>
               <div class="audio-readouts">
@@ -1110,7 +2322,8 @@ body.ui-compact .audio-dashboard { min-height:unset; }
               </div>
             </div>
             <div class="audio-spectrum-wrap viz-shell">
-              <canvas id="visualizer"></canvas>
+              <canvas id="visualizer" role="img" aria-label="Audio visualizer" aria-describedby="visualizerDescription"></canvas>
+              <span id="visualizerDescription" class="sr-only">The visualizer shows changing audio frequency levels. Audio playback is controlled with the buttons and sliders outside this graphic.</span>
               <span class="viz-sheen" aria-hidden="true"></span>
             </div>
             <div class="audio-bands" aria-label="Frequency bands">
@@ -1134,26 +2347,26 @@ body.ui-compact .audio-dashboard { min-height:unset; }
             </div>
           </div>
           <div class="progress-wrap" style="margin: 20px 0;">
-            <div class="timer-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
-            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek through track" />
+            <div class="timer-row" aria-label="Track time"><span id="currentTime">0:00</span><span aria-hidden="true"> / </span><span id="duration">0:00</span></div>
+            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek through track" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" />
             <div class="progress-shortcuts"><span id="seekHint">← / → skip</span><span id="playHint">Space play/pause</span></div>
           </div>
           <div class="primary-controls">
-            <button class="btn btn-secondary" id="prevBtn" title="Previous track">◀</button>
-            <button class="btn btn-primary" id="playBtn"><span id="playLabel">PLAY</span></button>
-            <button class="btn btn-secondary" id="nextBtn" title="Next track">▶</button>
+            <button class="btn btn-secondary" id="prevBtn" type="button" aria-label="Previous track" title="Previous track">◀</button>
+            <button class="btn btn-primary" id="playBtn" type="button" aria-label="Play" aria-pressed="false"><span id="playLabel">PLAY</span></button>
+            <button class="btn btn-secondary" id="nextBtn" type="button" aria-label="Next track" title="Next track">▶</button>
           </div>
           <div class="compact-tools">
             <div class="volume-container">
-              <button class="btn btn-quiet" id="muteBtn" title="Mute / unmute">Mute</button>
+              <button class="btn btn-quiet" id="muteBtn" type="button" aria-pressed="false" title="Mute / unmute">Mute</button>
               <span class="volume-label" id="volumeLabel">VOL 100%</span>
-              <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume" />
+              <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1" />
             </div>
             <button class="btn focus-quick" id="focusModeBtn" type="button" aria-pressed="false">Focus</button>
           </div>
           <details class="more-controls">
-            <summary class="btn more-toggle" id="moreControls">More controls</summary>
-            <div class="more-controls-grid">
+            <summary class="btn more-toggle" id="moreControls" aria-controls="moreControlsPanel">More controls</summary>
+            <div class="more-controls-grid" id="moreControlsPanel">
               <button class="btn" id="randomBtn">Random 🎲</button>
               <button class="btn" id="rewind10Btn" type="button">↶ 10s</button>
               <button class="btn" id="forward10Btn" type="button">10s ↷</button>
@@ -1165,7 +2378,7 @@ body.ui-compact .audio-dashboard { min-height:unset; }
             </div>
           </details>
       </div>
-      <div class="focus-dock" id="focusDock" aria-label="Focus mode controller">
+      <div class="focus-dock" id="focusDock" role="region" aria-label="Focus mode controller">
         <div class="dock-main">
           <button class="btn" id="dockPrevBtn" type="button" aria-label="Previous track">◀</button>
           <button class="btn" id="dockPlayBtn" type="button" aria-label="Play or pause"><span id="dockPlayLabel">PLAY</span></button>
@@ -1192,10 +2405,10 @@ body.ui-compact .audio-dashboard { min-height:unset; }
   </div>
 
   <nav class="legal-nav">
-    <a onclick="openModal('tos-modal')" id="nav-tos">Terms of Service</a>
-    <a onclick="openModal('privacy-modal')" id="nav-privacy">Privacy Policy</a>
-    <a onclick="openModal('contact-modal')" id="nav-contact">Contact</a>
-    <a onclick="openModal('help-modal')" id="nav-help" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
+    <a href="#tos-modal" onclick="openModal('tos-modal'); return false;" id="nav-tos">Terms of Service</a>
+    <a href="#privacy-modal" onclick="openModal('privacy-modal'); return false;" id="nav-privacy">Privacy Policy</a>
+    <a href="#contact-modal" onclick="openModal('contact-modal'); return false;" id="nav-contact">Contact</a>
+    <a href="#help-modal" onclick="openModal('help-modal'); return false;" id="nav-help" style="color: var(--accent-red); font-weight: bold;">[Keyboard Shortcuts] [H]</a>
   </nav>
   <footer>Copyright &copy; 2026 AndrewSudiro</footer>
 </div>
@@ -1217,11 +2430,11 @@ body.ui-compact .audio-dashboard { min-height:unset; }
   </div>
 </div>
 
-<div id="settings-modal" class="modal">
-  <div class="modal-content">
+<div id="settings-modal" class="modal" aria-hidden="true" aria-labelledby="title-settings" role="presentation">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="title-settings">
     <div class="modal-header">
       <span id="title-settings">⚙️ Performance & Smart Settings</span>
-      <span class="close-btn" onclick="closeModal('settings-modal')">[X]</span>
+      <button class="close-btn" type="button" onclick="closeModal('settings-modal')" aria-label="Close settings">[X]</button>
     </div>
     <div class="modal-scroll" style="height: auto; max-height: 400px; padding: 10px;">
       
@@ -1306,7 +2519,7 @@ body.ui-compact .audio-dashboard { min-height:unset; }
             <input id="vizSensitivity" type="range" min="50" max="160" step="5" value="100" />
           </div>
           <div>
-            <label class="settings-label"><span id="lbl-viz-smoothing">Signal Smoothing:</span> <output id="vizSmoothingValue">78%</output></label>
+            <label class="settings-label" for="vizSmoothing"><span id="lbl-viz-smoothing">Signal Smoothing:</span> <output id="vizSmoothingValue">78%</output></label>
             <input id="vizSmoothing" type="range" min="0" max="95" step="5" value="78" />
           </div>
         </div>
@@ -1341,13 +2554,13 @@ body.ui-compact .audio-dashboard { min-height:unset; }
   </div>
 </div>
 
-<div id="tos-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-tos">Terms of Service</span><span class="close-btn" onclick="closeModal('tos-modal')">[X]</span></div><div class="modal-scroll" id="body-tos"></div></div></div>
-<div id="privacy-modal" class="modal"><div class="modal-content"><div class="modal-header"><span id="title-privacy">Privacy Policy</span><span class="close-btn" onclick="closeModal('privacy-modal')">[X]</span></div><div class="modal-scroll" id="body-privacy"></div></div></div>
+<div id="tos-modal" class="modal" aria-hidden="true" aria-labelledby="title-tos" role="presentation"><div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="title-tos"><div class="modal-header"><h2 id="title-tos">Terms of Service</h2><button class="close-btn" type="button" onclick="closeModal('tos-modal')" aria-label="Close Terms of Service">[X]</button></div><div class="modal-scroll" id="body-tos"></div></div></div>
+<div id="privacy-modal" class="modal" aria-hidden="true" aria-labelledby="title-privacy" role="presentation"><div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="title-privacy"><div class="modal-header"><h2 id="title-privacy">Privacy Policy</h2><button class="close-btn" type="button" onclick="closeModal('privacy-modal')" aria-label="Close Privacy Policy">[X]</button></div><div class="modal-scroll" id="body-privacy"></div></div></div>
 <div id="help-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
       <span id="title-help">Keyboard Shortcuts</span>
-      <span class="close-btn" onclick="closeModal('help-modal')">[X]</span>
+      <button class="close-btn" type="button" onclick="closeModal('help-modal')" aria-label="Close help">[X]</button>
     </div>
     <div class="modal-scroll">
       <table style="width:100%; border-collapse: collapse; font-size: 13px;">
@@ -1371,11 +2584,11 @@ body.ui-compact .audio-dashboard { min-height:unset; }
     </div>
   </div>
 </div>
-<div id="contact-modal" class="modal">
-  <div class="modal-content contact-modal-card">
+<div id="contact-modal" class="modal" aria-hidden="true" aria-labelledby="title-contact" role="presentation">
+  <div class="modal-content contact-modal-card" role="dialog" aria-modal="true" aria-labelledby="title-contact">
     <div class="modal-header">
       <span id="title-contact">Contact Inquiry</span>
-      <span class="close-btn" onclick="closeModal('contact-modal')">[X]</span>
+      <button class="close-btn" type="button" onclick="closeModal('contact-modal')" aria-label="Close contact form">[X]</button>
     </div>
     <p class="contact-intro" id="contact-intro">Send a message directly to Andrew. You will receive a confirmation when the message is accepted.</p>
     <form id="contactForm" class="contact-form" novalidate>
@@ -1410,6 +2623,285 @@ body.ui-compact .audio-dashboard { min-height:unset; }
 .contact-status.error { color:var(--accent-red); font-weight:bold; }
 .contact-footer { text-align:center; font-size:10px; margin:14px 0 0; color:#777; }
 @media (max-width:600px) { .contact-field-row { grid-template-columns:1fr; } .contact-actions { align-items:stretch; flex-direction:column; } .contact-actions .btn { width:100%; } }
+
+  /* =========================================================
+     ACCESSIBILITY + COMPATIBILITY PATCH
+     ========================================================= */
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .site-logo-button {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 2px 6px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .site-logo-button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+  }
+
+  #fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  #fileInput:focus-visible { outline: 0; }
+  .btn-upload.file-focus {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 3px;
+  }
+
+  .track-play {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 0;
+    min-height: 36px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  /* Keep long filenames inside the clickable area so the delete control is
+     always reachable and visible. */
+  .track-play .track-info {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .track-item .del-btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 44px;
+    max-width: 44px;
+    min-height: 32px;
+    margin-left: 8px;
+    padding: 5px 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 1;
+  }
+  .track-play:focus-visible {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .track-item.keyboard-active {
+    background: var(--active-bg);
+  }
+
+  .close-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--accent-red);
+    cursor: pointer;
+    font: inherit;
+    min-height: 36px;
+    min-width: 40px;
+  }
+  .close-btn:focus-visible {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 2px;
+  }
+
+  .modal[aria-hidden="true"] {
+    display: none !important;
+  }
+  .modal[aria-hidden="false"] {
+    display: flex;
+  }
+  .modal-content:focus {
+    outline: none;
+  }
+
+  .lang-btn[aria-pressed="true"] {
+    font-weight: 800;
+  }
+  .panel-header { margin: 0; }
+  .modal {
+    display: none;
+  }
+  .modal[aria-hidden="false"] {
+    display: flex !important;
+  }
+  .modal-content {
+    position: relative;
+    margin: auto !important;
+    max-height: min(90vh, 760px);
+    max-height: min(90dvh, 760px);
+  }
+
+  .modal-header h2 { margin: 0; font-size: inherit; font-weight: inherit; }
+
+  @media (max-width: 420px) {
+    .track-item {
+      padding-inline: 7px !important;
+      gap: 6px !important;
+    }
+    .track-item .del-btn {
+      min-width: 42px;
+      max-width: 42px;
+      padding-inline: 4px;
+      font-size: 10px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    * {
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+    .btn, .track-play, .close-btn, .site-logo-button {
+      forced-color-adjust: auto;
+      border: 1px solid ButtonText !important;
+    }
+    .track-item.active, .track-item:focus-within {
+      outline: 2px solid Highlight;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto !important; }
+    .loading-spinner, #loading-overlay { animation: none !important; transition: none !important; }
+  }
+
+
+  /* Safari/WebKit compatibility fallbacks.
+     Older Safari versions may not understand color-mix(), so keep the UI fully
+     usable instead of dropping declarations that contain unsupported colors. */
+  @supports not (color: color-mix(in srgb, #000 50%, #fff)) {
+    body { background: var(--bg-main) !important; }
+    .app, .modal-content, .site-notification, .focus-dock {
+      background: var(--app-bg) !important;
+    }
+    .search-input, .contact-form input, .contact-form textarea, #settings-modal select {
+      background: var(--input-bg) !important;
+    }
+    .logo-header, header, .sidebar, .panel-header, .search-container,
+    .player-frame, .now-playing-display, .audio-dashboard,
+    .audio-dashboard-head, .volume-container, .settings-check, .status-bar {
+      background-color: var(--app-bg) !important;
+      background-image: none !important;
+    }
+    .sidebar { background-color: var(--sidebar-bg) !important; }
+    .panel-header, .search-container, .audio-dashboard-head,
+    .settings-check, .status-bar { background-color: var(--ui-surface-2, var(--sidebar-bg)) !important; }
+    .player-frame { background-color: var(--player-frame-bg) !important; }
+    .now-playing-display { background-color: var(--display-bg) !important; }
+    .audio-dashboard { background-color: var(--viz-bg) !important; }
+    .modal { background: rgba(15, 23, 42, .65) !important; }
+    .btn, .btn-upload { background: var(--btn-bg) !important; }
+    .btn-primary { background: var(--accent-blue) !important; color: #fff !important; }
+    .btn-upload { background: var(--btn-upload-bg) !important; color: #fff !important; }
+    .track-item:hover { background: var(--hover-bg) !important; }
+    .track-item.active { background: var(--active-bg) !important; }
+  }
+
+  /* Keep fixed dialogs and focus controls inside the visible Safari viewport. */
+  .modal {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(12px, env(safe-area-inset-top, 0px))
+             max(12px, env(safe-area-inset-right, 0px))
+             max(12px, env(safe-area-inset-bottom, 0px))
+             max(12px, env(safe-area-inset-left, 0px));
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .modal-content {
+    margin: auto !important;
+    width: min(92vw, 680px);
+    max-width: 100%;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Avoid WebKit text autosizing from making long UI labels unexpectedly huge. */
+  html { -webkit-text-size-adjust: 100%; }
+
+  @media (max-width: 700px) {
+    .modal-content {
+      width: min(100%, 680px);
+      max-height: calc(100vh - 16px);
+      max-height: calc(100dvh - 16px);
+    }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    .btn:hover, .track-item:hover, .del-btn:hover {
+      transform: none !important;
+    }
+  }
+
+  /* JAPANESE 2000s COLOR REVIVAL: restore the playful web-portal look. */
+  body { font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"MS PGothic",Arial,sans-serif !important; }
+  .app { border-radius:4px !important; border:2px solid var(--border-gray) !important; box-shadow:4px 4px 0 rgba(0,0,0,.18),0 12px 28px rgba(0,0,0,.14) !important; }
+  header { border-bottom:3px solid var(--accent-red) !important; }
+  .logo { font-weight:900 !important; text-shadow:1px 1px 0 rgba(255,255,255,.55),2px 2px 0 rgba(0,0,0,.12) !important; }
+  .panel-header { background:var(--panel-header-bg) !important; color:var(--panel-header-text) !important; border-bottom:2px solid var(--border-gray) !important; }
+  .search-container { background:var(--search-bg) !important; }
+  .search-input,.contact-field input,.contact-field textarea,#settings-modal select { border:2px inset var(--border-gray) !important; border-radius:3px !important; }
+  .track-item { border-radius:2px !important; border-left:4px solid transparent !important; }
+  .track-item:hover { background:var(--hover-bg) !important; border-color:var(--accent-blue) !important; border-left-color:var(--accent-blue) !important; transform:none !important; }
+  .track-item.active { background:var(--active-bg) !important; border-color:var(--accent-red) !important; border-left:5px solid var(--accent-red) !important; }
+  .btn,.btn-upload { border:2px outset var(--btn-border) !important; border-radius:3px !important; background:var(--btn-bg) !important; color:var(--btn-text) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 rgba(0,0,0,.12) !important; font-weight:800 !important; }
+  .btn:hover,.btn-upload:hover { background:var(--hover-bg) !important; border-color:var(--accent-blue) !important; transform:none !important; }
+  .btn-primary { color:#fff !important; background:linear-gradient(to bottom,var(--accent-blue),#064a87) !important; border-color:var(--accent-blue) !important; text-shadow:0 1px 0 rgba(0,0,0,.35) !important; }
+  .btn-upload { color:#fff !important; background:linear-gradient(to bottom,var(--accent-red),#8f0026) !important; border-color:var(--accent-red) !important; }
+  .btn.active,#focusModeBtn.active { background:linear-gradient(to bottom,#35c95b,#19863a) !important; border-color:#0f6528 !important; color:#fff !important; }
+  .player-frame { border:2px solid var(--player-frame-border) !important; border-radius:3px !important; background:var(--player-frame-bg) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.7),3px 3px 0 rgba(0,0,0,.1) !important; }
+  .now-playing-display { border:2px solid var(--display-border) !important; border-radius:3px !important; background:var(--display-bg) !important; }
+  .song-title { color:var(--title-color) !important; text-shadow:1px 1px 0 rgba(255,255,255,.6) !important; }
+  .song-meta-chip,.auto-badge { border:1px solid var(--border-gray) !important; border-radius:3px !important; background:var(--input-bg) !important; }
+  #visualizer { border:2px inset var(--display-border) !important; border-radius:2px !important; background:var(--viz-bg) !important; }
+  .audio-dashboard { border:2px solid var(--display-border) !important; border-radius:3px !important; background:var(--viz-bg) !important; }
+  .audio-meter,.audio-level-track { border:1px inset var(--border-gray) !important; border-radius:0 !important; background:var(--input-bg) !important; }
+  .volume-container,.settings-check,.status-bar { border:1px solid var(--border-gray) !important; border-radius:3px !important; background:var(--status-bg) !important; }
+  .modal-content { border:2px solid var(--modal-border) !important; border-radius:3px !important; background:var(--app-bg) !important; box-shadow:8px 8px 0 rgba(0,0,0,.24),0 14px 40px rgba(0,0,0,.2) !important; }
+
+  body[data-theme="default"],body:not([data-theme]){--accent-red:#d50035;--accent-blue:#0066cc;--border-gray:#b7c4d5;--bg-main:#d7ebff;--app-bg:#fff;--text-color:#17263b;--header-bg:#173a79;--sidebar-bg:#eef7ff;--panel-header-bg:linear-gradient(to bottom,#4a9be8,#1768ba);--panel-header-text:#fff;--search-bg:#dff0ff;--input-bg:#fff;--hover-bg:#fff4a8;--active-bg:#ffd8ea;--player-frame-bg:#e8f4ff;--player-frame-border:#4b9ae8;--display-bg:#fff;--display-border:#73acd8;--title-color:#0050a4;--viz-bg:#effaff;--btn-bg:linear-gradient(to bottom,#fff,#d8ebff);--btn-text:#163a64;--btn-border:#79a6d2;--btn-upload-bg:#ff4f83;--status-bg:#edf7ff;--modal-border:#2866a6;}
+  body[data-theme="2ch"]{--accent-red:#b40000;--accent-blue:#003cff;--border-gray:#b5a987;--bg-main:#efe4bc;--app-bg:#fffdf0;--text-color:#18140e;--header-bg:#8e0000;--sidebar-bg:#f1e6c8;--panel-header-bg:linear-gradient(to bottom,#e2d3a6,#c4b380);--panel-header-text:#1c1308;--search-bg:#e8d9b5;--input-bg:#fffef7;--hover-bg:#e9f6cf;--active-bg:#d8efb4;--player-frame-bg:#f4edcf;--player-frame-border:#8d7344;--display-bg:#fffef2;--display-border:#bca777;--title-color:#8e0000;--viz-bg:#f7f1dc;--btn-bg:linear-gradient(to bottom,#fffef7,#dfd3b1);--btn-text:#21190d;--btn-border:#a9966b;--btn-upload-bg:#d23d3d;--status-bg:#eee3c0;--modal-border:#8e0000;}
+  body[data-theme="cyber"]{--accent-red:#ff1493;--accent-blue:#00bfff;--border-gray:#176a94;--bg-main:#07152a;--app-bg:#0c1e38;--text-color:#c9faff;--header-bg:#02101f;--sidebar-bg:#092844;--panel-header-bg:linear-gradient(to bottom,#0d5d93,#07315d);--panel-header-text:#aaf7ff;--search-bg:#0a2542;--input-bg:#061525;--hover-bg:#25205f;--active-bg:#5a1457;--player-frame-bg:#0c2a45;--player-frame-border:#00a8d6;--display-bg:#061725;--display-border:#1677a1;--title-color:#69fff0;--viz-bg:#03111f;--btn-bg:linear-gradient(to bottom,#10385c,#09233e);--btn-text:#c9faff;--btn-border:#1188b6;--btn-upload-bg:#ff3b9d;--status-bg:#0b2942;--modal-border:#00bfff;}
+  body[data-theme="vkei"]{--accent-red:#ff2f72;--accent-blue:#b22cff;--border-gray:#70406d;--bg-main:#140b20;--app-bg:#21102d;--text-color:#f6d8ea;--header-bg:#0a0610;--sidebar-bg:#281236;--panel-header-bg:linear-gradient(to bottom,#8f1f66,#451036);--panel-header-text:#ffd2e7;--search-bg:#2f173d;--input-bg:#170b21;--hover-bg:#4b1844;--active-bg:#681451;--player-frame-bg:#2b1237;--player-frame-border:#a83287;--display-bg:#190c23;--display-border:#743f75;--title-color:#ff7bb0;--viz-bg:#100715;--btn-bg:linear-gradient(to bottom,#452050,#2a1235);--btn-text:#ffe8f3;--btn-border:#87528b;--btn-upload-bg:#ff4d88;--status-bg:#2c1439;--modal-border:#ff2f72;}
+  body[data-theme="kawaii"]{--accent-red:#ff1493;--accent-blue:#00a6e8;--border-gray:#ff9cca;--bg-main:#ffe9f4;--app-bg:#fff;--text-color:#5a2148;--header-bg:#ff66b2;--sidebar-bg:#fff6fb;--panel-header-bg:linear-gradient(to bottom,#ffb3dc,#ff4ea4);--panel-header-text:#fff;--search-bg:#ffdff0;--input-bg:#fff;--hover-bg:#dffbff;--active-bg:#ffe59a;--player-frame-bg:#fff0f8;--player-frame-border:#ff8fc8;--display-bg:#fff;--display-border:#ffadd2;--title-color:#ed1687;--viz-bg:#fffaff;--btn-bg:linear-gradient(to bottom,#fff,#ffd8ec);--btn-text:#6d2355;--btn-border:#f292c3;--btn-upload-bg:#ff78bd;--status-bg:#fff5fb;--modal-border:#ff1493;}
+  body[data-theme="galgame"]{--accent-red:#ff6a00;--accent-blue:#2167d8;--border-gray:#93bce8;--bg-main:#dff4ff;--app-bg:#fff;--text-color:#183154;--header-bg:#204a8a;--sidebar-bg:#eef8ff;--panel-header-bg:linear-gradient(to bottom,#66b8ef,#3979c1);--panel-header-text:#fff;--search-bg:#d9efff;--input-bg:#fff;--hover-bg:#fff0c7;--active-bg:#ffd6b0;--player-frame-bg:#eaf7ff;--player-frame-border:#72aae0;--display-bg:#fff;--display-border:#8ebde8;--title-color:#225ca8;--viz-bg:#f5fbff;--btn-bg:linear-gradient(to bottom,#fff,#d5e9ff);--btn-text:#23456f;--btn-border:#7ba9dc;--btn-upload-bg:#ff9a45;--status-bg:#edf8ff;--modal-border:#2167d8;}
+
+  body[data-theme="default"] .logo-header,body[data-theme="kawaii"] .logo-header,body[data-theme="galgame"] .logo-header{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.11) 0 4px,transparent 4px 8px),linear-gradient(to bottom,var(--header-bg),var(--header-bg)) !important;}
+  @media (prefers-reduced-motion: reduce){.btn,.track-item,.lang-btn,.settings-check,.legal-nav a{transition:none !important;}}
 </style>
 
 <audio id="audio" preload="metadata"></audio>
@@ -1423,6 +2915,29 @@ function debounce(fn, delay = 150) {
         timer = setTimeout(() => fn.apply(this, args), delay);
     };
 }
+
+
+// Safari/WebKit compatibility helpers. Prefer feature detection over UA sniffing.
+const APPLE_WEBKIT = /AppleWebKit/i.test(navigator.userAgent);
+function safeFocus(el, preventScroll = false) {
+    if (!el || typeof el.focus !== 'function') return;
+    try { el.focus({ preventScroll }); }
+    catch (_) { el.focus(); }
+}
+function getViewportHeight() {
+    if (window.visualViewport && Number.isFinite(window.visualViewport.height)) return window.visualViewport.height;
+    return window.innerHeight || document.documentElement.clientHeight || 0;
+}
+function syncAppleViewportUnit() {
+    const h = getViewportHeight();
+    if (h > 0) document.documentElement.style.setProperty('--app-viewport-height', `${h}px`);
+}
+window.addEventListener('resize', syncAppleViewportUnit, { passive: true });
+window.addEventListener('orientationchange', syncAppleViewportUnit, { passive: true });
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncAppleViewportUnit, { passive: true });
+}
+syncAppleViewportUnit();
 
 const translations = {
     ja: {
@@ -1471,6 +2986,7 @@ const translations = {
 
         contactTitle: "お問い合わせフォーム", contactSend: "メッセージ送信", namePh: "お名前", emailPh: "メールアドレス", msgPh: "内容を入力...",
         contactSuccess: "ありがとうございます！メッセージを受け付けました。",
+        contactInvalid: "名前、メールアドレス、メッセージを入力してください。", contactSending: "送信中...", contactSent: "メッセージを送信しました。", contactError: "現在送信できません。もう一度お試しください。", playbackError: "この曲を再生できません。ファイルが利用できないか、ブラウザでブロックされている可能性があります。",
         uxAutoBadge: "スマートUI", trackLabel: "TRACK", current: "現在", tracks: "曲", hint: "/ 検索 · U インポート", vizMonitorTitle: "リアルタイム オーディオ / 周波数モニター", vizPeakLabel: "ピーク", vizRmsLabel: "RMS", vizBassLabel: "低音", vizMidLabel: "中音", vizTrebleLabel: "高音", vizAmpLabel: "アンプ / 出力", seekHint: "← / → スキップ", playHint: "Space 再生/一時停止", moreControls: "その他の操作", rewind10: "↶ 10秒", forward10: "10秒 ↷", resetVolume: "音量をリセット", focusPlayer: "プレーヤーにフォーカス", focus: "フォーカス", exit: "終了", ready: "待機", playing: "再生中", normal: "通常", contactIntro: "Andrewへ直接メッセージを送信できます。受信が完了すると確認が表示されます。", nameLabel: "名前", emailLabel: "メール", subjectLabel: "件名", messageLabel: "メッセージ", contactFooter: "メッセージは設定されたフォームサービスを通じて andrew.sbstian@gmail.com に配信されます。", langJapanese: "日本語", langEnglish: "英語", langIndonesian: "インドネシア語",
         tosTitle: "利用規約",
         tosBody: `<p>プラットフォームの高い技術水準とプライベート利用の理念を維持しつつ、外部オーディオソースの取り込みに対応するため、改訂されたポリシーは以下の3段落構成となっています。<br><br>プラットフォームのアーキテクチャ基盤は、ローカルファーストデータポリシーに基づいて構築されており、従来のクラウドストレージモデルよりも高性能な再生とユーザーのプライバシーを優先しています。ユーザーが主に自身のハードウェアからストリーミングすることを義務付けることで、システムは最高の速度とデータ主権を確保します。このハードウェアを保護するため、信号完全性ルールが厳格に適用されます。このプロトコルは、ソフトウェアによる音量ブーストを自動的に監視・制限し、デジタルクリッピングを防ぎ、オーディオの忠実度を維持し、繊細なスピーカー部品を長期的な損傷から保護します。<br><br>プロフェッショナルで高忠実度のユーザーエクスペリエンスを維持するため、インポートまたはストリーミングされるすべてのファイルは、標準化されたメタデータ要件に準拠する必要があります。アーティスト、アルバム、タイトルなどの必須タグが欠落しているトラックは、ライブラリの断片化やインターフェースの煩雑化を防ぐため、高度なソート機能や検索機能が制限される場合があります。しかしながら、このプラットフォームは、コンテンツ制作者による許可を得た上で、著作権フリーのサウンドのストリーミング配信を可能にすることで、外部コンテンツへの適応性を維持しています。これらの外部ストリームは、ローカルファイルと同様のメタデータおよび信号完全性基準に準拠しており、ユーザーが設定した環境へのシームレスな統合を保証します。<br><br>このプラットフォームは、高度な美的および技術的なカスタマイズ機能を提供しますが、商業的な用途での使用は厳しく禁止しています。インターフェース、高解像度オーディオ処理、そして独自のビジュアライザー機能は、あくまでも個人的な楽しみのために設計されており、小売店、公共施設、または商業スペースでのBGMとして使用することはできません。個人的な非商業的な用途に限定することで、このプラットフォームは公共放送機関ではなく、音楽愛好家個人のための強力なプライベートツールとしてのアイデンティティを維持しています。</p>`,
@@ -1523,6 +3039,7 @@ const translations = {
 
         contactTitle: "Contact Inquiry", contactSend: "Send Message", namePh: "Your Name", emailPh: "Your Email Address", msgPh: "Your Message...",
         contactSuccess: "Thank you! Your message has been received.",
+        contactInvalid: "Please complete your name, email, and message.", contactSending: "Sending...", contactSent: "Message sent successfully.", contactError: "Could not send right now. Please try again.", playbackError: "Unable to start this track. The audio file may be unavailable or blocked by the browser.",
         uxAutoBadge: "SMART UI", trackLabel: "TRACK", current: "Current", tracks: "tracks", hint: "/ Search · U Import", vizMonitorTitle: "REAL-TIME AUDIO / FREQUENCY MONITOR", vizPeakLabel: "PEAK", vizRmsLabel: "RMS", vizBassLabel: "BASS", vizMidLabel: "MID", vizTrebleLabel: "TREBLE", vizAmpLabel: "AMP / OUTPUT", seekHint: "← / → skip", playHint: "Space play/pause", moreControls: "More controls", rewind10: "↶ 10s", forward10: "10s ↷", resetVolume: "Reset volume", focusPlayer: "Focus player", focus: "Focus", exit: "Exit", ready: "READY", playing: "PLAYING", normal: "NORMAL", contactIntro: "Send a message directly to Andrew. You will receive a confirmation when the message is accepted.", nameLabel: "Name", emailLabel: "Email", subjectLabel: "Subject", messageLabel: "Message", contactFooter: "Messages are delivered to andrew.sbstian@gmail.com via the configured form service.", langJapanese: "Japanese", langEnglish: "English", langIndonesian: "Indonesian",
         tosTitle: "Terms of Service",
         tosBody: `<p>To accommodate the inclusion of external audio sources while maintaining the platform's high technical standards and private-use philosophy, the updated policy is organized into the following three-paragraph structure:<br><br>The platform’s architectural foundation is built upon a Local-First Data Policy, prioritizing high-performance playback and user privacy over traditional cloud storage models. By requiring users to stream primarily from their own hardware, the system ensures maximum speed and data sovereignty. To safeguard this hardware, a Signal Integrity Rule is strictly enforced; this protocol automatically monitors and caps software-based volume boosts to prevent digital clipping, preserving audio fidelity and protecting sensitive speaker components from long-term damage.<br><br>To maintain a professional, high-fidelity user experience, all imported or streamed files must adhere to Standardized Metadata requirements. Tracks missing essential tags—such as artist, album, or title—may be restricted from advanced sorting and discovery features to prevent library fragmentation and interface clutter. However, the platform remains adaptable to external content by permitting the streaming of non-copyrighted sounds, provided such usage is authorized by the content creator. These external streams are subject to the same metadata and signal integrity standards as local files to ensure a seamless integration into the user’s curated environment.<br><br>While the platform offers deep aesthetic and technical customization, it strictly prohibits Commercial Atmosphere Usage. The interface, its high-resolution audio processing, and its unique visualizer suites are designed exclusively for private enjoyment and may not be used to provide background music for retail, public business, or commercial spaces. By restricting usage to personal, non-commercial contexts, the platform preserves its identity as a powerful, private tool dedicated to the individual music enthusiast rather than a public broadcasting utility.</p>`,
@@ -1575,6 +3092,7 @@ const translations = {
 
         contactTitle: "Inquiry Kontak", contactSend: "Kirim Pesan", namePh: "Nama Anda", emailPh: "Alamat Email", msgPh: "Pesan Anda...",
         contactSuccess: "Terima kasih! Pesan Anda telah diterima.",
+        contactInvalid: "Lengkapi nama, email, dan pesan Anda.", contactSending: "Mengirim...", contactSent: "Pesan berhasil dikirim.", contactError: "Pesan belum dapat dikirim. Silakan coba lagi.", playbackError: "Lagu ini tidak dapat diputar. File mungkin tidak tersedia atau diblokir oleh browser.",
         uxAutoBadge: "UI CERDAS", trackLabel: "LAGU", current: "Sekarang", tracks: "lagu", hint: "/ Cari · U Impor", vizMonitorTitle: "MONITOR AUDIO / FREKUENSI REAL-TIME", vizPeakLabel: "PUNCAK", vizRmsLabel: "RMS", vizBassLabel: "BASS", vizMidLabel: "MID", vizTrebleLabel: "TREBLE", vizAmpLabel: "AMP / OUTPUT", seekHint: "← / → lewati", playHint: "Space putar/jeda", moreControls: "Kontrol lainnya", rewind10: "↶ 10 dtk", forward10: "10 dtk ↷", resetVolume: "Atur ulang volume", focusPlayer: "Fokus ke pemutar", focus: "Fokus", exit: "Keluar", ready: "SIAP", playing: "DIPUTAR", normal: "NORMAL", contactIntro: "Kirim pesan langsung ke Andrew. Anda akan menerima konfirmasi saat pesan diterima.", nameLabel: "Nama", emailLabel: "Email", subjectLabel: "Subjek", messageLabel: "Pesan", contactFooter: "Pesan dikirim ke andrew.sbstian@gmail.com melalui layanan formulir yang dikonfigurasi.", langJapanese: "Jepang", langEnglish: "Inggris", langIndonesian: "Indonesia",
         tosTitle: "Ketentuan Layanan",
         tosBody: `<p>Untuk mengakomodasi penyertaan sumber audio eksternal sambil mempertahankan standar teknis tinggi platform dan filosofi penggunaan pribadi, kebijakan yang diperbarui disusun dalam struktur tiga paragraf berikut:<br><br>Fondasi arsitektur platform dibangun di atas Kebijakan Data Lokal-Pertama, yang memprioritaskan pemutaran berkinerja tinggi dan privasi pengguna di atas model penyimpanan cloud tradisional. Dengan mewajibkan pengguna untuk melakukan streaming terutama dari perangkat keras mereka sendiri, sistem memastikan kecepatan maksimum dan kedaulatan data. Untuk melindungi perangkat keras ini, Aturan Integritas Sinyal diberlakukan secara ketat; protokol ini secara otomatis memantau dan membatasi peningkatan volume berbasis perangkat lunak untuk mencegah distorsi digital, menjaga fidelitas audio, dan melindungi komponen speaker yang sensitif dari kerusakan jangka panjang.<br><br>Untuk mempertahankan pengalaman pengguna yang profesional dan berkualitas tinggi, semua file yang diimpor atau di-streaming harus mematuhi persyaratan Metadata Standar. Trek yang kehilangan tag penting—seperti artis, album, atau judul—dapat dibatasi dari fitur pengurutan dan penemuan tingkat lanjut untuk mencegah fragmentasi pustaka dan kekacauan antarmuka. Namun, platform tetap dapat beradaptasi dengan konten eksternal dengan mengizinkan streaming suara yang tidak memiliki hak cipta, asalkan penggunaan tersebut diizinkan oleh pencipta konten. Aliran eksternal ini tunduk pada standar metadata dan integritas sinyal yang sama seperti file lokal untuk memastikan integrasi yang mulus ke dalam lingkungan yang dikurasi pengguna.<br><br>Meskipun platform ini menawarkan kustomisasi estetika dan teknis yang mendalam, platform ini secara tegas melarang Penggunaan Atmosfer Komersial. Antarmuka, pemrosesan audio resolusi tinggi, dan rangkaian visualisasi uniknya dirancang khusus untuk kenikmatan pribadi dan tidak boleh digunakan untuk menyediakan musik latar untuk ritel, bisnis publik, atau ruang komersial. Dengan membatasi penggunaan pada konteks pribadi dan non-komersial, platform ini mempertahankan identitasnya sebagai alat pribadi yang ampuh yang didedikasikan untuk penggemar musik individu, bukan sebagai utilitas penyiaran publik.</p>`,
@@ -1591,6 +3109,7 @@ let library = [];
 let currentIndex = -1;
 let mode = 'normal';
 let currentUrl = null;
+let playRequestId = 0;
 let currentLang = 'ja';
 let isSeeking = false;
 let searchQuery = "";
@@ -1626,8 +3145,8 @@ function normalizePerfSettings() {
     perfSettings.bgPause = perfSettings.bgPause !== false;
     perfSettings.preload = ['metadata','auto'].includes(perfSettings.preload) ? perfSettings.preload : 'metadata';
     perfSettings.fftSize = [128,256,512,1024].includes(Number(perfSettings.fftSize)) ? Number(perfSettings.fftSize) : 512;
-    perfSettings.sensitivity = Math.max(0.5, Math.min(1.6, Number(perfSettings.sensitivity) || 1));
-    perfSettings.smoothing = Math.max(0, Math.min(0.95, Number(perfSettings.smoothing) || 0.78));
+    perfSettings.sensitivity = Math.max(0.5, Math.min(1.6, Number.isFinite(Number(perfSettings.sensitivity)) ? Number(perfSettings.sensitivity) : 1));
+    perfSettings.smoothing = Math.max(0, Math.min(0.95, Number.isFinite(Number(perfSettings.smoothing)) ? Number(perfSettings.smoothing) : 0.78));
     perfSettings.style = ['spectrum','mirror','scope'].includes(perfSettings.style) ? perfSettings.style : 'spectrum';
     perfSettings.canvasDpr = [1,1.5,2].includes(Number(perfSettings.canvasDpr)) ? Number(perfSettings.canvasDpr) : 2;
     perfSettings.density = ['compact','comfortable'].includes(perfSettings.density) ? perfSettings.density : 'comfortable';
@@ -1704,7 +3223,11 @@ function changePerfPreset(val) {
         perfSettings.preload = 'metadata';
     } else {
         detectSystemPerformance();
+        localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
+        if (perfSettings.fps === 0) stopVisualizer();
+        return;
     }
+    applyPerfSettingsToUI();
     savePerfSettings();
 }
 
@@ -1729,6 +3252,105 @@ function savePerfSettings() {
     if (perfSettings.fps === 0) {
         stopVisualizer();
     }
+}
+
+// --- UI Sound Effects -----------------------------------------------------
+// Subtle synthesized feedback keeps the interface tactile without shipping
+// external sound files. SFX reuse the existing Web Audio context so they stay
+// lightweight and respect the browser's user-activation policy.
+let uiSfxReady = false;
+let uiSfxMaster = null;
+let lastUiSfxAt = 0;
+
+function initUISfx() {
+    if (!window.AudioContext && !window.webkitAudioContext) return false;
+    if (!audioCtx) initAudioContext();
+    if (!audioCtx) return false;
+
+    try {
+        if (!uiSfxMaster) {
+            uiSfxMaster = audioCtx.createGain();
+            uiSfxMaster.gain.value = 0.055;
+            uiSfxMaster.connect(audioCtx.destination);
+        }
+        if (audioCtx.state === 'suspended') { const p = audioCtx.resume(); if (p && typeof p.catch === 'function') p.catch(() => {}); }
+        uiSfxReady = audioCtx.state !== 'closed';
+        return uiSfxReady;
+    } catch (e) {
+        uiSfxReady = false;
+        return false;
+    }
+}
+
+function playUISfx(kind = 'click') {
+    if (!uiSfxReady && !initUISfx()) return;
+    if (!audioCtx || !uiSfxMaster || audioCtx.state === 'closed') return;
+
+    const nowMs = performance.now();
+    // Avoid a noisy burst when the pointer crosses nested interactive elements.
+    if (nowMs - lastUiSfxAt < 32) return;
+    lastUiSfxAt = nowMs;
+
+    const profiles = {
+        hover:   { f: 520, end: 620, d: 0.055, v: 0.42, wave: 'sine' },
+        click:   { f: 760, end: 520, d: 0.075, v: 0.62, wave: 'triangle' },
+        toggle:  { f: 650, end: 940, d: 0.095, v: 0.68, wave: 'sine' },
+        select:  { f: 580, end: 760, d: 0.085, v: 0.52, wave: 'sine' },
+        error:   { f: 180, end: 120, d: 0.14,  v: 0.52, wave: 'square' }
+    };
+    const cfg = profiles[kind] || profiles.click;
+
+    try {
+        const t0 = audioCtx.currentTime + 0.001;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = cfg.wave;
+        osc.frequency.setValueAtTime(cfg.f, t0);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(40, cfg.end), t0 + cfg.d);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(cfg.v, t0 + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + cfg.d);
+        osc.connect(gain);
+        gain.connect(uiSfxMaster);
+        osc.start(t0);
+        osc.stop(t0 + cfg.d + 0.02);
+    } catch (e) {
+        // UI feedback is strictly optional; never let SFX break app controls.
+    }
+}
+
+function installUISoundEffects() {
+    const interactiveSelector = [
+        'button', 'a[href]', '[onclick]',
+        'input[type="range"]', 'input[type="checkbox"]', 'input[type="radio"]',
+        'select', '.track-item', '.settings-check', '.more-controls summary'
+    ].join(',');
+
+    document.addEventListener('pointerover', (e) => {
+        const target = e.target.closest?.(interactiveSelector);
+        if (!target || target.disabled) return;
+        if (e.relatedTarget && target.contains(e.relatedTarget)) return;
+        playUISfx('hover');
+    }, { passive: true });
+
+    document.addEventListener('pointerdown', (e) => {
+        const target = e.target.closest?.(interactiveSelector);
+        if (!target || target.disabled) return;
+        initUISfx();
+        const type = target.classList.contains('track-item') ||
+            target.matches('select, input[type="checkbox"], input[type="radio"]') ||
+            target.matches('.more-controls summary') ? 'select' : 'click';
+        playUISfx(type);
+    }, { passive: true });
+
+    document.addEventListener('keydown', (e) => {
+        if (!['Enter', ' ', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+        const target = e.target.closest?.(interactiveSelector);
+        if (!target || target.disabled) return;
+        if (e.repeat) return;
+        initUISfx();
+        playUISfx('click');
+    }, { passive: true });
 }
 
 function initAudioContext() {
@@ -1978,9 +3600,13 @@ function setLanguage(lang) {
     currentLang = lang;
     const t = translations[lang];
     localStorage.setItem('andre_music_lang', lang);
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    document.documentElement.lang = lang === 'ja' ? 'ja' : lang === 'id' ? 'id' : 'en';
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
     const targetBtn = document.getElementById(`lang-${lang}`);
-    if (targetBtn) targetBtn.classList.add('active');
+    if (targetBtn) { targetBtn.classList.add('active'); targetBtn.setAttribute('aria-pressed', 'true'); }
 
     const map = {
         'drop-overlay': 'dropOverlay',
@@ -2079,6 +3705,37 @@ function setLanguage(lang) {
 
 let confirmResolver = null;
 let notificationSeq = 0;
+const modalFocusStack = [];
+let activeModalId = null;
+
+function getModalFocusable(modal) {
+    if (!modal) return [];
+    return Array.from(modal.querySelectorAll('button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])')).filter(el => !el.disabled && el.getAttribute('aria-hidden') !== 'true' && el.offsetParent !== null);
+}
+
+function prepareModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return null;
+    if (!modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
+    if (!modal.querySelector('.modal-content')?.hasAttribute('tabindex')) modal.querySelector('.modal-content')?.setAttribute('tabindex', '-1');
+    return modal;
+}
+
+function safeFocus(el, options = {preventScroll:true}) {
+    if (!el || typeof el.focus !== 'function') return false;
+    try {
+        el.focus(options);
+        return document.activeElement === el;
+    } catch (_) {
+        try { el.focus(); return document.activeElement === el; } catch (_) { return false; }
+    }
+}
+
+function focusModalFirstControl(modal) {
+    const focusables = getModalFocusable(modal);
+    safeFocus(focusables[0] || modal.querySelector('.modal-content'));
+}
+
 
 function notify(message, type = 'info', options = {}) {
     const stack = document.getElementById('notification-stack');
@@ -2120,10 +3777,14 @@ function customConfirm(message, options = {}) {
     copy.textContent = message;
     accept.textContent = options.acceptLabel || t.accept || 'Confirm';
     cancel.textContent = options.cancelLabel || t.cancel || 'Cancel';
+    prepareModal('confirm-modal');
+    const previous = document.activeElement;
+    modalFocusStack.push(previous);
+    activeModalId = 'confirm-modal';
     modal.style.display = 'block';
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    requestAnimationFrame(() => (options.focusCancel !== false ? cancel : accept).focus());
+    requestAnimationFrame(() => safeFocus(options.focusCancel !== false ? cancel : accept));
 
     return new Promise(resolve => {
         confirmResolver = resolve;
@@ -2133,7 +3794,10 @@ function customConfirm(message, options = {}) {
             confirmResolver = null;
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = '';
+            activeModalId = null;
+            syncModalScrollLock();
+            const restore = modalFocusStack.pop();
+            if (restore && typeof restore.focus === 'function') requestAnimationFrame(() => safeFocus(restore));
             resolver(value);
         };
         accept.onclick = () => finish(true);
@@ -2144,17 +3808,31 @@ function customConfirm(message, options = {}) {
     });
 }
 
+function syncModalScrollLock() {
+    const anyVisible = Array.from(document.querySelectorAll('.modal')).some(m => m.style.display === 'block');
+    document.body.style.overflow = anyVisible ? 'hidden' : '';
+}
+
 function openModal(id) {
-    const el = document.getElementById(id);
+    const el = prepareModal(id);
     if (!el) return;
+    const previous = document.activeElement;
+    modalFocusStack.push(previous);
+    activeModalId = id;
     el.style.display = "block";
     el.setAttribute("aria-hidden", "false");
+    syncModalScrollLock();
+    requestAnimationFrame(() => focusModalFirstControl(el));
 }
 function closeModal(id) {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.display = "none";
     el.setAttribute("aria-hidden", "true");
+    if (activeModalId === id) activeModalId = null;
+    syncModalScrollLock();
+    const restore = modalFocusStack.pop();
+    if (restore && typeof restore.focus === 'function') requestAnimationFrame(() => safeFocus(restore));
 }
 window.addEventListener("click", (e) => {
     if (e.target.classList && e.target.classList.contains("modal") && e.target.id !== "confirm-modal") closeModal(e.target.id);
@@ -2174,9 +3852,12 @@ function updateVolumeUI() {
     const dockVol = document.getElementById('dockVolumeSlider');
     if (dockVol) dockVol.value = String(audio.volume);
     const mute = document.getElementById('muteBtn');
-    if (mute) mute.classList.toggle('active', audio.muted);
+    if (mute) { mute.classList.toggle('active', audio.muted); mute.setAttribute('aria-pressed', String(audio.muted)); }
     const dockMute = document.getElementById('dockMuteBtn');
-    if (dockMute) dockMute.classList.toggle('active', audio.muted);
+    if (dockMute) { dockMute.classList.toggle('active', audio.muted); dockMute.setAttribute('aria-pressed', String(audio.muted)); }
+    const volNow = audio.muted ? 0 : audio.volume;
+    volumeSlider?.setAttribute('aria-valuenow', String(volNow));
+    document.getElementById('dockVolumeSlider')?.setAttribute('aria-valuenow', String(audio.volume));
 }
 
 function updateUXState() {
@@ -2203,6 +3884,12 @@ function seekBy(seconds) {
     audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
 }
 function setupUXControls() {
+    const focusDock = document.getElementById('focusDock');
+    // Keep the focus dock outside .app so fixed positioning is always relative to the viewport,
+    // even when the app/layout gains transforms, filters, or other containing-block styles.
+    if (focusDock && focusDock.parentElement !== document.body) {
+        document.body.appendChild(focusDock);
+    }
     const search = document.getElementById('searchInput');
     const clear = document.getElementById('searchClearBtn');
     const sortBtn = document.getElementById('sortBtn');
@@ -2223,24 +3910,40 @@ function setupUXControls() {
     const dockVol = document.getElementById('dockVolumeSlider');
     if (clear) clear.onclick = () => { search.value = ''; searchQuery = ''; renderLibrary(); search.focus(); updateUXState(); };
     if (sortBtn) sortBtn.onclick = () => {
-        library = [...library].sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
-        currentIndex = library.length ? Math.max(0, Math.min(currentIndex, library.length - 1)) : -1;
-        sortBtn.textContent = sortBtn.textContent === 'A→Z' ? 'Z→A' : 'A→Z';
-        if (sortBtn.textContent === 'Z→A') library.reverse();
+        const currentId = currentIndex >= 0 ? library[currentIndex]?.id : null;
+        const ascending = sortBtn.dataset.order !== 'desc';
+        library = [...library].sort((a, b) => {
+            const cmp = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+            return ascending ? cmp : -cmp;
+        });
+        sortBtn.dataset.order = ascending ? 'desc' : 'asc';
+        sortBtn.textContent = ascending ? 'Z→A' : 'A→Z';
+        currentIndex = currentId == null ? -1 : library.findIndex(track => track.id === currentId);
         renderLibrary();
         focusCurrentTrack();
     };
     if (focusBtn) focusBtn.onclick = focusCurrentTrack;
     if (rewind) rewind.onclick = () => seekBy(-10);
     if (forward) forward.onclick = () => seekBy(10);
-    if (resetVolume) resetVolume.onclick = () => { audio.muted = false; audio.volume = 1; volumeSlider.value = '1'; volumeSlider.dispatchEvent(new Event('input')); };
+    if (resetVolume) resetVolume.onclick = () => { audio.muted = false; audio.volume = 1; volumeSlider.value = '1'; volumeSlider.dispatchEvent(typeof Event === 'function' ? new Event('input', { bubbles: true }) : document.createEvent('Event')); };
     if (focusPlayer) focusPlayer.onclick = () => document.querySelector('.main-player')?.scrollIntoView({behavior:'smooth', block:'center'});
     const setFocusMode = (enabled) => {
         document.body.classList.toggle('focus-mode', enabled);
         if (focusModeBtn) { focusModeBtn.classList.toggle('active', enabled); focusModeBtn.setAttribute('aria-pressed', String(enabled)); }
         localStorage.setItem('andre_music_focus_mode', enabled ? '1' : '0');
-        if (enabled) { document.getElementById('dockSeek')?.focus({preventScroll:true}); document.getElementById('dockPlayBtn')?.focus({preventScroll:true}); }
-        updateFocusDock();
+        if (enabled) {
+            // Reassert viewport anchoring after the class changes and avoid changing scroll position.
+            if (focusDock && focusDock.parentElement !== document.body) document.body.appendChild(focusDock);
+            requestAnimationFrame(() => {
+                focusDock?.style.setProperty('position', 'fixed', 'important');
+                focusDock?.style.setProperty('bottom', 'max(10px, env(safe-area-inset-bottom, 0px))', 'important');
+                safeFocus(document.getElementById('dockSeek'));
+                safeFocus(document.getElementById('dockPlayBtn'));
+                updateFocusDock();
+            });
+        } else {
+            updateFocusDock();
+        }
     };
     const updateFocusDock = () => {
         const cur = document.getElementById('dockCurrentTime');
@@ -2252,12 +3955,32 @@ function setupUXControls() {
         if (cur) cur.textContent = document.getElementById('currentTime')?.textContent || '0:00';
         if (dur) dur.textContent = document.getElementById('duration')?.textContent || '0:00';
         if (seek && audio.duration) seek.value = String((audio.currentTime / audio.duration) * 100);
-        if (label) label.textContent = audio.paused ? 'PLAY' : 'PAUSE';
+        if (label) {
+            const t = translations[currentLang] || translations.en;
+            label.textContent = audio.paused ? (t.play || 'PLAY') : (t.pause || 'PAUSE');
+        }
         if (vol) vol.value = String(audio.volume);
         if (vr) vr.textContent = `VOL ${audio.muted ? 0 : Math.round(audio.volume*100)}%`;
     };
     window.setFocusMode = setFocusMode;
     window.updateFocusDock = updateFocusDock;
+    const syncFocusDockViewport = () => {
+        if (!document.body.classList.contains('focus-mode') || !focusDock) return;
+        // Keep the dock attached to the visible viewport on mobile browsers when the URL bar/IME changes viewport height.
+        const vv = window.visualViewport;
+        if (vv) {
+            const bottomGap = Math.max(5, window.innerHeight - (vv.offsetTop + vv.height));
+            focusDock.style.bottom = `${bottomGap}px`;
+        } else {
+            focusDock.style.removeProperty('bottom');
+        }
+    };
+    window.addEventListener('resize', syncFocusDockViewport, { passive: true });
+    window.addEventListener('orientationchange', syncFocusDockViewport, { passive: true });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncFocusDockViewport, { passive: true });
+        window.visualViewport.addEventListener('scroll', syncFocusDockViewport, { passive: true });
+    }
     if (focusModeBtn) focusModeBtn.onclick = () => setFocusMode(!document.body.classList.contains('focus-mode'));
     if (dockExit) dockExit.onclick = () => setFocusMode(false);
     if (dockPlay) dockPlay.onclick = () => document.getElementById('playBtn')?.click();
@@ -2279,9 +4002,10 @@ function renderLibrary() {
 
     const fragment = document.createDocumentFragment();
     const query = searchQuery.toLowerCase();
+    const t = translations[currentLang] || translations.en;
 
     const filtered = library
-        .map((t, originalIdx) => ({ track: t, originalIdx }))
+        .map((track, originalIdx) => ({ track, originalIdx }))
         .filter(item => item.track.name.toLowerCase().includes(query));
 
     filtered.forEach(item => {
@@ -2289,18 +4013,28 @@ function renderLibrary() {
         const li = document.createElement('li');
         li.className = 'track-item' + (originalIdx === currentIndex ? ' active' : '');
         li.dataset.index = originalIdx;
-        
+
+        const play = document.createElement('button');
+        play.type = 'button';
+        play.className = 'track-play';
+        play.dataset.index = originalIdx;
+        play.setAttribute('aria-label', `${t.play || 'Play'}: ${cleanFileName(track.name)}`);
+        if (originalIdx === currentIndex) play.setAttribute('aria-current', 'true');
+
         const info = document.createElement('span');
         info.className = 'track-info';
         info.textContent = `♪ ${track.name}`;
+        play.appendChild(info);
 
         const del = document.createElement('button');
+        del.type = 'button';
         del.className = 'del-btn';
         del.textContent = 'DEL';
         del.dataset.id = track.id;
         del.dataset.index = originalIdx;
+        del.setAttribute('aria-label', `Delete ${cleanFileName(track.name)}`);
 
-        li.append(info, del);
+        li.append(play, del);
         fragment.appendChild(li);
     });
 
@@ -2308,12 +4042,19 @@ function renderLibrary() {
     if (filtered.length === 0) {
         const empty = document.createElement('li');
         empty.className = 'empty-library';
-        const t = translations[currentLang] || translations.en;
+        empty.setAttribute('role', 'status');
         empty.textContent = library.length ? (t.noResults || 'No tracks match your search.') : (t.emptyPlaylist || t.emptyLibrary || 'You have an empty playlist. Import music from your files.');
         list.appendChild(empty);
     }
     document.getElementById('count').textContent = library.length;
     updateUXState();
+}
+
+const fileInput = document.getElementById('fileInput');
+const uploadLabel = document.getElementById('label-upload');
+if (fileInput && uploadLabel) {
+    fileInput.addEventListener('focus', () => uploadLabel.classList.add('file-focus'));
+    fileInput.addEventListener('blur', () => uploadLabel.classList.remove('file-focus'));
 }
 
 document.getElementById('trackList').addEventListener('click', (e) => {
@@ -2326,10 +4067,18 @@ document.getElementById('trackList').addEventListener('click', (e) => {
         return;
     }
 
-    const trackItem = e.target.closest('.track-item');
-    if (trackItem) {
-        const arrayIdx = Number(trackItem.dataset.index);
+    const playBtn = e.target.closest('.track-play');
+    if (playBtn) {
+        const arrayIdx = Number(playBtn.dataset.index);
         playTrack(arrayIdx);
+    }
+});
+
+document.getElementById('trackList').addEventListener('keydown', (e) => {
+    const playBtn = e.target.closest('.track-play');
+    if (playBtn && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        playBtn.click();
     }
 });
 
@@ -2347,37 +4096,44 @@ async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
     initAudioContext();
 
-    if (currentUrl) {
-        URL.revokeObjectURL(currentUrl);
-        currentUrl = null;
-    }
-    
-    currentIndex = index;
-    const t = library[currentIndex];
-
-    document.getElementById('seek').value = 0;
-    document.getElementById('currentTime').textContent = "0:00";
+    const requestId = ++playRequestId;
+    const track = library[index];
+    if (!track) return;
 
     try {
-        const blob = await getTrackBlob(t.id);
-        if (!blob) throw new Error("Audio blob missing in IndexedDB");
+        const blob = await getTrackBlob(track.id);
+        if (requestId !== playRequestId) return;
+        if (!blob) throw new Error('Audio blob missing in IndexedDB');
 
-        currentUrl = URL.createObjectURL(blob);
-        audio.src = currentUrl;
+        const nextUrl = URL.createObjectURL(blob);
+        const previousUrl = currentUrl;
+
+        currentUrl = nextUrl;
+        currentIndex = index;
+        document.getElementById('seek').value = 0;
+        document.getElementById('currentTime').textContent = '0:00';
+        document.getElementById('duration').textContent = '0:00';
+        document.getElementById('nowTitle').textContent = cleanFileName(track.name);
+
+        audio.src = nextUrl;
         audio.load();
-
         await audio.play();
-    } catch(e) {
-        console.warn("User interaction needed or playback error: ", e);
-        notify("Unable to start this track. The audio file may be unavailable or blocked by the browser.", "error");
+
+        if (previousUrl) URL.revokeObjectURL(previousUrl);
+    } catch (e) {
+        if (requestId !== playRequestId) return;
+        console.warn('Playback error:', e);
+        notify((translations[currentLang] || translations.en).playbackError || 'Unable to start this track. The audio file may be unavailable or blocked by the browser.', 'error');
+        renderLibrary();
     }
 
-    document.getElementById('nowTitle').textContent = cleanFileName(t.name);
+    if (requestId !== playRequestId) return;
     renderLibrary();
-    updateMediaSession(t);
+    updateMediaSession(track);
 
     if (isRandom) {
         setTimeout(() => {
+            if (requestId !== playRequestId) return;
             const activeItem = document.querySelector('.track-item.active');
             if (activeItem) {
                 activeItem.classList.add('picking-animation');
@@ -2389,48 +4145,68 @@ async function playTrack(index, isRandom = false) {
 }
 
 function updateMediaSession(track) {
-    if ('mediaSession' in navigator) {
+    if (!('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
+    try {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: cleanFileName(track.name),
             artist: 'AndreMusic Local Library',
             album: 'AndreMusic'
         });
-
-        navigator.mediaSession.setActionHandler('play', () => audio.play());
-        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
-        navigator.mediaSession.setActionHandler('previoustrack', () => document.getElementById('prevBtn').click());
-        navigator.mediaSession.setActionHandler('nexttrack', () => document.getElementById('nextBtn').click());
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-            if (details.fastSeek && 'fastSeek' in audio) {
-                audio.fastSeek(details.seekTime);
-                return;
+        const handlers = {
+            play: () => audio.play(),
+            pause: () => audio.pause(),
+            previoustrack: () => document.getElementById('prevBtn')?.click(),
+            nexttrack: () => document.getElementById('nextBtn')?.click(),
+            seekto: (details) => {
+                if (!Number.isFinite(details.seekTime)) return;
+                if (details.fastSeek && 'fastSeek' in audio && typeof audio.fastSeek === 'function') audio.fastSeek(details.seekTime);
+                else audio.currentTime = details.seekTime;
             }
-            audio.currentTime = details.seekTime;
+        };
+        Object.entries(handlers).forEach(([action, handler]) => {
+            try { navigator.mediaSession.setActionHandler(action, handler); } catch (_) {}
         });
+    } catch (e) {
+        console.warn('Media Session update skipped:', e);
     }
 }
 
 async function deleteTrack(dbId, arrayIndex) {
-    const db = await openDB();
-    await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).delete(dbId).onsuccess = resolve;
-        tx.onerror = reject;
-    });
+    try {
+        const db = await openDB();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).delete(dbId);
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error('Delete failed'));
+            tx.onabort = () => reject(tx.error || new Error('Delete aborted'));
+        });
 
-    if (arrayIndex === currentIndex) {
-        audio.pause(); 
-        audio.src = ""; 
-        currentIndex = -1;
-        document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-        document.querySelector('.now-playing-display')?.classList.remove('is-playing');
-        stopVisualizer();
-    } else if (arrayIndex < currentIndex) {
-        currentIndex--;
+        const wasCurrent = arrayIndex === currentIndex;
+        if (wasCurrent) {
+            ++playRequestId;
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+            if (currentUrl) URL.revokeObjectURL(currentUrl);
+            currentUrl = null;
+            currentIndex = -1;
+            document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+            document.getElementById('duration').textContent = '0:00';
+            document.getElementById('currentTime').textContent = '0:00';
+            document.getElementById('seek').value = 0;
+            document.querySelector('.now-playing-display')?.classList.remove('is-playing');
+            stopVisualizer();
+        } else if (arrayIndex < currentIndex) {
+            currentIndex--;
+        }
+
+        library.splice(arrayIndex, 1);
+        renderLibrary();
+    } catch (e) {
+        console.warn('Delete track error:', e);
+        notify('Unable to delete this track right now.', 'error');
     }
-
-    library.splice(arrayIndex, 1);
-    renderLibrary();
 }
 
 function getNext() {
@@ -2457,7 +4233,9 @@ audio.ontimeupdate = () => {
     const curM = Math.floor(audio.currentTime / 60);
     const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
     document.getElementById('currentTime').textContent = `${curM}:${curS}`;
-    document.getElementById('seek').value = (audio.currentTime / audio.duration) * 100;
+    const seekPct = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('seek').value = seekPct;
+    document.getElementById('seek').setAttribute('aria-valuenow', String(Math.round(seekPct)));
     window.updateFocusDock?.();
 };
 
@@ -2469,14 +4247,18 @@ seekInput.ontouchend = () => { isSeeking = false; };
 seekInput.oninput = (e) => {
     if (audio.duration && !isNaN(audio.duration)) {
         audio.currentTime = (e.target.value / 100) * audio.duration;
+        e.target.setAttribute('aria-valuenow', String(Math.round(Number(e.target.value))));
     }
 };
 
 const volumeSlider = document.getElementById('volumeSlider');
 const savedVolume = localStorage.getItem('andre_music_volume');
 if (savedVolume !== null) {
-    audio.volume = parseFloat(savedVolume);
-    volumeSlider.value = audio.volume;
+    const parsedVolume = Number.parseFloat(savedVolume);
+    if (Number.isFinite(parsedVolume)) {
+        audio.volume = Math.max(0, Math.min(1, parsedVolume));
+        volumeSlider.value = String(audio.volume);
+    }
 }
 
 volumeSlider.oninput = (e) => {
@@ -2490,9 +4272,7 @@ updateVolumeUI();
 
 // --- Strict File Filtering to Block Videos and Ensure Audio Only ---
 async function handleFilesImport(files) {
-    const fileList = Array.from(files);
-    
-    // Explicitly filter out any video types or video extensions (.mp4, .mov, .avi, .mkv, .webm, etc.)
+    const fileList = Array.from(files || []);
     const audioFiles = fileList.filter(f => {
         const isVideo = f.type.startsWith('video/') || /\.(mp4|mov|avi|mkv|wmv|flv|webm|m4v)$/i.test(f.name);
         if (isVideo) return false;
@@ -2500,26 +4280,40 @@ async function handleFilesImport(files) {
     });
 
     if (audioFiles.length === 0) {
-        if (fileList.length > 0) {
-            notify((translations[currentLang] || translations.en).invalidAudio, "error");
-        }
+        if (fileList.length > 0) notify((translations[currentLang] || translations.en).invalidAudio, 'error');
         return;
     }
 
-    const db = await openDB();
-    let importedCount = 0;
-    for (const f of audioFiles) {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.add({ name: f.name, blob: f });
-        req.onsuccess = (ev) => {
-            library.push({ id: ev.target.result, name: f.name });
-            importedCount++;
-            renderLibrary();
-            if (importedCount === audioFiles.length) {
-                notify(`${importedCount} track${importedCount === 1 ? '' : 's'} imported successfully.`, 'success');
+    try {
+        const db = await openDB();
+        let importedCount = 0;
+
+        for (const f of audioFiles) {
+            try {
+                const id = await new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error || new Error('Import failed'));
+                    tx.onabort = () => reject(tx.error || new Error('Import aborted'));
+                });
+                library.push({ id, name: f.name });
+                importedCount++;
+            } catch (err) {
+                console.warn('Skipping file:', f.name, err);
             }
-        };
+        }
+
+        renderLibrary();
+        if (importedCount > 0) {
+            const suffix = importedCount === audioFiles.length ? '' : ` (${audioFiles.length - importedCount} skipped)`;
+            notify(`${importedCount} track${importedCount === 1 ? '' : 's'} imported successfully.${suffix}`, 'success');
+        } else {
+            notify('The selected audio files could not be imported.', 'error');
+        }
+    } catch (err) {
+        console.warn('Import error:', err);
+        notify('Unable to access the music library storage.', 'error');
     }
 }
 
@@ -2558,15 +4352,21 @@ document.getElementById('clearBtn').onclick = async () => {
             tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
             tx.onerror = reject;
         });
+        ++playRequestId;
         library = []; 
         currentIndex = -1; 
         audio.pause(); 
-        audio.src = "";
+        audio.removeAttribute('src');
+        audio.load();
         document.querySelector('.now-playing-display')?.classList.remove('is-playing');
         stopVisualizer();
-        if(currentUrl) URL.revokeObjectURL(currentUrl);
-        renderLibrary();
+        if (currentUrl) URL.revokeObjectURL(currentUrl);
+        currentUrl = null;
         document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
+        document.getElementById('duration').textContent = '0:00';
+        document.getElementById('currentTime').textContent = '0:00';
+        document.getElementById('seek').value = 0;
+        renderLibrary();
         notify(translations[currentLang].status, 'success');
     }
 };
@@ -2599,10 +4399,11 @@ audio.onpause = () => {
     stopVisualizer();
 };
 audio.onended = () => {
-    if(mode === 'loopOne') playTrack(currentIndex);
-    else if(mode === 'loopAll' || mode === 'shuffle') playTrack(getNext());
-    else if(currentIndex < library.length - 1) playTrack(currentIndex + 1);
-    else stopVisualizer();
+    if (mode === 'loopOne') { playTrack(currentIndex); return; }
+    if (mode === 'loopAll' || mode === 'shuffle') { playTrack(getNext()); return; }
+    if (currentIndex < library.length - 1) { playTrack(currentIndex + 1); return; }
+    stopVisualizer();
+    updateUXState();
 };
 
 document.getElementById('nextBtn').onclick = () => {
@@ -2655,14 +4456,14 @@ document.getElementById('contactForm').onsubmit = async (e) => {
     const message = String(data.get('message') || '').trim();
 
     if (!name || !email || !message) {
-        status.textContent = 'Please complete your name, email, and message.';
+        status.textContent = (translations[currentLang] || translations.en).contactInvalid;
         status.className = 'contact-status error';
         return;
     }
 
     if (data.get('_honey')) return;
 
-    status.textContent = 'Sending...';
+    status.textContent = (translations[currentLang] || translations.en).contactSending;
     status.className = 'contact-status';
     submit.disabled = true;
     try {
@@ -2674,22 +4475,36 @@ document.getElementById('contactForm').onsubmit = async (e) => {
         const result = await response.json().catch(() => ({}));
         if (!response.ok || result.success === false) throw new Error(result.message || 'Submission failed');
 
-        status.textContent = 'Message sent successfully.';
+        status.textContent = (translations[currentLang] || translations.en).contactSent;
         status.className = 'contact-status success';
-        notify('Message sent successfully.', 'success');
+        notify((translations[currentLang] || translations.en).contactSent, 'success');
         setTimeout(() => { closeModal('contact-modal'); form.reset(); status.textContent = ''; status.className = 'contact-status'; }, 900);
     } catch (err) {
         console.warn('Contact submission error:', err);
-        status.textContent = 'Could not send right now. Please try again.';
+        status.textContent = (translations[currentLang] || translations.en).contactError;
         status.className = 'contact-status error';
-        notify('Unable to send the message. Please try again.', 'error');
+        notify((translations[currentLang] || translations.en).contactError, 'error');
     } finally {
         submit.disabled = false;
     }
 };
 
+document.addEventListener('keydown', (e) => {
+    if (!activeModalId) return;
+    const modal = document.getElementById(activeModalId);
+    if (!modal || modal.getAttribute('aria-hidden') === 'true') return;
+    if (e.key === 'Tab') {
+        const focusables = getModalFocusable(modal);
+        if (!focusables.length) { e.preventDefault(); return; }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+});
+
 window.addEventListener('keydown', (e) => {
-    if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
+    if (document.activeElement?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
         if (e.code === 'Escape') document.activeElement.blur();
         return;
     }
@@ -2740,7 +4555,9 @@ window.addEventListener('keydown', (e) => {
 });
 
 (async function init() {
+    document.querySelectorAll('.modal:not(#confirm-modal)').forEach(modal => { if (!modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true'); });
     setupUXControls();
+installUISoundEffects();
     const hideLoading = () => {
         const overlay = document.getElementById('loading-overlay');
         if (overlay) {
