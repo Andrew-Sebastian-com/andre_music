@@ -2902,6 +2902,142 @@ body.focus-mode {
 
   body[data-theme="default"] .logo-header,body[data-theme="kawaii"] .logo-header,body[data-theme="galgame"] .logo-header{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.11) 0 4px,transparent 4px 8px),linear-gradient(to bottom,var(--header-bg),var(--header-bg)) !important;}
   @media (prefers-reduced-motion: reduce){.btn,.track-item,.lang-btn,.settings-check,.legal-nav a{transition:none !important;}}
+
+/* =========================================================
+   PERFORMANCE / STABILITY HARDENING
+   ========================================================= */
+html, body {
+  min-width: 0;
+  overscroll-behavior-x: none;
+}
+.audio-dashboard,
+.viz-shell,
+#visualizer {
+  contain: layout paint;
+}
+.track-list {
+  contain: content;
+}
+.track-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 46px;
+}
+.audio-meter > span,
+.audio-level-fill {
+  will-change: auto;
+}
+#visualizer {
+  image-rendering: auto;
+  touch-action: pan-y;
+}
+.low-effects .app,
+.low-effects .focus-dock,
+.low-effects .modal-content {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.low-effects .app {
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+}
+.low-effects .focus-dock,
+.low-effects .modal-content,
+.low-effects .site-notification {
+  box-shadow: 0 5px 18px rgba(0,0,0,.12);
+}
+.low-effects .now-playing-display::before,
+.low-effects .viz-sheen,
+.low-effects .now-playing-display.is-playing .song-title,
+.low-effects .track-item.active::after {
+  animation: none !important;
+  display: none !important;
+}
+.low-effects #visualizer {
+  filter: none !important;
+}
+@media (hover: none), (pointer: coarse) {
+  .btn:hover,
+  .track-item:hover,
+  .del-btn:hover {
+    transform: none !important;
+  }
+}
+@media (max-width: 700px) {
+  .app,
+  .modal-content,
+  .focus-dock {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  body:not(.focus-mode) .track-list {
+    contain: content;
+  }
+}
+@media (max-width: 420px) {
+  #visualizer {
+    contain: strict;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .track-item,
+  .lang-btn,
+  .settings-check,
+  .legal-nav a,
+  .site-notification {
+    transition: none !important;
+  }
+}
+
+
+  /* --- DEVICE PERFORMANCE HARDENING -----------------------------------------
+     Keep the visual identity, but avoid expensive blur/filter effects on
+     constrained devices and smaller windows. */
+  body.low-effects .app,
+  body.low-effects .modal,
+  body.low-effects .modal-content,
+  body.low-effects .focus-dock {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body.low-effects .app {
+    box-shadow: 0 4px 18px rgba(0,0,0,.10);
+  }
+
+  body.low-effects .modal-content {
+    box-shadow: 0 8px 28px rgba(0,0,0,.16);
+  }
+
+  body.low-effects .site-notification {
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+  }
+
+  body.low-effects .now-playing-display::before,
+  body.low-effects .viz-sheen {
+    display: none !important;
+  }
+
+  body.low-effects #visualizer {
+    filter: none !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
+  }
+
+  @media (max-width: 950px) {
+    .app,
+    .modal,
+    .modal-content,
+    .focus-dock {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .app {
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
+  }
+
 </style>
 
 <audio id="audio" preload="metadata"></audio>
@@ -3102,10 +3238,12 @@ const translations = {
 };
 
 const DB_NAME = 'music-library-db';
+const DB_VERSION = 2;
 const STORE_NAME = 'tracks';
+const META_STORE_NAME = 'trackMeta';
 const audio = document.getElementById('audio');
 
-let library = []; 
+let library = [];
 let currentIndex = -1;
 let mode = 'normal';
 let currentUrl = null;
@@ -3120,9 +3258,57 @@ let mediaSource = null;
 let dataArray = null;
 let timeArray = null;
 let animFrameId = null;
+let dbPromise = null;
+let resizeObserver = null;
+let resizeRafId = null;
+let playbackUiLastSecond = -1;
 
 const canvas = document.getElementById('visualizer');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true }) || canvas.getContext('2d');
+
+// Cache stable DOM references once. The visualizer runs frequently, so avoiding
+// repeated getElementById/getComputedStyle calls noticeably reduces main-thread work.
+const ui = {
+    nowTitle: document.getElementById('nowTitle'),
+    currentTime: document.getElementById('currentTime'),
+    duration: document.getElementById('duration'),
+    seek: document.getElementById('seek'),
+    playBtn: document.getElementById('playBtn'),
+    playLabel: document.getElementById('playLabel'),
+    nowPlayingDisplay: document.querySelector('.now-playing-display'),
+    trackList: document.getElementById('trackList'),
+    count: document.getElementById('count'),
+    librarySummary: document.getElementById('librarySummary'),
+    trackIndexBadge: document.getElementById('trackIndexBadge'),
+    modeBadge: document.getElementById('modeBadge'),
+    playStateBadge: document.getElementById('playStateBadge'),
+    searchInput: document.getElementById('searchInput'),
+    searchClearBtn: document.getElementById('searchClearBtn'),
+    volumeSlider: document.getElementById('volumeSlider'),
+    volumeLabel: document.getElementById('volumeLabel'),
+    volumeReadout: document.getElementById('volumeReadout'),
+    resetVolumeBtn: document.getElementById('resetVolumeBtn'),
+    dock: document.getElementById('focusDock'),
+    dockCurrentTime: document.getElementById('dockCurrentTime'),
+    dockDuration: document.getElementById('dockDuration'),
+    dockSeek: document.getElementById('dockSeek'),
+    dockPlayLabel: document.getElementById('dockPlayLabel'),
+    dockVolumeSlider: document.getElementById('dockVolumeSlider'),
+    dockVolumeReadout: document.getElementById('dockVolumeReadout')
+};
+
+const vizUI = {
+    peakReadout: document.getElementById('peakReadout'),
+    rmsReadout: document.getElementById('rmsReadout'),
+    bassMeter: document.getElementById('bassMeter'),
+    midMeter: document.getElementById('midMeter'),
+    trebleMeter: document.getElementById('trebleMeter'),
+    bassReadout: document.getElementById('bassReadout'),
+    midReadout: document.getElementById('midReadout'),
+    trebleReadout: document.getElementById('trebleReadout'),
+    levelMeter: document.getElementById('levelMeter'),
+    vizLabel: document.getElementById('vizMonitorTitle')
+};
 
 let perfSettings = {
     preset: 'auto',
@@ -3133,23 +3319,47 @@ let perfSettings = {
     sensitivity: 1,
     smoothing: 0.78,
     style: 'spectrum',
-    canvasDpr: 2,
+    canvasDpr: 1.5,
     density: 'comfortable',
     glow: true,
     uiMotion: true
 };
 
+let autoLowEffects = false;
+const MAX_CANVAS_DPR = 2;
+const MAX_CANVAS_PIXELS = 1500000;
+const VIS_READOUT_INTERVAL = 120;
+const HOVER_SFX_INTERVAL = 70;
+const BAND_RANGES = [[20, 250], [250, 2000], [2000, 16000]];
+let bandBins = [[0, 1], [1, 2], [2, 3]];
+let currentCanvasDpr = 1;
+const visualizerTheme = { bg: '#fafafa', text: '#333333', red: '#cc0000', accent: '#0066cc' };
+let visualizerAccent = visualizerTheme.accent;
+let lastFrameTime = 0;
+let lastReadoutAt = 0;
+const peakState = { value: 0, hold: 0 };
+
 function normalizePerfSettings() {
-    perfSettings.preset = ['auto','high','balanced','low'].includes(perfSettings.preset) ? perfSettings.preset : 'auto';
-    perfSettings.fps = [0,30,60].includes(Number(perfSettings.fps)) ? Number(perfSettings.fps) : 60;
+    const allowed = {
+        preset: ['auto', 'high', 'balanced', 'low'],
+        fps: [0, 30, 60],
+        preload: ['metadata', 'auto'],
+        fftSize: [128, 256, 512, 1024],
+        style: ['spectrum', 'mirror', 'scope'],
+        canvasDpr: [1, 1.5, 2],
+        density: ['compact', 'comfortable']
+    };
+
+    perfSettings.preset = allowed.preset.includes(perfSettings.preset) ? perfSettings.preset : 'auto';
+    perfSettings.fps = allowed.fps.includes(Number(perfSettings.fps)) ? Number(perfSettings.fps) : 60;
     perfSettings.bgPause = perfSettings.bgPause !== false;
-    perfSettings.preload = ['metadata','auto'].includes(perfSettings.preload) ? perfSettings.preload : 'metadata';
-    perfSettings.fftSize = [128,256,512,1024].includes(Number(perfSettings.fftSize)) ? Number(perfSettings.fftSize) : 512;
+    perfSettings.preload = allowed.preload.includes(perfSettings.preload) ? perfSettings.preload : 'metadata';
+    perfSettings.fftSize = allowed.fftSize.includes(Number(perfSettings.fftSize)) ? Number(perfSettings.fftSize) : 512;
     perfSettings.sensitivity = Math.max(0.5, Math.min(1.6, Number.isFinite(Number(perfSettings.sensitivity)) ? Number(perfSettings.sensitivity) : 1));
     perfSettings.smoothing = Math.max(0, Math.min(0.95, Number.isFinite(Number(perfSettings.smoothing)) ? Number(perfSettings.smoothing) : 0.78));
-    perfSettings.style = ['spectrum','mirror','scope'].includes(perfSettings.style) ? perfSettings.style : 'spectrum';
-    perfSettings.canvasDpr = [1,1.5,2].includes(Number(perfSettings.canvasDpr)) ? Number(perfSettings.canvasDpr) : 2;
-    perfSettings.density = ['compact','comfortable'].includes(perfSettings.density) ? perfSettings.density : 'comfortable';
+    perfSettings.style = allowed.style.includes(perfSettings.style) ? perfSettings.style : 'spectrum';
+    perfSettings.canvasDpr = allowed.canvasDpr.includes(Number(perfSettings.canvasDpr)) ? Number(perfSettings.canvasDpr) : 1.5;
+    perfSettings.density = allowed.density.includes(perfSettings.density) ? perfSettings.density : 'comfortable';
     perfSettings.glow = perfSettings.glow !== false;
     perfSettings.uiMotion = perfSettings.uiMotion !== false;
 }
@@ -3164,45 +3374,103 @@ function changeTheme(themeKey) {
 }
 
 function detectSystemPerformance() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const cores = navigator.hardwareConcurrency || 4;
+    const ua = navigator.userAgent || '';
+    const isMobile = navigator.userAgentData?.mobile === true ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const cores = Math.max(1, Number(navigator.hardwareConcurrency) || 4);
+    const memory = Number(navigator.deviceMemory) || 4;
+    const saveData = navigator.connection?.saveData === true;
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+    const narrowViewport = Math.min(window.innerWidth || 9999, window.innerHeight || 9999) < 520;
+    const veryLowEnd = saveData || cores <= 2 || memory <= 2;
+    const lowEnd = veryLowEnd || isMobile || cores <= 4 || memory <= 3;
+
     const deviceEl = document.getElementById('detected-device');
-    
-    let deviceText = isMobile ? "Mobile Device" : "Desktop System";
-    deviceText += ` (${cores} CPU Cores)`;
-    if(deviceEl) deviceEl.textContent = deviceText;
+    if (deviceEl) {
+        const className = veryLowEnd ? 'Low-power' : lowEnd ? 'Balanced' : 'High-performance';
+        deviceEl.textContent = `${isMobile ? 'Mobile' : 'Desktop'} · ${cores} CPU cores${memory ? ` · ~${memory} GB RAM hint` : ''} · ${className}`;
+    }
+
+    autoLowEffects = false;
 
     if (perfSettings.preset === 'auto') {
-        if (isMobile || cores <= 2) {
+        if (veryLowEnd || (isMobile && narrowViewport)) {
             perfSettings.fps = 30;
             perfSettings.preload = 'metadata';
+            perfSettings.canvasDpr = 1;
+            perfSettings.fftSize = Math.min(perfSettings.fftSize, 256);
+            autoLowEffects = true;
+        } else if (lowEnd) {
+            perfSettings.fps = 30;
+            perfSettings.preload = 'metadata';
+            perfSettings.canvasDpr = 1.5;
+            perfSettings.fftSize = Math.min(perfSettings.fftSize, 512);
         } else {
             perfSettings.fps = 60;
             perfSettings.preload = 'auto';
+            perfSettings.canvasDpr = Math.min(Math.max(perfSettings.canvasDpr, 1.5), 1.5);
         }
     }
+
+    perfSettings.bgPause = perfSettings.bgPause !== false;
+    if (prefersReducedMotion) autoLowEffects = true;
+    normalizePerfSettings();
     applyPerfSettingsToUI();
 }
 
 function applyPerfSettingsToUI() {
-    document.getElementById('perfPreset').value = perfSettings.preset;
-    document.getElementById('visualizerQuality').value = perfSettings.fps;
-    document.getElementById('bgPauseSetting').value = perfSettings.bgPause ? 'true' : 'false';
-    document.getElementById('preloadSetting').value = perfSettings.preload;
-    document.getElementById('visualizerStyle').value = perfSettings.style;
-    document.getElementById('fftSizeSetting').value = String(perfSettings.fftSize);
-    document.getElementById('vizSensitivity').value = Math.round(perfSettings.sensitivity * 100);
-    document.getElementById('vizSmoothing').value = Math.round(perfSettings.smoothing * 100);
-    document.getElementById('canvasDprSetting').value = String(perfSettings.canvasDpr);
-    document.getElementById('uiDensity').value = perfSettings.density;
-    document.getElementById('vizGlowSetting').checked = perfSettings.glow;
-    document.getElementById('uiMotionSetting').checked = perfSettings.uiMotion;
-    document.getElementById('vizSensitivityValue').textContent = `${Math.round(perfSettings.sensitivity * 100)}%`;
-    document.getElementById('vizSmoothingValue').textContent = `${Math.round(perfSettings.smoothing * 100)}%`;
+    const get = id => document.getElementById(id);
+    const preset = get('perfPreset');
+    const vizQuality = get('visualizerQuality');
+    const bgPause = get('bgPauseSetting');
+    const preload = get('preloadSetting');
+    const style = get('visualizerStyle');
+    const fft = get('fftSizeSetting');
+    const sens = get('vizSensitivity');
+    const smooth = get('vizSmoothing');
+    const dpr = get('canvasDprSetting');
+    const density = get('uiDensity');
+    const glow = get('vizGlowSetting');
+    const motion = get('uiMotionSetting');
+    const sensValue = get('vizSensitivityValue');
+    const smoothValue = get('vizSmoothingValue');
+
+    if (preset) preset.value = perfSettings.preset;
+    if (vizQuality) vizQuality.value = String(perfSettings.fps);
+    if (bgPause) bgPause.value = perfSettings.bgPause ? 'true' : 'false';
+    if (preload) preload.value = perfSettings.preload;
+    if (style) style.value = perfSettings.style;
+    if (fft) fft.value = String(perfSettings.fftSize);
+    if (sens) sens.value = String(Math.round(perfSettings.sensitivity * 100));
+    if (smooth) smooth.value = String(Math.round(perfSettings.smoothing * 100));
+    if (dpr) dpr.value = String(perfSettings.canvasDpr);
+    if (density) density.value = perfSettings.density;
+    if (glow) glow.checked = perfSettings.glow;
+    if (motion) motion.checked = perfSettings.uiMotion;
+    if (sensValue) sensValue.textContent = `${Math.round(perfSettings.sensitivity * 100)}%`;
+    if (smoothValue) smoothValue.textContent = `${Math.round(perfSettings.smoothing * 100)}%`;
+
     audio.preload = perfSettings.preload;
-    if (analyser) { analyser.fftSize = perfSettings.fftSize; analyser.smoothingTimeConstant = perfSettings.smoothing; dataArray = new Uint8Array(analyser.frequencyBinCount); timeArray = new Uint8Array(analyser.fftSize); }
+
+    if (analyser) {
+        try {
+            analyser.fftSize = perfSettings.fftSize;
+            analyser.smoothingTimeConstant = perfSettings.smoothing;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            timeArray = new Uint8Array(analyser.fftSize);
+            updateBandBins();
+        } catch (e) {
+            console.warn('Visualizer settings could not be applied:', e);
+        }
+    }
+
     const root = document.body;
+    const lowEffects = autoLowEffects ||
+        perfSettings.preset === 'low' ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
     root.classList.toggle('perf-low', perfSettings.fps === 0);
+    root.classList.toggle('low-effects', lowEffects);
     root.classList.toggle('no-ui-motion', !perfSettings.uiMotion);
     root.classList.toggle('ui-compact', perfSettings.density === 'compact');
     root.classList.toggle('viz-glow-off', !perfSettings.glow);
@@ -3215,12 +3483,15 @@ function changePerfPreset(val) {
     if (val === 'high') {
         perfSettings.fps = 60;
         perfSettings.preload = 'auto';
+        autoLowEffects = false;
     } else if (val === 'balanced') {
         perfSettings.fps = 30;
         perfSettings.preload = 'metadata';
+        autoLowEffects = false;
     } else if (val === 'low') {
         perfSettings.fps = 0;
         perfSettings.preload = 'metadata';
+        autoLowEffects = true;
     } else {
         detectSystemPerformance();
         localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
@@ -3232,26 +3503,34 @@ function changePerfPreset(val) {
 }
 
 function savePerfSettings() {
-    perfSettings.fps = parseInt(document.getElementById('visualizerQuality').value, 10);
-    perfSettings.bgPause = document.getElementById('bgPauseSetting').value === 'true';
-    perfSettings.preload = document.getElementById('preloadSetting').value;
-    perfSettings.style = document.getElementById('visualizerStyle').value;
-    perfSettings.fftSize = parseInt(document.getElementById('fftSizeSetting').value, 10);
-    perfSettings.sensitivity = parseInt(document.getElementById('vizSensitivity').value, 10) / 100;
-    perfSettings.smoothing = parseInt(document.getElementById('vizSmoothing').value, 10) / 100;
-    perfSettings.canvasDpr = parseFloat(document.getElementById('canvasDprSetting').value);
-    perfSettings.density = document.getElementById('uiDensity').value;
-    perfSettings.glow = document.getElementById('vizGlowSetting').checked;
-    perfSettings.uiMotion = document.getElementById('uiMotionSetting').checked;
-    document.getElementById('vizSensitivityValue').textContent = `${Math.round(perfSettings.sensitivity * 100)}%`;
-    document.getElementById('vizSmoothingValue').textContent = `${Math.round(perfSettings.smoothing * 100)}%`;
-    audio.preload = perfSettings.preload;
+    const get = id => document.getElementById(id);
+    const readNumber = (id, fallback) => {
+        const value = Number(get(id)?.value);
+        return Number.isFinite(value) ? value : fallback;
+    };
+
+    perfSettings.fps = readNumber('visualizerQuality', perfSettings.fps);
+    perfSettings.bgPause = get('bgPauseSetting')?.value === 'true';
+    perfSettings.preload = get('preloadSetting')?.value || perfSettings.preload;
+    perfSettings.style = get('visualizerStyle')?.value || perfSettings.style;
+    perfSettings.fftSize = readNumber('fftSizeSetting', perfSettings.fftSize);
+    perfSettings.sensitivity = readNumber('vizSensitivity', perfSettings.sensitivity * 100) / 100;
+    perfSettings.smoothing = readNumber('vizSmoothing', perfSettings.smoothing * 100) / 100;
+    perfSettings.canvasDpr = readNumber('canvasDprSetting', perfSettings.canvasDpr);
+    perfSettings.density = get('uiDensity')?.value || perfSettings.density;
+    perfSettings.glow = get('vizGlowSetting')?.checked !== false;
+    perfSettings.uiMotion = get('uiMotionSetting')?.checked !== false;
+
+    normalizePerfSettings();
     applyPerfSettingsToUI();
-    if (canvas) resizeCanvas();
-    localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
-    if (perfSettings.fps === 0) {
-        stopVisualizer();
-    }
+    scheduleVisualizerResize();
+
+    try {
+        localStorage.setItem('andre_music_perf', JSON.stringify(perfSettings));
+    } catch (_) {}
+
+    if (perfSettings.fps === 0) stopVisualizer();
+    else if (!document.hidden && !audio.paused) startVisualizer();
 }
 
 // --- UI Sound Effects -----------------------------------------------------
@@ -3261,6 +3540,7 @@ function savePerfSettings() {
 let uiSfxReady = false;
 let uiSfxMaster = null;
 let lastUiSfxAt = 0;
+let uiSfxUserActivated = false;
 
 function initUISfx() {
     if (!window.AudioContext && !window.webkitAudioContext) return false;
@@ -3327,6 +3607,7 @@ function installUISoundEffects() {
     ].join(',');
 
     document.addEventListener('pointerover', (e) => {
+        if (!uiSfxUserActivated || e.pointerType !== 'mouse') return;
         const target = e.target.closest?.(interactiveSelector);
         if (!target || target.disabled) return;
         if (e.relatedTarget && target.contains(e.relatedTarget)) return;
@@ -3334,6 +3615,7 @@ function installUISoundEffects() {
     }, { passive: true });
 
     document.addEventListener('pointerdown', (e) => {
+        uiSfxUserActivated = true;
         const target = e.target.closest?.(interactiveSelector);
         if (!target || target.disabled) return;
         initUISfx();
@@ -3345,6 +3627,7 @@ function installUISoundEffects() {
 
     document.addEventListener('keydown', (e) => {
         if (!['Enter', ' ', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+        uiSfxUserActivated = true;
         const target = e.target.closest?.(interactiveSelector);
         if (!target || target.disabled) return;
         if (e.repeat) return;
@@ -3355,8 +3638,11 @@ function installUISoundEffects() {
 
 function initAudioContext() {
     if (!audioCtx) {
+        const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextCtor) return false;
+
         try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx = new AudioContextCtor();
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = perfSettings.fftSize;
             analyser.smoothingTimeConstant = perfSettings.smoothing;
@@ -3365,126 +3651,173 @@ function initAudioContext() {
             analyser.connect(audioCtx.destination);
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             timeArray = new Uint8Array(analyser.fftSize);
-        } catch(e) {
-            console.warn("AudioContext setup error:", e);
+            updateBandBins();
+        } catch (e) {
+            console.warn('AudioContext setup error:', e);
+            audioCtx = null;
+            analyser = null;
+            mediaSource = null;
+            return false;
         }
     }
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
+
+    if (audioCtx.state === 'suspended') {
+        const resumePromise = audioCtx.resume();
+        if (resumePromise?.catch) resumePromise.catch(() => {});
     }
+    return audioCtx.state !== 'closed';
 }
 
-let lastFrameTime = 0;
-const MAX_CANVAS_DPR = 2;
-let visualizerAccent = '#0066cc';
-const peakState = { value: 0, hold: 0 };
-function refreshVisualizerTheme() {
-    visualizerAccent = getComputedStyle(document.body).getPropertyValue('--accent-blue').trim() || '#0066cc';
+function updateBandBins() {
+    if (!analyser || !audioCtx) {
+        bandBins = [[0, 1], [1, 2], [2, 3]];
+        return;
+    }
+
+    const binHz = audioCtx.sampleRate / analyser.fftSize;
+    bandBins = BAND_RANGES.map(([startHz, endHz]) => [
+        Math.max(0, Math.floor(startHz / binHz)),
+        Math.min(analyser.frequencyBinCount, Math.max(1, Math.ceil(endHz / binHz) + 1))
+    ]);
 }
+
+function refreshVisualizerTheme() {
+    const styles = getComputedStyle(document.body);
+    visualizerTheme.bg = styles.getPropertyValue('--viz-bg').trim() || '#fafafa';
+    visualizerTheme.text = styles.getPropertyValue('--text-color').trim() || '#333333';
+    visualizerTheme.red = styles.getPropertyValue('--accent-red').trim() || '#cc0000';
+    visualizerTheme.accent = styles.getPropertyValue('--accent-blue').trim() || '#0066cc';
+    visualizerAccent = visualizerTheme.accent;
+}
+
 function setMeter(el, value, max = 1) {
     if (!el) return;
-    const pct = Math.max(0, Math.min(100, (value / max) * 100));
-    el.style.transform = `scaleX(${pct / 100})`;
+    const pct = Math.max(0, Math.min(1, value / max));
+    const next = `scaleX(${pct})`;
+    if (el.style.transform !== next) el.style.transform = next;
 }
-function avgBand(startHz, endHz) {
-    if (!analyser || !dataArray || !audioCtx) return 0;
-    const binHz = audioCtx.sampleRate / analyser.fftSize;
-    const start = Math.max(0, Math.floor(startHz / binHz));
-    const end = Math.min(analyser.frequencyBinCount - 1, Math.ceil(endHz / binHz));
-    let sum = 0;
-    let count = 0;
-    for (let i = start; i <= end; i++) { sum += dataArray[i]; count++; }
-    return count ? (sum / count) / 255 : 0;
-}
+
 function dbFromLinear(value) {
     return value > 0.00001 ? 20 * Math.log10(value) : -Infinity;
 }
+
 function formatDb(db) {
     return Number.isFinite(db) ? `${db.toFixed(1)} dB` : '-∞ dB';
 }
-function updateAudioReadouts(rmsLinear, peakLinear) {
-    const peakDb = dbFromLinear(peakLinear);
-    const rmsDb = dbFromLinear(rmsLinear);
-    const peakEl = document.getElementById('peakReadout');
-    const rmsEl = document.getElementById('rmsReadout');
-    if (peakEl) peakEl.textContent = formatDb(peakDb);
-    if (rmsEl) rmsEl.textContent = formatDb(rmsDb);
 
-    const bass = avgBand(20, 250);
-    const mid = avgBand(250, 2000);
-    const treble = avgBand(2000, 16000);
-    setMeter(document.getElementById('bassMeter'), bass);
-    setMeter(document.getElementById('midMeter'), mid);
-    setMeter(document.getElementById('trebleMeter'), treble);
-    const b = document.getElementById('bassReadout');
-    const m = document.getElementById('midReadout');
-    const t = document.getElementById('trebleReadout');
-    if (b) b.textContent = `${Math.round(bass * 100)}%`;
-    if (m) m.textContent = `${Math.round(mid * 100)}%`;
-    if (t) t.textContent = `${Math.round(treble * 100)}%`;
+function updateAudioReadouts(rmsLinear, peakLinear, bass, mid, treble, force = false) {
+    const now = performance.now();
+    if (!force && now - lastReadoutAt < VIS_READOUT_INTERVAL) {
+        // Keep only the cheap meter transforms responsive at render speed.
+        setMeter(vizUI.bassMeter, bass);
+        setMeter(vizUI.midMeter, mid);
+        setMeter(vizUI.trebleMeter, treble);
+        const volume = audio.muted ? 0 : audio.volume;
+        setMeter(vizUI.levelMeter, Math.sqrt(Math.max(0, rmsLinear)) * volume);
+        return;
+    }
+    lastReadoutAt = now;
 
     const volume = audio.muted ? 0 : audio.volume;
-    const perceptual = Math.sqrt(Math.max(0, rmsLinear)) * volume;
-    setMeter(document.getElementById('levelMeter'), perceptual);
-    const vr = document.getElementById('volumeReadout');
-    if (vr) vr.textContent = `${Math.round(volume * 100)}%`;
-    const level = document.getElementById('levelMeter');
-    if (level) {
-        level.classList.toggle('hot', peakLinear > 0.85);
-        level.classList.toggle('safe', peakLinear <= 0.85);
+    const values = {
+        peak: formatDb(dbFromLinear(peakLinear)),
+        rms: formatDb(dbFromLinear(rmsLinear)),
+        bass: `${Math.round(bass * 100)}%`,
+        mid: `${Math.round(mid * 100)}%`,
+        treble: `${Math.round(treble * 100)}%`,
+        volume: `${Math.round(volume * 100)}%`
+    };
+
+    if (vizUI.peakReadout && vizUI.peakReadout.textContent !== values.peak) vizUI.peakReadout.textContent = values.peak;
+    if (vizUI.rmsReadout && vizUI.rmsReadout.textContent !== values.rms) vizUI.rmsReadout.textContent = values.rms;
+    if (vizUI.bassReadout && vizUI.bassReadout.textContent !== values.bass) vizUI.bassReadout.textContent = values.bass;
+    if (vizUI.midReadout && vizUI.midReadout.textContent !== values.mid) vizUI.midReadout.textContent = values.mid;
+    if (vizUI.trebleReadout && vizUI.trebleReadout.textContent !== values.treble) vizUI.trebleReadout.textContent = values.treble;
+    if (vizUI.levelMeter) {
+        const perceptual = Math.sqrt(Math.max(0, rmsLinear)) * volume;
+        setMeter(vizUI.levelMeter, perceptual);
+        vizUI.levelMeter.classList.toggle('hot', peakLinear > 0.85);
+        vizUI.levelMeter.classList.toggle('safe', peakLinear <= 0.85);
     }
+
+    setMeter(vizUI.bassMeter, bass);
+    setMeter(vizUI.midMeter, mid);
+    setMeter(vizUI.trebleMeter, treble);
 }
+
 function drawVisualizer(timestamp) {
     animFrameId = requestAnimationFrame(drawVisualizer);
-    if (!analyser || perfSettings.fps === 0) return;
-    const targetInterval = 1000 / perfSettings.fps;
+
+    if (!analyser || perfSettings.fps === 0 || document.hidden && perfSettings.bgPause) return;
+
+    const targetInterval = 1000 / Math.max(1, perfSettings.fps);
     if (timestamp - lastFrameTime < targetInterval) return;
     lastFrameTime = timestamp;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
-    const width = canvas.width / dpr;
-    const height = canvas.height / dpr;
-    const styles = getComputedStyle(document.body);
-    const bg = styles.getPropertyValue('--viz-bg').trim() || '#fafafa';
-    const text = styles.getPropertyValue('--text-color').trim() || '#333';
-    const red = styles.getPropertyValue('--accent-red').trim() || '#cc0000';
+    const width = Math.max(1, canvas.width / currentCanvasDpr);
+    const height = Math.max(1, canvas.height / currentCanvasDpr);
+    const sensitivity = perfSettings.sensitivity || 1;
 
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, width, height);
-
     analyser.getByteFrequencyData(dataArray);
-    const sensitivity = perfSettings.sensitivity || 1;
-    const bars = Math.min(64, analyser.frequencyBinCount);
-    const gap = 2;
-    const barWidth = Math.max(2, width / bars - gap);
-    const step = analyser.frequencyBinCount / bars;
 
-    let peakLinear = 0; let sumSquares = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-        const n = dataArray[i] / 255; sumSquares += n * n; if (n > peakLinear) peakLinear = n;
+    const bins = dataArray.length;
+    const bars = Math.min(perfSettings.fps >= 60 ? 64 : 48, bins);
+    const gap = width < 480 ? 1 : 2;
+    const step = bins / bars;
+    const barWidth = Math.max(1.5, width / bars - gap);
+
+    let peakLinear = 0;
+    let sumSquares = 0;
+    let bassSum = 0, midSum = 0, trebleSum = 0;
+    const [bassRange, midRange, trebleRange] = bandBins;
+    let bassCount = 0, midCount = 0, trebleCount = 0;
+
+    for (let i = 0; i < bins; i++) {
+        const n = dataArray[i] / 255;
+        sumSquares += n * n;
+        if (n > peakLinear) peakLinear = n;
+
+        if (i >= bassRange[0] && i < bassRange[1]) { bassSum += n; bassCount++; }
+        else if (i >= midRange[0] && i < midRange[1]) { midSum += n; midCount++; }
+        else if (i >= trebleRange[0] && i < trebleRange[1]) { trebleSum += n; trebleCount++; }
     }
-    const rmsLinear = Math.sqrt(sumSquares / dataArray.length);
+
+    const rmsLinear = bins ? Math.sqrt(sumSquares / bins) : 0;
+    const bass = bassCount ? bassSum / bassCount : 0;
+    const mid = midCount ? midSum / midCount : 0;
+    const treble = trebleCount ? trebleSum / trebleCount : 0;
 
     if (perfSettings.style === 'scope') {
         analyser.getByteTimeDomainData(timeArray);
-        ctx.strokeStyle = visualizerAccent; ctx.lineWidth = 1.5; ctx.beginPath();
-        for (let i = 0; i < timeArray.length; i++) {
-            const x = (i / (timeArray.length - 1)) * width;
+        const points = Math.min(timeArray.length, perfSettings.fps >= 60 ? 768 : 384);
+        const stride = timeArray.length / points;
+
+        ctx.strokeStyle = visualizerTheme.accent;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+
+        for (let p = 0; p < points; p++) {
+            const i = Math.min(timeArray.length - 1, Math.floor(p * stride));
+            const x = points <= 1 ? 0 : (p / (points - 1)) * width;
             const v = (timeArray[i] - 128) / 128;
             const y = height * 0.5 + v * height * 0.42 * sensitivity;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            if (p === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         }
         ctx.stroke();
     } else {
-        ctx.fillStyle = visualizerAccent;
+        ctx.fillStyle = visualizerTheme.accent;
         for (let i = 0; i < bars; i++) {
-            const idx = Math.min(dataArray.length - 1, Math.floor(i * step));
+            const idx = Math.min(bins - 1, Math.floor(i * step));
             const n = Math.min(1.15, (dataArray[idx] / 255) * sensitivity);
-            const barHeight = Math.max(2, n * (height - 12));
+            const barHeight = Math.max(2, n * Math.max(4, height - 12));
             const x = i * (barWidth + gap);
             const y = height - barHeight;
+
             ctx.globalAlpha = 0.42 + Math.min(0.58, n * 0.6);
             ctx.fillRect(x, y, barWidth, barHeight);
+
             if (perfSettings.style === 'mirror') {
                 ctx.globalAlpha = 0.14 + Math.min(0.18, n * 0.2);
                 ctx.fillRect(x, height, barWidth, -Math.min(height - 4, barHeight * 0.42));
@@ -3493,36 +3826,46 @@ function drawVisualizer(timestamp) {
         ctx.globalAlpha = 1;
     }
 
-    // Readable frequency landmarks.
     const nyquist = audioCtx ? audioCtx.sampleRate / 2 : 24000;
     ctx.font = '9px monospace';
     [250, 2000, 8000].forEach(freq => {
-        const x = Math.max(0, Math.min(width, Math.log10(freq / 20) / Math.log10(nyquist / 20) * width));
-        ctx.fillStyle = text; ctx.globalAlpha = 0.3; ctx.fillRect(x, 0, 1, height);
-        ctx.globalAlpha = 0.72; ctx.fillText(freq >= 1000 ? `${freq/1000}k` : `${freq}`, Math.min(width - 28, x + 3), 11);
+        const denom = Math.max(1, Math.log10(nyquist / 20));
+        const x = Math.max(0, Math.min(width, Math.log10(freq / 20) / denom * width));
+        ctx.fillStyle = visualizerTheme.text;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(x, 0, 1, height);
+        ctx.globalAlpha = 0.72;
+        ctx.fillText(freq >= 1000 ? `${freq / 1000}k` : `${freq}`, Math.min(Math.max(0, width - 28), x + 3), 11);
     });
     ctx.globalAlpha = 1;
 
-    if (perfSettings.glow && peakLinear > 0.72) {
-        ctx.fillStyle = peakLinear > 0.9 ? red : visualizerAccent;
+    if (perfSettings.glow && peakLinear > 0.72 && !document.body.classList.contains('low-effects')) {
+        ctx.fillStyle = peakLinear > 0.9 ? visualizerTheme.red : visualizerTheme.accent;
         ctx.globalAlpha = 0.55;
         ctx.fillRect(0, 0, width * Math.min(1, peakLinear), 2);
         ctx.globalAlpha = 1;
     }
 
     if (peakLinear >= peakState.value || timestamp > peakState.hold) {
-        peakState.value = peakLinear; peakState.hold = timestamp + 650;
-    } else { peakState.value *= 0.985; }
-    const peakY = height - Math.max(2, Math.min(1, peakState.value) * (height - 10));
-    ctx.fillStyle = peakState.value > 0.85 ? red : visualizerAccent;
+        peakState.value = peakLinear;
+        peakState.hold = timestamp + 650;
+    } else {
+        peakState.value *= 0.985;
+    }
+
+    const peakY = height - Math.max(2, Math.min(1, peakState.value) * Math.max(4, height - 10));
+    ctx.fillStyle = peakState.value > 0.85 ? visualizerTheme.red : visualizerTheme.accent;
     ctx.fillRect(0, peakY, width, 2);
 
-    updateAudioReadouts(rmsLinear, peakLinear);
+    updateAudioReadouts(rmsLinear, peakLinear, bass, mid, treble);
 }
 
 function startVisualizer() {
-    if (perfSettings.fps === 0) return;
-    if (!animFrameId) drawVisualizer(0);
+    if (perfSettings.fps === 0 || document.hidden && perfSettings.bgPause) return;
+    if (!animFrameId) {
+        lastFrameTime = 0;
+        animFrameId = requestAnimationFrame(drawVisualizer);
+    }
 }
 
 function stopVisualizer() {
@@ -3530,26 +3873,63 @@ function stopVisualizer() {
         cancelAnimationFrame(animFrameId);
         animFrameId = null;
     }
+
     peakState.value = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
-    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-    updateAudioReadouts(0, 0);
+    lastFrameTime = 0;
+    lastReadoutAt = 0;
+
+    const width = Math.max(1, canvas.width / currentCanvasDpr);
+    const height = Math.max(1, canvas.height / currentCanvasDpr);
+    ctx.clearRect(0, 0, width, height);
+    updateAudioReadouts(0, 0, 0, 0, 0, true);
+}
+
+function effectiveCanvasDprForRect(rect) {
+    let dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR, MAX_CANVAS_DPR);
+    const area = Math.max(1, rect.width * rect.height);
+    const maxDprByArea = Math.sqrt(MAX_CANVAS_PIXELS / area);
+    dpr = Math.min(dpr, Math.max(1, maxDprByArea));
+    return Math.max(1, Number(dpr.toFixed(2)));
 }
 
 function resizeCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, perfSettings.canvasDpr || MAX_CANVAS_DPR);
+    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, Math.round(rect.width * dpr));
-    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    const dpr = effectiveCanvasDprForRect(rect);
+    const nextWidth = Math.max(1, Math.round(rect.width * dpr));
+    const nextHeight = Math.max(1, Math.round(rect.height * dpr));
+
+    if (canvas.width === nextWidth && canvas.height === nextHeight && currentCanvasDpr === dpr) return;
+
+    currentCanvasDpr = dpr;
+    canvas.width = nextWidth;
+    canvas.height = nextHeight;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    peakState.value = 0;
     refreshVisualizerTheme();
+}
+
+function scheduleVisualizerResize() {
+    if (resizeRafId) return;
+    resizeRafId = requestAnimationFrame(() => {
+        resizeRafId = null;
+        resizeCanvas();
+    });
 }
 
 const debouncedResize = debounce(resizeCanvas, 100);
 
+const debouncedSavePerfSettings = debounce(savePerfSettings, 140);
 ['vizSensitivity','vizSmoothing'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('input', savePerfSettings);
+    if (!el) return;
+    el.addEventListener('input', () => {
+        const output = document.getElementById(id === 'vizSensitivity' ? 'vizSensitivityValue' : 'vizSmoothingValue');
+        if (output) output.textContent = `${el.value}%`;
+        debouncedSavePerfSettings();
+    });
 });
 const resetPerfBtn = document.getElementById('resetPerfBtn');
 if (resetPerfBtn) resetPerfBtn.addEventListener('click', () => {
@@ -3562,27 +3942,74 @@ if (resetPerfBtn) resetPerfBtn.addEventListener('click', () => {
 
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && perfSettings.bgPause) {
-        if (animFrameId) {
-            cancelAnimationFrame(animFrameId);
-            animFrameId = null;
-        }
-    } else {
-        if (!audio.paused) {
-            startVisualizer();
-        }
+        stopVisualizer();
+    } else if (!audio.paused) {
+        startVisualizer();
     }
 });
 
 function openDB() {
-    return new Promise((res, rej) => {
-        const req = indexedDB.open(DB_NAME, 1);
+    if (dbPromise) return dbPromise;
+
+    dbPromise = new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+            reject(new Error('IndexedDB is not available in this browser.'));
+            return;
+        }
+
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+
         req.onupgradeneeded = () => {
-            if (!req.result.objectStoreNames.contains(STORE_NAME))
-                req.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            const db = req.result;
+            const tx = req.transaction;
+
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+
+            let metaStore;
+            if (!db.objectStoreNames.contains(META_STORE_NAME)) {
+                metaStore = db.createObjectStore(META_STORE_NAME, { keyPath: 'id' });
+            } else {
+                metaStore = tx.objectStore(META_STORE_NAME);
+            }
+
+            // One-time migration for existing v1 libraries: create lightweight
+            // metadata without keeping every Blob in RAM at startup.
+            if (metaStore && tx && tx.objectStoreNames.contains(STORE_NAME)) {
+                const trackStore = tx.objectStore(STORE_NAME);
+                const cursorReq = trackStore.openCursor();
+                cursorReq.onsuccess = e => {
+                    const cursor = e.target.result;
+                    if (!cursor) return;
+                    const value = cursor.value;
+                    if (value && value.id != null && typeof value.name === 'string') {
+                        try { metaStore.put({ id: value.id, name: value.name }); } catch (_) {}
+                    }
+                    cursor.continue();
+                };
+            }
         };
-        req.onsuccess = () => res(req.result);
-        req.onerror = () => rej(req.error || 'indexedDB open error');
+
+        req.onsuccess = () => {
+            const db = req.result;
+            db.onversionchange = () => {
+                try { db.close(); } catch (_) {}
+                dbPromise = null;
+            };
+            resolve(db);
+        };
+
+        req.onerror = () => {
+            dbPromise = null;
+            reject(req.error || new Error('IndexedDB open error'));
+        };
+        req.onblocked = () => {
+            console.warn('IndexedDB upgrade is blocked by another tab.');
+        };
     });
+
+    return dbPromise;
 }
 
 async function getTrackBlob(id) {
@@ -3590,10 +4017,40 @@ async function getTrackBlob(id) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readonly');
         const req = tx.objectStore(STORE_NAME).get(id);
-        req.onsuccess = () => resolve(req.result ? req.result.blob : null);
-        req.onerror = () => reject(req.error);
+        req.onsuccess = () => resolve(req.result?.blob || null);
+        req.onerror = () => reject(req.error || new Error('Unable to read audio data.'));
+        tx.onerror = () => reject(tx.error || new Error('Unable to read audio data.'));
     });
 }
+
+async function getLibraryMetadata(db) {
+    const storeName = db.objectStoreNames.contains(META_STORE_NAME) ? META_STORE_NAME : STORE_NAME;
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const records = [];
+
+        // Cursor fallback avoids materializing a whole track library into a second in-memory array.
+        const req = store.openCursor();
+        req.onsuccess = () => {
+            const cursor = req.result;
+            if (!cursor) {
+                resolve(records);
+                return;
+            }
+            const value = cursor.value || {};
+            records.push({
+                id: value.id,
+                name: value.name,
+                searchName: String(value.name || '').toLocaleLowerCase()
+            });
+            cursor.continue();
+        };
+        req.onerror = () => reject(req.error || new Error('Unable to load library metadata.'));
+        tx.onerror = () => reject(tx.error || new Error('Unable to load library metadata.'));
+    });
+}
+
 
 function setLanguage(lang) {
     if (!translations[lang]) lang = 'en';
@@ -3841,48 +4298,74 @@ window.addEventListener("click", (e) => {
 
 function updateVolumeUI() {
     const vol = audio.muted ? 0 : Math.round(audio.volume * 100);
-    const label = document.getElementById('volumeLabel');
-    if (label) label.textContent = `VOL ${vol}%`;
-    const readout = document.getElementById('volumeReadout');
-    if (readout) readout.textContent = `${vol}%`;
-    const reset = document.getElementById('resetVolumeBtn');
-    if (reset) reset.textContent = `VOL ${vol}%`;
-    const dockReadout = document.getElementById('dockVolumeReadout');
-    if (dockReadout) dockReadout.textContent = `VOL ${vol}%`;
-    const dockVol = document.getElementById('dockVolumeSlider');
-    if (dockVol) dockVol.value = String(audio.volume);
+
+    if (ui.volumeLabel) ui.volumeLabel.textContent = `VOL ${vol}%`;
+    if (ui.volumeReadout) ui.volumeReadout.textContent = `${vol}%`;
+    if (ui.resetVolumeBtn) ui.resetVolumeBtn.textContent = `VOL ${vol}%`;
+    ui.volumeSlider?.setAttribute('aria-valuenow', String(audio.muted ? 0 : audio.volume));
+
+    // The focus dock is hidden most of the time; don't update hidden DOM on every call.
+    if (document.body.classList.contains('focus-mode')) {
+        if (ui.dockVolumeReadout) ui.dockVolumeReadout.textContent = `VOL ${vol}%`;
+        if (ui.dockVolumeSlider) {
+            ui.dockVolumeSlider.value = String(audio.volume);
+            ui.dockVolumeSlider.setAttribute('aria-valuenow', String(audio.volume));
+        }
+        const dockMute = document.getElementById('dockMuteBtn');
+        if (dockMute) {
+            dockMute.classList.toggle('active', audio.muted);
+            dockMute.setAttribute('aria-pressed', String(audio.muted));
+        }
+    }
+
     const mute = document.getElementById('muteBtn');
-    if (mute) { mute.classList.toggle('active', audio.muted); mute.setAttribute('aria-pressed', String(audio.muted)); }
-    const dockMute = document.getElementById('dockMuteBtn');
-    if (dockMute) { dockMute.classList.toggle('active', audio.muted); dockMute.setAttribute('aria-pressed', String(audio.muted)); }
-    const volNow = audio.muted ? 0 : audio.volume;
-    volumeSlider?.setAttribute('aria-valuenow', String(volNow));
-    document.getElementById('dockVolumeSlider')?.setAttribute('aria-valuenow', String(audio.volume));
+    if (mute) {
+        mute.classList.toggle('active', audio.muted);
+        mute.setAttribute('aria-pressed', String(audio.muted));
+    }
 }
 
 function updateUXState() {
     const count = library.length;
-    const summary = document.getElementById('librarySummary');
     const t = translations[currentLang] || translations.en;
-    if (summary) summary.textContent = `${count} ${t.tracks}`;
-    const badge = document.getElementById('trackIndexBadge');
-    if (badge) badge.textContent = `${t.trackLabel || 'TRACK'} ${currentIndex >= 0 ? currentIndex + 1 : 0} / ${count}`;
-    const modeBadge = document.getElementById('modeBadge');
-    if (modeBadge) modeBadge.textContent = mode === 'loopAll' ? t.loopAll : mode === 'loopOne' ? t.loopOne : mode === 'shuffle' ? t.shuffle : t.normal;
-    const playBadge = document.getElementById('playStateBadge');
-    if (playBadge) playBadge.textContent = audio.paused ? t.ready : t.playing;
+
+    if (ui.librarySummary) ui.librarySummary.textContent = `${count} ${t.tracks}`;
+    if (ui.trackIndexBadge) ui.trackIndexBadge.textContent = `${t.trackLabel || 'TRACK'} ${currentIndex >= 0 ? currentIndex + 1 : 0} / ${count}`;
+    if (ui.modeBadge) ui.modeBadge.textContent = mode === 'loopAll' ? t.loopAll : mode === 'loopOne' ? t.loopOne : mode === 'shuffle' ? t.shuffle : t.normal;
+    if (ui.playStateBadge) ui.playStateBadge.textContent = audio.paused ? t.ready : t.playing;
+    if (ui.searchClearBtn) ui.searchClearBtn.hidden = !searchQuery;
+
     updateVolumeUI();
-    const clear = document.getElementById('searchClearBtn');
-    if (clear) clear.hidden = !searchQuery;
 }
+
+function updateActiveTrackUI() {
+    if (!ui.trackList) return;
+
+    const current = ui.trackList.querySelector('.track-item.active');
+    if (current) {
+        current.classList.remove('active');
+        current.querySelector('.track-play')?.removeAttribute('aria-current');
+    }
+
+    const items = ui.trackList.querySelectorAll('.track-item');
+    for (const item of items) {
+        if (Number(item.dataset.index) !== currentIndex) continue;
+        item.classList.add('active');
+        item.querySelector('.track-play')?.setAttribute('aria-current', 'true');
+        break;
+    }
+}
+
 function focusCurrentTrack() {
-    const active = document.querySelector('.track-item.active');
+    const active = ui.trackList?.querySelector('.track-item.active');
     if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
 function seekBy(seconds) {
-    if (!audio.duration || Number.isNaN(audio.duration)) return;
+    if (!Number.isFinite(audio.duration)) return;
     audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
 }
+
 function setupUXControls() {
     const focusDock = document.getElementById('focusDock');
     // Keep the focus dock outside .app so fixed positioning is always relative to the viewport,
@@ -3925,7 +4408,14 @@ function setupUXControls() {
     if (focusBtn) focusBtn.onclick = focusCurrentTrack;
     if (rewind) rewind.onclick = () => seekBy(-10);
     if (forward) forward.onclick = () => seekBy(10);
-    if (resetVolume) resetVolume.onclick = () => { audio.muted = false; audio.volume = 1; volumeSlider.value = '1'; volumeSlider.dispatchEvent(typeof Event === 'function' ? new Event('input', { bubbles: true }) : document.createEvent('Event')); };
+    if (resetVolume) resetVolume.onclick = () => {
+        audio.muted = false;
+        audio.volume = 1;
+        if (volumeSlider) volumeSlider.value = '1';
+        saveVolume(1);
+        updateVolumeUI();
+        if (document.body.classList.contains('focus-mode')) updateFocusDock();
+    };
     if (focusPlayer) focusPlayer.onclick = () => document.querySelector('.main-player')?.scrollIntoView({behavior:'smooth', block:'center'});
     const setFocusMode = (enabled) => {
         document.body.classList.toggle('focus-mode', enabled);
@@ -3946,32 +4436,40 @@ function setupUXControls() {
         }
     };
     const updateFocusDock = () => {
-        const cur = document.getElementById('dockCurrentTime');
-        const dur = document.getElementById('dockDuration');
-        const seek = document.getElementById('dockSeek');
-        const label = document.getElementById('dockPlayLabel');
-        const vol = document.getElementById('dockVolumeSlider');
-        const vr = document.getElementById('dockVolumeReadout');
-        if (cur) cur.textContent = document.getElementById('currentTime')?.textContent || '0:00';
-        if (dur) dur.textContent = document.getElementById('duration')?.textContent || '0:00';
-        if (seek && audio.duration) seek.value = String((audio.currentTime / audio.duration) * 100);
-        if (label) {
-            const t = translations[currentLang] || translations.en;
-            label.textContent = audio.paused ? (t.play || 'PLAY') : (t.pause || 'PAUSE');
+        if (!document.body.classList.contains('focus-mode')) return;
+
+        if (ui.dockCurrentTime) ui.dockCurrentTime.textContent = ui.currentTime?.textContent || '0:00';
+        if (ui.dockDuration) ui.dockDuration.textContent = ui.duration?.textContent || '0:00';
+
+        if (ui.dockSeek && Number.isFinite(audio.duration)) {
+            const pct = Math.max(0, Math.min(100, (audio.currentTime / audio.duration) * 100));
+            if (Math.abs(Number(ui.dockSeek.value) - pct) >= 0.35) ui.dockSeek.value = String(pct);
         }
-        if (vol) vol.value = String(audio.volume);
-        if (vr) vr.textContent = `VOL ${audio.muted ? 0 : Math.round(audio.volume*100)}%`;
+
+        if (ui.dockPlayLabel) {
+            const t = translations[currentLang] || translations.en;
+            ui.dockPlayLabel.textContent = audio.paused ? (t.play || 'PLAY') : (t.pause || 'PAUSE');
+        }
+        if (ui.dockVolumeSlider) ui.dockVolumeSlider.value = String(audio.volume);
+        if (ui.dockVolumeReadout) ui.dockVolumeReadout.textContent = `VOL ${audio.muted ? 0 : Math.round(audio.volume * 100)}%`;
     };
     window.setFocusMode = setFocusMode;
     window.updateFocusDock = updateFocusDock;
+    let lastDockBottom = null;
     const syncFocusDockViewport = () => {
         if (!document.body.classList.contains('focus-mode') || !focusDock) return;
-        // Keep the dock attached to the visible viewport on mobile browsers when the URL bar/IME changes viewport height.
+
         const vv = window.visualViewport;
-        if (vv) {
-            const bottomGap = Math.max(5, window.innerHeight - (vv.offsetTop + vv.height));
+        const bottomGap = vv
+            ? Math.max(5, Math.round(window.innerHeight - (vv.offsetTop + vv.height)))
+            : null;
+
+        if (bottomGap !== null) {
+            if (lastDockBottom === bottomGap) return;
+            lastDockBottom = bottomGap;
             focusDock.style.bottom = `${bottomGap}px`;
-        } else {
+        } else if (lastDockBottom !== null) {
+            lastDockBottom = null;
             focusDock.style.removeProperty('bottom');
         }
     };
@@ -3990,34 +4488,40 @@ function setupUXControls() {
     if (dockForward) dockForward.onclick = () => seekBy(10);
     if (dockMute) dockMute.onclick = () => document.getElementById('muteBtn')?.click();
     if (dockSeek) dockSeek.oninput = (e) => { if (audio.duration) audio.currentTime = (Number(e.target.value)/100)*audio.duration; };
-    if (dockVol) dockVol.oninput = (e) => { volumeSlider.value = e.target.value; volumeSlider.dispatchEvent(new Event('input')); };
+    if (dockVol) dockVol.oninput = (e) => {
+        if (!volumeSlider) return;
+        volumeSlider.value = e.target.value;
+        volumeSlider.dispatchEvent(new Event('input'));
+    };
     updateUXState();
     updateFocusDock();
     if (localStorage.getItem('andre_music_focus_mode') === '1') setFocusMode(true);
 }
 
 function renderLibrary() {
-    const list = document.getElementById('trackList');
-    list.innerHTML = '';
+    if (!ui.trackList) return;
 
-    const fragment = document.createDocumentFragment();
-    const query = searchQuery.toLowerCase();
+    const list = ui.trackList;
+    const query = searchQuery.toLocaleLowerCase();
     const t = translations[currentLang] || translations.en;
+    const fragment = document.createDocumentFragment();
+    let shownCount = 0;
 
-    const filtered = library
-        .map((track, originalIdx) => ({ track, originalIdx }))
-        .filter(item => item.track.name.toLowerCase().includes(query));
+    for (let originalIdx = 0; originalIdx < library.length; originalIdx++) {
+        const track = library[originalIdx];
+        if (!track) continue;
 
-    filtered.forEach(item => {
-        const { track, originalIdx } = item;
+        const normalized = track.searchName || (track.searchName = String(track.name || '').toLocaleLowerCase());
+        if (query && !normalized.includes(query)) continue;
+
         const li = document.createElement('li');
         li.className = 'track-item' + (originalIdx === currentIndex ? ' active' : '');
-        li.dataset.index = originalIdx;
+        li.dataset.index = String(originalIdx);
 
         const play = document.createElement('button');
         play.type = 'button';
         play.className = 'track-play';
-        play.dataset.index = originalIdx;
+        play.dataset.index = String(originalIdx);
         play.setAttribute('aria-label', `${t.play || 'Play'}: ${cleanFileName(track.name)}`);
         if (originalIdx === currentIndex) play.setAttribute('aria-current', 'true');
 
@@ -4030,23 +4534,27 @@ function renderLibrary() {
         del.type = 'button';
         del.className = 'del-btn';
         del.textContent = 'DEL';
-        del.dataset.id = track.id;
-        del.dataset.index = originalIdx;
+        del.dataset.id = String(track.id);
+        del.dataset.index = String(originalIdx);
         del.setAttribute('aria-label', `Delete ${cleanFileName(track.name)}`);
 
         li.append(play, del);
         fragment.appendChild(li);
-    });
+        shownCount++;
+    }
 
-    list.appendChild(fragment);
-    if (filtered.length === 0) {
+    if (shownCount === 0) {
         const empty = document.createElement('li');
         empty.className = 'empty-library';
         empty.setAttribute('role', 'status');
-        empty.textContent = library.length ? (t.noResults || 'No tracks match your search.') : (t.emptyPlaylist || t.emptyLibrary || 'You have an empty playlist. Import music from your files.');
-        list.appendChild(empty);
+        empty.textContent = library.length
+            ? (t.noResults || 'No tracks match your search.')
+            : (t.emptyPlaylist || t.emptyLibrary || 'You have an empty playlist. Import music from your files.');
+        fragment.appendChild(empty);
     }
-    document.getElementById('count').textContent = library.length;
+
+    list.replaceChildren(fragment);
+    if (ui.count) ui.count.textContent = String(library.length);
     updateUXState();
 }
 
@@ -4057,7 +4565,7 @@ if (fileInput && uploadLabel) {
     fileInput.addEventListener('blur', () => uploadLabel.classList.remove('file-focus'));
 }
 
-document.getElementById('trackList').addEventListener('click', (e) => {
+ui.trackList?.addEventListener('click', (e) => {
     const delBtn = e.target.closest('.del-btn');
     if (delBtn) {
         e.stopPropagation();
@@ -4074,7 +4582,7 @@ document.getElementById('trackList').addEventListener('click', (e) => {
     }
 });
 
-document.getElementById('trackList').addEventListener('keydown', (e) => {
+ui.trackList?.addEventListener('keydown', (e) => {
     const playBtn = e.target.closest('.track-play');
     if (playBtn && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
@@ -4082,11 +4590,10 @@ document.getElementById('trackList').addEventListener('keydown', (e) => {
     }
 });
 
-document.getElementById('searchInput').oninput = debounce((e) => {
-    searchQuery = e.target.value.trim();
+ui.searchInput?.addEventListener('input', debounce((e) => {
+    searchQuery = String(e.target.value || '').trim();
     renderLibrary();
-    updateUXState();
-}, 150);
+}, 140));
 
 function cleanFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
@@ -4094,53 +4601,94 @@ function cleanFileName(filename) {
 
 async function playTrack(index, isRandom = false) {
     if (index < 0 || index >= library.length) return;
-    initAudioContext();
 
-    const requestId = ++playRequestId;
     const track = library[index];
     if (!track) return;
+
+    initAudioContext();
+    const requestId = ++playRequestId;
+
+    let nextUrl = null;
+    const previousUrl = currentUrl;
+    const previousIndex = currentIndex;
+    const previousTrack = previousIndex >= 0 ? library[previousIndex] : null;
 
     try {
         const blob = await getTrackBlob(track.id);
         if (requestId !== playRequestId) return;
         if (!blob) throw new Error('Audio blob missing in IndexedDB');
 
-        const nextUrl = URL.createObjectURL(blob);
-        const previousUrl = currentUrl;
-
+        nextUrl = URL.createObjectURL(blob);
         currentUrl = nextUrl;
         currentIndex = index;
-        document.getElementById('seek').value = 0;
-        document.getElementById('currentTime').textContent = '0:00';
-        document.getElementById('duration').textContent = '0:00';
-        document.getElementById('nowTitle').textContent = cleanFileName(track.name);
+        playbackUiLastSecond = -1;
 
+        if (ui.seek) {
+            ui.seek.value = '0';
+            ui.seek.setAttribute('aria-valuenow', '0');
+        }
+        if (ui.currentTime) ui.currentTime.textContent = '0:00';
+        if (ui.duration) ui.duration.textContent = '0:00';
+        if (ui.nowTitle) ui.nowTitle.textContent = cleanFileName(track.name);
+
+        audio.pause();
         audio.src = nextUrl;
         audio.load();
         await audio.play();
 
-        if (previousUrl) URL.revokeObjectURL(previousUrl);
-    } catch (e) {
         if (requestId !== playRequestId) return;
-        console.warn('Playback error:', e);
-        notify((translations[currentLang] || translations.en).playbackError || 'Unable to start this track. The audio file may be unavailable or blocked by the browser.', 'error');
-        renderLibrary();
-    }
 
-    if (requestId !== playRequestId) return;
-    renderLibrary();
-    updateMediaSession(track);
+        if (previousUrl && previousUrl !== currentUrl) URL.revokeObjectURL(previousUrl);
+        updateActiveTrackUI();
+        updateUXState();
+        updateMediaSession(track);
 
-    if (isRandom) {
-        setTimeout(() => {
-            if (requestId !== playRequestId) return;
-            const activeItem = document.querySelector('.track-item.active');
-            if (activeItem) {
+        if (isRandom) {
+            requestAnimationFrame(() => {
+                if (requestId !== playRequestId) return;
+                const activeItem = ui.trackList?.querySelector('.track-item.active');
+                if (!activeItem) return;
                 activeItem.classList.add('picking-animation');
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => activeItem.classList.remove('picking-animation'), 600);
-            }
-        }, 50);
+            });
+        }
+    } catch (e) {
+        if (requestId !== playRequestId) {
+            // A newer request may still be using this URL as its previous source.
+            // Only revoke it when ownership has already moved elsewhere.
+            if (nextUrl && currentUrl !== nextUrl) URL.revokeObjectURL(nextUrl);
+            return;
+        }
+
+        audio.pause();
+        if (previousUrl) {
+            audio.src = previousUrl;
+            audio.load();
+        } else {
+            audio.removeAttribute('src');
+            audio.load();
+        }
+
+        if (nextUrl && currentUrl === nextUrl) {
+            URL.revokeObjectURL(nextUrl);
+            currentUrl = previousUrl || null;
+        }
+
+        currentIndex = previousIndex;
+        if (previousTrack && ui.nowTitle) {
+            ui.nowTitle.textContent = cleanFileName(previousTrack.name);
+        } else if (ui.nowTitle) {
+            ui.nowTitle.textContent = (translations[currentLang] || translations.en).noTrack;
+        }
+
+        updateActiveTrackUI();
+        updateUXState();
+
+        console.warn('Playback error:', e);
+        notify((translations[currentLang] || translations.en).playbackError ||
+            'Unable to start this track. The audio file may be unavailable or blocked by the browser.', 'error');
+        updateUXState();
     }
 }
 
@@ -4172,30 +4720,41 @@ function updateMediaSession(track) {
 }
 
 async function deleteTrack(dbId, arrayIndex) {
+    if (!Number.isInteger(dbId) || arrayIndex < 0 || arrayIndex >= library.length) return;
+
     try {
         const db = await openDB();
+        const storeNames = db.objectStoreNames.contains(META_STORE_NAME)
+            ? [STORE_NAME, META_STORE_NAME]
+            : [STORE_NAME];
+
         await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const tx = db.transaction(storeNames, 'readwrite');
             tx.objectStore(STORE_NAME).delete(dbId);
+            if (storeNames.length > 1) tx.objectStore(META_STORE_NAME).delete(dbId);
             tx.oncomplete = resolve;
             tx.onerror = () => reject(tx.error || new Error('Delete failed'));
             tx.onabort = () => reject(tx.error || new Error('Delete aborted'));
         });
 
         const wasCurrent = arrayIndex === currentIndex;
+
         if (wasCurrent) {
             ++playRequestId;
             audio.pause();
             audio.removeAttribute('src');
             audio.load();
+
             if (currentUrl) URL.revokeObjectURL(currentUrl);
             currentUrl = null;
             currentIndex = -1;
-            document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-            document.getElementById('duration').textContent = '0:00';
-            document.getElementById('currentTime').textContent = '0:00';
-            document.getElementById('seek').value = 0;
-            document.querySelector('.now-playing-display')?.classList.remove('is-playing');
+
+            if (ui.nowTitle) ui.nowTitle.textContent = translations[currentLang].noTrack;
+            if (ui.duration) ui.duration.textContent = '0:00';
+            if (ui.currentTime) ui.currentTime.textContent = '0:00';
+            if (ui.seek) ui.seek.value = '0';
+
+            ui.nowPlayingDisplay?.classList.remove('is-playing');
             stopVisualizer();
         } else if (arrayIndex < currentIndex) {
             currentIndex--;
@@ -4221,22 +4780,31 @@ function getNext() {
 }
 
 audio.onloadedmetadata = () => {
-    if (audio.duration) {
+    if (Number.isFinite(audio.duration) && audio.duration >= 0 && ui.duration) {
         const durM = Math.floor(audio.duration / 60);
         const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
-        document.getElementById('duration').textContent = `${durM}:${durS}`;
+        ui.duration.textContent = `${durM}:${durS}`;
     }
 };
 
 audio.ontimeupdate = () => {
-    if (!audio.duration || isNaN(audio.duration) || isSeeking) return;
-    const curM = Math.floor(audio.currentTime / 60);
-    const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-    document.getElementById('currentTime').textContent = `${curM}:${curS}`;
-    const seekPct = (audio.currentTime / audio.duration) * 100;
-    document.getElementById('seek').value = seekPct;
-    document.getElementById('seek').setAttribute('aria-valuenow', String(Math.round(seekPct)));
-    window.updateFocusDock?.();
+    if (!Number.isFinite(audio.duration)) return;
+
+    const currentSecond = Math.floor(audio.currentTime);
+    if (!isSeeking && currentSecond !== playbackUiLastSecond) {
+        playbackUiLastSecond = currentSecond;
+        const curM = Math.floor(audio.currentTime / 60);
+        const curS = String(currentSecond % 60).padStart(2, '0');
+        if (ui.currentTime) ui.currentTime.textContent = `${curM}:${curS}`;
+
+        const seekPct = Math.max(0, Math.min(100, (audio.currentTime / audio.duration) * 100));
+        if (ui.seek && Math.abs(Number(ui.seek.value) - seekPct) >= 0.35) {
+            ui.seek.value = String(seekPct);
+            ui.seek.setAttribute('aria-valuenow', String(Math.round(seekPct)));
+        }
+    }
+
+    if (document.body.classList.contains('focus-mode')) window.updateFocusDock?.();
 };
 
 const seekInput = document.getElementById('seek');
@@ -4251,8 +4819,13 @@ seekInput.oninput = (e) => {
     }
 };
 
-const volumeSlider = document.getElementById('volumeSlider');
-const savedVolume = localStorage.getItem('andre_music_volume');
+const volumeSlider = ui.volumeSlider;
+const saveVolume = debounce((value) => {
+    try { localStorage.setItem('andre_music_volume', String(value)); } catch (_) {}
+}, 180);
+const savedVolume = (() => {
+    try { return localStorage.getItem('andre_music_volume'); } catch (_) { return null; }
+})();
 if (savedVolume !== null) {
     const parsedVolume = Number.parseFloat(savedVolume);
     if (Number.isFinite(parsedVolume)) {
@@ -4262,21 +4835,60 @@ if (savedVolume !== null) {
 }
 
 volumeSlider.oninput = (e) => {
-    audio.volume = Number(e.target.value);
-    audio.muted = (audio.volume === 0);
-    localStorage.setItem('andre_music_volume', String(audio.volume));
+    const value = Math.max(0, Math.min(1, Number(e.target.value) || 0));
+    audio.volume = value;
+    audio.muted = (value === 0);
+    saveVolume(value);
     updateVolumeUI();
-    window.updateFocusDock?.();
+    if (document.body.classList.contains('focus-mode')) window.updateFocusDock?.();
 };
 updateVolumeUI();
+
+// --- Strict File Filtering to Block Videos and Ensure Audio Only ---
+async function addImportBatch(db, batch) {
+    const storeNames = db.objectStoreNames.contains(META_STORE_NAME)
+        ? [STORE_NAME, META_STORE_NAME]
+        : [STORE_NAME];
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeNames, 'readwrite');
+        const trackStore = tx.objectStore(STORE_NAME);
+        const metaStore = storeNames.length > 1 ? tx.objectStore(META_STORE_NAME) : null;
+        const imported = [];
+
+        for (const file of batch) {
+            const req = trackStore.add({ name: file.name, blob: file });
+            req.onsuccess = () => {
+                const id = req.result;
+                imported.push({ id, name: file.name, searchName: file.name.toLocaleLowerCase() });
+                if (metaStore) {
+                    try { metaStore.put({ id, name: file.name }); } catch (_) {}
+                }
+            };
+            req.onerror = () => {
+                // Let the transaction abort. The caller can retry files individually.
+                try { tx.abort(); } catch (_) {}
+            };
+        }
+
+        tx.oncomplete = () => resolve(imported);
+        tx.onerror = () => reject(tx.error || new Error('Import failed'));
+        tx.onabort = () => reject(tx.error || new Error('Import aborted'));
+    });
+}
+
+async function addImportOne(db, file) {
+    return addImportBatch(db, [file]);
+}
 
 // --- Strict File Filtering to Block Videos and Ensure Audio Only ---
 async function handleFilesImport(files) {
     const fileList = Array.from(files || []);
     const audioFiles = fileList.filter(f => {
-        const isVideo = f.type.startsWith('video/') || /\.(mp4|mov|avi|mkv|wmv|flv|webm|m4v)$/i.test(f.name);
-        if (isVideo) return false;
-        return f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name);
+        const type = String(f.type || '');
+        const isVideo = type.startsWith('video/') ||
+            /\.(mp4|mov|avi|mkv|wmv|flv|webm|m4v)$/i.test(f.name);
+        return !isVideo && (type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
     });
 
     if (audioFiles.length === 0) {
@@ -4287,26 +4899,36 @@ async function handleFilesImport(files) {
     try {
         const db = await openDB();
         let importedCount = 0;
+        const BATCH_SIZE = 8;
 
-        for (const f of audioFiles) {
+        for (let i = 0; i < audioFiles.length; i += BATCH_SIZE) {
+            const batch = audioFiles.slice(i, i + BATCH_SIZE);
+
             try {
-                const id = await new Promise((resolve, reject) => {
-                    const tx = db.transaction(STORE_NAME, 'readwrite');
-                    const req = tx.objectStore(STORE_NAME).add({ name: f.name, blob: f });
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => reject(req.error || new Error('Import failed'));
-                    tx.onabort = () => reject(tx.error || new Error('Import aborted'));
-                });
-                library.push({ id, name: f.name });
-                importedCount++;
-            } catch (err) {
-                console.warn('Skipping file:', f.name, err);
+                const imported = await addImportBatch(db, batch);
+                library.push(...imported);
+                importedCount += imported.length;
+            } catch (batchError) {
+                console.warn('Batch import failed, retrying files individually:', batchError);
+
+                for (const file of batch) {
+                    try {
+                        const imported = await addImportOne(db, file);
+                        library.push(...imported);
+                        importedCount += imported.length;
+                    } catch (singleError) {
+                        console.warn('Skipping file:', file.name, singleError);
+                    }
+                }
             }
         }
 
         renderLibrary();
+
         if (importedCount > 0) {
-            const suffix = importedCount === audioFiles.length ? '' : ` (${audioFiles.length - importedCount} skipped)`;
+            const suffix = importedCount === audioFiles.length
+                ? ''
+                : ` (${audioFiles.length - importedCount} skipped)`;
             notify(`${importedCount} track${importedCount === 1 ? '' : 's'} imported successfully.${suffix}`, 'success');
         } else {
             notify('The selected audio files could not be imported.', 'error');
@@ -4347,10 +4969,16 @@ document.getElementById('clearBtn').onclick = async () => {
     const confirmed = await customConfirm(translations[currentLang].confirm, { focusCancel: true });
     if (confirmed) {
         const db = await openDB();
+        const storeNames = db.objectStoreNames.contains(META_STORE_NAME)
+            ? [STORE_NAME, META_STORE_NAME]
+            : [STORE_NAME];
         await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
-            tx.onerror = reject;
+            const tx = db.transaction(storeNames, 'readwrite');
+            tx.objectStore(STORE_NAME).clear();
+            if (storeNames.length > 1) tx.objectStore(META_STORE_NAME).clear();
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error('Clear failed'));
+            tx.onabort = () => reject(tx.error || new Error('Clear aborted'));
         });
         ++playRequestId;
         library = []; 
@@ -4358,14 +4986,14 @@ document.getElementById('clearBtn').onclick = async () => {
         audio.pause(); 
         audio.removeAttribute('src');
         audio.load();
-        document.querySelector('.now-playing-display')?.classList.remove('is-playing');
+        ui.nowPlayingDisplay?.classList.remove('is-playing');
         stopVisualizer();
         if (currentUrl) URL.revokeObjectURL(currentUrl);
         currentUrl = null;
-        document.getElementById('nowTitle').textContent = translations[currentLang].noTrack;
-        document.getElementById('duration').textContent = '0:00';
-        document.getElementById('currentTime').textContent = '0:00';
-        document.getElementById('seek').value = 0;
+        if (ui.nowTitle) ui.nowTitle.textContent = translations[currentLang].noTrack;
+        if (ui.duration) ui.duration.textContent = '0:00';
+        if (ui.currentTime) ui.currentTime.textContent = '0:00';
+        if (ui.seek) ui.seek.value = '0';
         renderLibrary();
         notify(translations[currentLang].status, 'success');
     }
@@ -4385,18 +5013,20 @@ document.getElementById('playBtn').onclick = () => {
 };
 
 audio.onplay = () => {
-    document.getElementById('playLabel').textContent = translations[currentLang].pause;
-    document.getElementById('playBtn').classList.add('active');
-    window.updateFocusDock?.();
-    document.querySelector('.now-playing-display')?.classList.add('is-playing');
+    ui.playLabel && (ui.playLabel.textContent = translations[currentLang].pause);
+    ui.playBtn?.classList.add('active');
+    if (document.body.classList.contains('focus-mode')) window.updateFocusDock?.();
+    ui.nowPlayingDisplay?.classList.add('is-playing');
     startVisualizer();
+    updateUXState();
 };
 audio.onpause = () => {
-    document.getElementById('playLabel').textContent = translations[currentLang].play;
-    document.getElementById('playBtn').classList.remove('active');
-    window.updateFocusDock?.();
-    document.querySelector('.now-playing-display')?.classList.remove('is-playing');
+    ui.playLabel && (ui.playLabel.textContent = translations[currentLang].play);
+    ui.playBtn?.classList.remove('active');
+    if (document.body.classList.contains('focus-mode')) window.updateFocusDock?.();
+    ui.nowPlayingDisplay?.classList.remove('is-playing');
     stopVisualizer();
+    updateUXState();
 };
 audio.onended = () => {
     if (mode === 'loopOne') { playTrack(currentIndex); return; }
@@ -4582,25 +5212,22 @@ installUISoundEffects();
         detectSystemPerformance();
 
         const db = await openDB();
-        await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, 'readonly');
-            const req = tx.objectStore(STORE_NAME).getAll();
-            req.onsuccess = (e) => {
-                library = e.target.result.map(item => ({ id: item.id, name: item.name }));
-                const savedLang = localStorage.getItem('andre_music_lang');
-                const initialLang = savedLang && translations[savedLang] ? savedLang : 'ja';
-                setLanguage(initialLang);
-                resolve();
-            };
-            req.onerror = (e) => reject(e.target.error);
-            tx.onerror = (e) => reject(e.target.error);
-        });
+        library = await getLibraryMetadata(db);
+        const savedLang = localStorage.getItem('andre_music_lang');
+        const initialLang = savedLang && translations[savedLang] ? savedLang : 'ja';
+        setLanguage(initialLang);
 
         clearTimeout(safetyTimer);
         hideLoading();
 
-        window.addEventListener('resize', debouncedResize);
-        resizeCanvas();
+        if ('ResizeObserver' in window) {
+            resizeObserver?.disconnect();
+            resizeObserver = new ResizeObserver(() => scheduleVisualizerResize());
+            resizeObserver.observe(canvas);
+        } else {
+            window.addEventListener('resize', debouncedResize, { passive: true });
+        }
+        scheduleVisualizerResize();
     } catch(e) {
         console.warn("Init Warning / Storage Error:", e);
         clearTimeout(safetyTimer);
